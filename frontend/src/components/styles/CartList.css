@@ -1,0 +1,13 @@
+.listCard{
+    height: 50vh;
+    overflow-y: scroll;
+}
+
+.removeArrows::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Handle */
+.removeArrows::-webkit-scrollbar-thumb {
+    background: rgba(210, 210, 210, 0.8); 
+}

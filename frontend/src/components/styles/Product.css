@@ -1,0 +1,35 @@
+.cardImage{
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+}
+/* 
+@media screen and (max-width: 768px) {
+    .cardImage{
+        height: 40vw;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .cardImage{
+        height: 60vw;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .cardImage{
+        height: 80vw;
+    }
+}
+    
+@media screen and (max-width: 280px) {
+    .cardImage{
+        height: 100vw;
+    }
+}
+
+@media screen and (max-width: 240px) {
+    .cardImage{
+        height: 120vw;
+    }
+} */
