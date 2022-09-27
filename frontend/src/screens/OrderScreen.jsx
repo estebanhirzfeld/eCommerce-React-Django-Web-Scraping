@@ -2,28 +2,37 @@ import React from 'react'
 import {useParams} from 'react-router-dom'
 import {useEffect} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
-import { getOrderDetails } from '../actions/orderActions'
+import { getOrderDetails, payOrder } from '../actions/orderActions'
 import {Container, Row, Col, ListGroup, Image, Card} from 'react-bootstrap'
 
-import { payOrder } from '../actions/orderActions'
 
 function OrderScreen() {
 
     const dispatch = useDispatch()
     const {id} = useParams()
-
-
+    
+    
+    const orderPay = useSelector(state => state.orderPay)
+    const {paymentLink, success} = orderPay
+    
     const orderDetails = useSelector(state => state.orderDetails)
     const {order, loading, error} = orderDetails
-
-
+    
     useEffect(() => {
         dispatch(getOrderDetails(id))
+        
     }, [dispatch, id])
+    
+    useEffect(() => {
+        if (success) {
+            window.location.href = paymentLink
+        }
+    }, [success, paymentLink])
 
-    const paidHandler = () => {
-        dispatch(payOrder(id))
+    const payHandler = () => {
+            dispatch(payOrder(id))
     }
+
 
     return (
         <Container className='mt-5'>
@@ -44,7 +53,7 @@ function OrderScreen() {
                                 ) : (
                                     <div className="alert alert-danger" role="alert">
                                         Not Paid
-                                        <button onClick={paidHandler}>Paid</button>
+                                                <button className='btn btn-primary' onClick={payHandler}>Pay Now</button>
                                     </div>
                                 )}
                             </ListGroup.Item>
@@ -111,7 +120,7 @@ function OrderScreen() {
                                 <ListGroup.Item>
                                     <Row>
                                         <Col>Items</Col>
-                                        <Col>${order.itemsPrice}</Col>
+                                        <Col>${order.totalPrice}</Col>
                                     </Row>
                                 </ListGroup.Item>
                                 <ListGroup.Item>

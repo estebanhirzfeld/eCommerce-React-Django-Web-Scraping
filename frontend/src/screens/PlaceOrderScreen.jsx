@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import CheckoutSteps from '../components/CheckoutSteps'
 
 import { createOrder } from '../actions/orderActions'
+import { payOrder } from '../actions/orderActions'
 
 import { CART_CLEAR_ITEMS } from '../constants/cartConstants'
 import { ORDER_CREATE_RESET } from '../constants/orderConstants'
@@ -23,16 +24,16 @@ function PlaceOrderScreen() {
         return (Math.round(num * 100) / 100).toFixed(2)
     }
 
-    cart.itemsPrice = addDecimals(cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0))
-    cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100)
+    cart.itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)
+    cart.shippingPrice = addDecimals(cart.itemsPrice > 15000 ? 0 : 800)
     cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)))
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2)
 
-
+    
     if (!cart.paymentMethod) {
         navigate('/payment')
     }
-
+    
     useEffect(() => {
         if (success) {
             navigate(`/order/${order.id}`)
@@ -40,20 +41,28 @@ function PlaceOrderScreen() {
             dispatch({ type: CART_CLEAR_ITEMS })
         }
     }, [success, navigate, order])
-
-
+    
+    
+    
     const placeOrderHandler = () => {
         dispatch(createOrder({
-            paymentMethod: cart.paymentMethod,
-            taxPrice: cart.taxPrice,
-            shippingPrice: cart.shippingPrice,
-            totalPrice: cart.totalPrice,
             orderItems: cart.cartItems,
             shippingAddress: cart.shippingAddress,
+            paymentMethod: cart.paymentMethod,
             itemsPrice: cart.itemsPrice,
+            shippingPrice: cart.shippingPrice,
+            taxPrice: cart.taxPrice,
+            totalPrice: cart.totalPrice,
         }))
-        // navigate(`/order/${order.id}`)
     }
+    
+    console.log(cart.cartItems, typeof(cart.cartItems))
+    console.log(cart.shippingAddress, typeof(cart.shippingAddress))
+    console.log(cart.paymentMethod, typeof(cart.paymentMethod))
+    console.log(cart.itemsPrice, typeof(cart.itemsPrice))
+    console.log(cart.shippingPrice, typeof(cart.shippingPrice))
+    console.log(cart.taxPrice, typeof(cart.taxPrice))
+    console.log(cart.totalPrice, typeof(cart.totalPrice))
 
     return (
         <div>

@@ -58,6 +58,8 @@ class Order(models.Model):
     deliveredAt = models.DateTimeField(
         auto_now_add=False, null=True, blank=True)
 
+    paymentLink = models.CharField(max_length=600, null=True, blank=True)
+
     ORDER_ORIGIN_WEBSITE = models.CharField(
         max_length=200, null=True, blank=True)
     ORDER_ORIGIN_NUMBER = models.CharField(

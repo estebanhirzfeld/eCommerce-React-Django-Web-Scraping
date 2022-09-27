@@ -3,6 +3,7 @@ import {
     ORDER_CREATE_REQUEST,
     ORDER_CREATE_SUCCESS,
     ORDER_CREATE_RESET,
+    ORDER_CREATE_PAYMENT_MP,
 
     ORDER_DETAILS_REQUEST,
     ORDER_DETAILS_SUCCESS,
@@ -35,6 +36,12 @@ export const orderCreateReducer = (state = {}, action) => {
         case ORDER_CREATE_RESET:
             return {};
 
+        case ORDER_CREATE_PAYMENT_MP:
+            return {
+                ...state,
+                orderLink: action.payload,
+            };
+            
         default:
             return state;
     }
@@ -70,8 +77,10 @@ export const orderPayReducer = (state = {}, action) => {
             };
         case ORDER_PAY_SUCCESS:
             return {
+                ...state,
                 loading: false,
                 success: true,
+                paymentLink: action.payload.init_point,
             };
         case ORDER_PAY_FAIL:
             return {

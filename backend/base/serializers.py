@@ -62,6 +62,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'isDelivered',
             'deliveredAt',
             'createdAt',
+            'paymentLink',
         )
 
     def get_OrderItems(self, obj):
