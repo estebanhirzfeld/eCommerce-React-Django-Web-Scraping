@@ -141,7 +141,7 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
                 ],
                 "installments": 12
             },
-            "notification_url": "https://www.your-site.com/ipn",
+            "notification_url": "http://localhost:8000/api/orders/webhook/",
             "statement_descriptor": "Zoldyck Store",
             "external_reference": "Reference_1234",
             "expires": false,
