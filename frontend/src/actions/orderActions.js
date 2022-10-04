@@ -13,6 +13,9 @@ import {
     ORDER_PAY_SUCCESS,
     ORDER_PAY_FAIL,
 
+    ORDERS_LIST_REQUEST,
+    ORDERS_LIST_SUCCESS,
+    ORDERS_LIST_FAIL,
 
 } from "../constants/orderConstants";
 
@@ -100,8 +103,8 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
 
         const url = "https://api.mercadopago.com/checkout/preferences";
         
-        // let orderNames =  order.OrderItems.map((item) => item.name).join(" | ");
         let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
+        console.log(orderNames,typeof(orderNames));
         const body = {
             "items": [
                 {
@@ -123,29 +126,15 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
                 }
             },
             "back_urls": {
-                "success": "https://www.success.com",
+                "success": "http://localhost:5173",
                 "failure": "http://www.failure.com",
                 "pending": "http://www.pending.com"
             },
             "auto_return": "approved",
-            "payment_methods": {
-                "excluded_payment_methods": [
-                    {
-                        "id": "master"
-                    }
-                ],
-                "excluded_payment_types": [
-                    {
-                        "id": "ticket"
-                    }
-                ],
-                "installments": 12
-            },
-            "notification_url": "http://localhost:8000/api/orders/webhook/",
+            // "notification_url": "http://localhost:8000/api/orders/pay/",
             "statement_descriptor": "Zoldyck Store",
-            "external_reference": "Reference_1234",
+            "external_reference": order.id,
             "expires": false,
-
         }
 
         const { data } = await axios.post(url, body, {
@@ -157,26 +146,6 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
 
         // //////////////////////////////////////////////
 
-        // const {
-        //     login: { userInfo },
-        // } = getState();
-
-        // const config = {
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         Authorization: `Bearer ${userInfo.token}`,
-        //     },
-        // };
-
-        // const { data } = await axios.put(
-        //     `http://localhost:8000/api/orders/${orderId}/pay/`,
-        //     paymentResult,
-        //     config
-        // );
-
-
-        console.log("payload",data);
-
         dispatch({
             type: ORDER_PAY_SUCCESS,
             payload: data,
@@ -186,6 +155,40 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
     } catch (error) {
         dispatch({
             type: ORDER_PAY_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
+
+export const listOrders = () => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDERS_LIST_REQUEST,
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };
+
+        const { data } = await axios.get(`http://localhost:8000/api/orders/myorders/`, config);
+
+        dispatch({
+            type: ORDERS_LIST_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDERS_LIST_FAIL,
             payload:
                 error.response && error.response.data.message
                     ? error.response.data.message

@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getUserDetails, updateUserProfile } from '../actions/userActions'
 import {USER_UPDATE_PROFILE_RESET} from '../constants/userConstants'
 
+import {listOrders} from '../actions/orderActions'
 
 function ProfileScreen() {
 
@@ -26,6 +27,9 @@ function ProfileScreen() {
     const userUpdateProfile = useSelector(state => state.userUpdateProfile)
     const { success } = userUpdateProfile
 
+    const orderList = useSelector(state => state.orderList)
+    // const { loading, orders, error } = orderList
+
     useEffect(() => {
         if (!userInfo) {
             navigate('/login')
@@ -40,6 +44,10 @@ function ProfileScreen() {
         }
     }, [dispatch, userInfo, user, success])
 
+
+    useEffect(() => {
+        dispatch(listOrders())
+    }, [dispatch])
 
     const submitHandler = (e) => {
         e.preventDefault()
