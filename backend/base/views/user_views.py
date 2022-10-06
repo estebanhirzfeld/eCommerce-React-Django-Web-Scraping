@@ -68,6 +68,14 @@ def registerUser(request):
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
         
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserById(request, pk):
+    if request.user.is_staff:
+        user = User.objects.get(id=pk)
+        serializer = UserSerializer(user, many=False)
+        return Response(serializer.data)
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateUserProfile(request):

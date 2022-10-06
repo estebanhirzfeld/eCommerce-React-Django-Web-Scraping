@@ -11,6 +11,8 @@ from base.serializers import ProductSerializer, OrderSerializer, ShippingAddress
 
 from rest_framework import status
 
+from django.contrib.auth.models import User
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -57,6 +59,13 @@ def addOrderItems(request):
         return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
+def getOrders(request):
+    orders = Order.objects.all()
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getOrderById(request, pk):
     user = request.user
@@ -71,7 +80,6 @@ def getOrderById(request, pk):
     except:
         return Response({'detail': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getMyOrders(request):
@@ -79,6 +87,15 @@ def getMyOrders(request):
     orders = Order.objects.filter(user=user)
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def getOrdersByUser(request, pk):
+    user = User.objects.get(id=pk)
+    orders = Order.objects.filter(user=user)
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
+
 
 
 

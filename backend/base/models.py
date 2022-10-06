@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils.timezone import now
 from email.mime import image
 from unicodedata import category
 from django.db import models
@@ -58,7 +60,10 @@ class Order(models.Model):
     deliveredAt = models.DateTimeField(
         auto_now_add=False, null=True, blank=True)
 
-    paymentLink = models.CharField(max_length=600, null=True, blank=True)
+    def expiration():
+        return now() + timedelta(days=7)
+
+    expiryDate = models.DateTimeField(default=expiration, auto_now_add=False, null=True, blank=True)
 
     ORDER_ORIGIN_WEBSITE = models.CharField(
         max_length=200, null=True, blank=True)

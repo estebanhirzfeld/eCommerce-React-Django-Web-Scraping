@@ -9,7 +9,7 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('name', 'rating', 'product', 'user')
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'paymentMethod', 'taxPrice', 'shippingPrice', 'totalPrice', 'isPaid', 'paidAt', 'isDelivered', 'deliveredAt', 'createdAt')
+    list_display = ('user', 'paymentMethod', 'taxPrice', 'shippingPrice', 'totalPrice', 'isPaid', 'paidAt', 'isDelivered', 'deliveredAt', 'createdAt', 'expiryDate')
 
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('order', 'get_user_email', 'product', 'name', 'qty', 'price', 'image', 'is_paided', 'is_delivered')

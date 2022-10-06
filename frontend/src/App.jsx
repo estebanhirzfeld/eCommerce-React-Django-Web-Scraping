@@ -21,6 +21,11 @@ import PaymentScreen from './screens/PaymentScreen.jsx'
 import PlaceOrderScreen from './screens/PlaceOrderScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
 
+import ADMIN_ListUsersScreen from './screens/ADMIN_ListUsersScreen.jsx'
+import ADMIN_UserDetailsScreen from './screens/ADMIN_UserDetailsScreen.jsx'
+import ADMIN_ListOrdersScreen from './screens/ADMIN_ListOrdersScreen.jsx'
+import ADMIN_ListOrdersStatusScreen from './screens/ADMIN_ListOrdersStatusScreen.jsx'
+
 function App() {
 
   return (
@@ -89,6 +94,30 @@ function App() {
           <Route path='/order/:id' element={
             <Container>
               <OrderScreen/>
+            </Container>
+          }
+          />
+          <Route path='/admin/users' element={
+            <Container>
+              <ADMIN_ListUsersScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin/users/:id' element={
+            <Container>
+              <ADMIN_UserDetailsScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin/orders' element={
+            <Container>
+              <ADMIN_ListOrdersScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin/orders/:status' element={
+            <Container>
+              <ADMIN_ListOrdersStatusScreen/>
             </Container>
           }
           />

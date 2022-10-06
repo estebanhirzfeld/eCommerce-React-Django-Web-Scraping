@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Container, Col, Row, Form, Button } from 'react-bootstrap'
+import { Container, Col, Row, Form, Button, Table, } from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { getUserDetails, updateUserProfile } from '../actions/userActions'
-import {USER_UPDATE_PROFILE_RESET} from '../constants/userConstants'
+import { USER_UPDATE_PROFILE_RESET } from '../constants/userConstants'
 
-import {listOrders} from '../actions/orderActions'
+import { listOrders } from '../actions/orderActions'
 
 function ProfileScreen() {
 
@@ -27,34 +28,32 @@ function ProfileScreen() {
     const userUpdateProfile = useSelector(state => state.userUpdateProfile)
     const { success } = userUpdateProfile
 
-    const orderList = useSelector(state => state.orderList)
-    // const { loading, orders, error } = orderList
+    const ordersList = useSelector(state => state.ordersList)
+    const { loading: loadingOrders, error: errorOrders, orders } = ordersList
+
 
     useEffect(() => {
         if (!userInfo) {
             navigate('/login')
         } else {
-            if ( !user || !user.name || success) {
-                dispatch({type: USER_UPDATE_PROFILE_RESET})
+            if (!user || !user.name || success) {
+                dispatch({ type: USER_UPDATE_PROFILE_RESET })
                 dispatch(getUserDetails('profile'))
+                dispatch(listOrders())
             } else {
                 setName(user.name)
                 setEmail(user.email)
             }
         }
-    }, [dispatch, userInfo, user, success])
+    }, [dispatch, navigate, userInfo, user, success, orders])
 
-
-    useEffect(() => {
-        dispatch(listOrders())
-    }, [dispatch])
 
     const submitHandler = (e) => {
         e.preventDefault()
         if (password !== confirmPassword) {
             alert('Passwords do not match')
         } else {
-            dispatch(updateUserProfile({name,email,password}))
+            dispatch(updateUserProfile({ name, email, password }))
         }
     }
 
@@ -112,7 +111,54 @@ function ProfileScreen() {
             </Col>
             <Col md={9}>
                 <h2>My Orders</h2>
+                {
+                    orders && orders.length > 0
+                        ? (
+                            loadingOrders ? <h2>Loading...</h2> : errorOrders ? <h2>{errorOrders}</h2> : (
+                                <Table striped bordered hover responsive className='table-sm'>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>DATE</th>
+                                            <th>TOTAL</th>
+                                            <th>PAID</th>
+                                            <th>DELIVERED</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            loadingOrders ? <h2>Loading...</h2> :
+                                                orders.map(order => (
+                                                    <tr key={order.id}>
+                                                        <td>{order.id}</td>
+                                                        <td>{order.createdAt.substring(0, 10)}</td>
+                                                        <td>${order.totalPrice}</td>
+                                                        <td className="text-center text-success">{order.isPaid ? order.paidAt.substring(0, 10) : (
+                                                            <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                                        )}</td>
+                                                        <td className="text-center text-success">{order.isDelivered ? order.deliveredAt.substring(0, 10) : (
+                                                            <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                                        )}</td>
+                                                        <td>
+                                                            <LinkContainer to={`/order/${order.id}`}>
+                                                                <Button className='btn-sm' variant='light'>Details</Button>
+                                                            </LinkContainer>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                    </tbody>
+                                </Table>
+                            )
+                        )
+                        :
+                        <p className='mt-5'>
+                            You have not placed any orders yet. <Link to='/'>Go Shopping</Link>
+                        </p>
+
+                }
             </Col>
+
         </Row>
     )
 }
