@@ -25,6 +25,7 @@ import ADMIN_ListUsersScreen from './screens/ADMIN_ListUsersScreen.jsx'
 import ADMIN_UserDetailsScreen from './screens/ADMIN_UserDetailsScreen.jsx'
 import ADMIN_ListOrdersScreen from './screens/ADMIN_ListOrdersScreen.jsx'
 import ADMIN_ListOrdersStatusScreen from './screens/ADMIN_ListOrdersStatusScreen.jsx'
+import ADMIN_Panel from './screens/ADMIN_Panel.jsx'
 
 function App() {
 
@@ -118,6 +119,12 @@ function App() {
           <Route path='admin/orders/:status' element={
             <Container>
               <ADMIN_ListOrdersStatusScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin' element={
+            <Container>
+              <ADMIN_Panel/>
             </Container>
           }
           />
