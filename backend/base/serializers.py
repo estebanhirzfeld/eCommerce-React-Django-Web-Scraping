@@ -57,7 +57,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'taxPrice',
             'shippingPrice',
             'totalPrice',
-            'isPaid',
+            'status',
             'paidAt',
             'isDelivered',
             'deliveredAt',

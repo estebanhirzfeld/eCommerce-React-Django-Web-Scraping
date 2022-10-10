@@ -1,28 +1,29 @@
 import React from 'react'
-import {useParams} from 'react-router-dom'
-import {useEffect} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
+import { useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { getOrderDetails, payOrder } from '../actions/orderActions'
-import {Container, Row, Col, ListGroup, Image, Card} from 'react-bootstrap'
+import { Container, Row, Col, ListGroup, Image, Card } from 'react-bootstrap'
+import { createOrder } from '../actions/orderActions'
 
 
 function OrderScreen() {
 
     const dispatch = useDispatch()
-    const {id} = useParams()
-    
-    
+    const { id } = useParams()
+
+
     const orderPay = useSelector(state => state.orderPay)
-    const {paymentLink, success} = orderPay
-    
+    const { paymentLink, success } = orderPay
+
     const orderDetails = useSelector(state => state.orderDetails)
-    const {order, loading, error} = orderDetails
-    
+    const { order, loading, error } = orderDetails
+
     useEffect(() => {
         dispatch(getOrderDetails(id))
-        
+
     }, [dispatch, id])
-    
+
     useEffect(() => {
         if (success) {
             window.location.href = paymentLink
@@ -30,9 +31,8 @@ function OrderScreen() {
     }, [success, paymentLink])
 
     const payHandler = () => {
-            dispatch(payOrder(id))
+        dispatch(payOrder(id))
     }
-
 
     return (
         <Container className='mt-5'>
@@ -40,22 +40,35 @@ function OrderScreen() {
                 <Row>
                     <Col md={8}>
                         <ListGroup variant='flush'>
-                        <ListGroup.Item>
+                            <ListGroup.Item>
                                 <h2>Payment Method</h2>
                                 <p>
                                     <strong>Method: </strong>
                                     {order.paymentMethod}
                                 </p>
-                                {order.isPaid ? (
+
+                                {order.status == 'Paid' ? (
                                     <div className="alert alert-success" role="alert">
                                         Paid on {order.paidAt}
                                     </div>
+                                ) : order.status == 'Pending' ? (
+                                    <div className="alert alert-warning" role="alert">
+                                        Pending
+                                    </div>
+                                ) : order.status == 'Cancelled' ? (
+                                    <div className="alert alert-danger" role="alert">
+                                        Cancelled
+                                    </div>
+                                ) : order.status == 'Expired' ? (
+                                    <div className="alert alert-danger" role="alert">
+                                        Expired
+                                    </div>
                                 ) : (
                                     <div className="alert alert-danger" role="alert">
-                                        Not Paid
-                                                <button className='btn btn-primary' onClick={payHandler}>Pay Now</button>
+                                        {order.status}
                                     </div>
                                 )}
+                                
                             </ListGroup.Item>
 
                             <ListGroup.Item>
@@ -84,7 +97,7 @@ function OrderScreen() {
                                     </div>
                                 )}
                             </ListGroup.Item>
-                                    
+
                             <ListGroup.Item>
                                 <h2>Order Items</h2>
                                 {order.OrderItems.length === 0 ? (

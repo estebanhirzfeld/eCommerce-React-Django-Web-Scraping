@@ -44,7 +44,7 @@ function ADMIN_ListOrdersScreen() {
                 <Col xs={4}>
                     <Link to={'/admin/orders/pending'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.isPaid === true && order.isDelivered === false).length}
+                            {orders.filter(order => order.status === 'Pending' || order.isDelivered === false).length}
                         </span>
                         <span>Pending</span>
                     </Link>
@@ -52,7 +52,7 @@ function ADMIN_ListOrdersScreen() {
                 <Col xs={4}>
                     <Link to={'/admin/orders/success'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.isPaid === true && order.isDelivered === true).length}
+                            {orders.filter(order => order.status === 'Paid' && order.isDelivered === true).length}
                         </span>
                         <span>Success</span>
                     </Link>
@@ -60,7 +60,7 @@ function ADMIN_ListOrdersScreen() {
                 <Col xs={4}>
                     <Link to={'/admin/orders/cancelled'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.isPaid === false && order.isDelivered === false).length}
+                            {orders.filter(order => order.status === 'Cancelled' || order.status === 'Expired').length}
                         </span>
                         <span>Cancelled</span>
                     </Link>

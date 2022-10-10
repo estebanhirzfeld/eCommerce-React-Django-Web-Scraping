@@ -4,6 +4,25 @@ import { Link } from 'react-router-dom'
 
 const categories = ['hombre', 'mujer', 'ninos', 'accesorios']
 
+const handleCloseNav = () => {
+    alert('close')
+}
+
+const pages = [
+    {
+        name: 'Home',
+        link: '/'
+    },
+    {
+        name: 'Women',
+        link: '/category/women clothing'
+    },
+    {
+        name: 'Men',
+        link: '/category/men clothing'
+    }
+]
+
 function Test() {
     return (
         <>
@@ -29,40 +48,17 @@ function Test() {
                 </div>
             </div>
 
-
             <div className="container">
                 <div className="row">
-                    <strong class='col-12 col-lg-6'>Pack Monotributo</strong>
-                    <p class='col-12 col-lg-6'>
-                        Inscripción en el Régimen Simplificado de Monotributo
-                        Inscripción en Impuestos Provinciales
-                        Recategorizaciones Semestrales
-                        Presentaciones Mensuales y Anuales de Impuestos Provinciales
-                        Avisos de vencimientos
-                    </p>
-                </div>
-                <div className="row">
-                    <strong class='col-12 col-lg-6'>Pack Responsable Inscripto</strong>
-                    <p class='col-12 col-lg-6'>
-                        Inscripciones en IVA, Impuesto a las Ganancias, Autónomos e Impuestos Provinciales
-                        Presentación mensual de IVA y Libro IVA Digital
-                        Proyección de Impuesto a las Ganancias
-                        Avisos de vencimientos y generación de Volantes Electrónicos de Pago
-                    </p>
-                </div>
-                <div className="row">
-                    <strong class='col-12 col-lg-6'>Regularizaciones</strong>
-                    <p class='col-12 col-lg-6'>
-                        Elaboración de un diagnóstico de la situación actual y propuestas con las posibles alternativas de solución
-                    </p>
-                </div>
-                <div className="row">
-                    <strong class='col-12 col-lg-6'>Sueldos y Cargas Sociales</strong>
-                    <p class='col-12 col-lg-6'>
-                        Elaboración de presupuestos
-                        Liquidación mensual de sueldos y cargas sociales según el Convenio Colectivo de Trabajo correspondiente
-                        Renuncias, despidos, licencias, etc
-                    </p>
+                    {
+                        pages.map((page, index) => (
+                            <Link to={page.link}>
+                                <buttton onClick={handleCloseNav} className='col-4 btn btn-primary' key={index}>
+                                    {page.name}
+                                </buttton>
+                            </Link>
+                        ))
+                    }
                 </div>
             </div>
 

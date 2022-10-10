@@ -47,7 +47,7 @@ function ADMIN_UserDetailsScreen() {
         getUserOrders()
     }, [userOrders])
 
-    
+
 
     console.log(user)
     console.log(userOrders)
@@ -78,12 +78,12 @@ function ADMIN_UserDetailsScreen() {
                             <Col md={7}>
                                 {/* <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1043.3257650178182!2d2.1765868833130946!3d41.37638718572824!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4a257230ed68d%3A0x54c90bb381795eaa!2sLa%20Rambla%2C%201%2C%2008002%20Barcelona%2C%20Espa%C3%B1a!5e0!3m2!1ses!2sus!4v1664913992574!5m2!1ses!2sus" height="350" style={{border:'0',width:'100%'}} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe> */}
 
-                                {address? (
+                                {address ? (
                                     <iframe src={`https://maps.google.com/maps?&hl=en&q=${address}&t=&z=14&ie=UTF8&iwloc=B&output=embed`} height="350" style={{ border: '0', width: '100%' }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                                ):
-                                (
-                                <p>No address found</p>
-                                )
+                                ) :
+                                    (
+                                        <p>No address found</p>
+                                    )
                                 }
 
 
@@ -99,25 +99,28 @@ function ADMIN_UserDetailsScreen() {
                                         <th>DATE</th>
                                         <th>TOTAL</th>
                                         <th>METHOD</th>
-                                        <th className='text-center'>PAID</th>
+                                        <th className='text-center'>STATUS</th>
                                         <th className='text-center'>DELIVERED</th>
                                         <th className='text-center'>MORE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {userOrders.map(order => (
+                                    {userOrders.reverse().map(order => (
                                         <tr key={order.id}>
                                             <td>{order.id}</td>
                                             <td>{order.createdAt.substring(0, 10)}</td>
                                             <td>${order.totalPrice}</td>
                                             <td>{order.paymentMethod}</td>
-                                            <td className='text-center text-success'>
-                                                {order.isPaid ? (
-                                                    order.paidAt.substring(0, 10)
-                                                ) : (
-                                                    <i className='fas fa-times' style={{ color: 'red' }}></i>
-                                                )}
-                                            </td>
+                                            <td className="text-center">{order.status === 'Paid'
+                                                ? <span className='text-success'>{order.paidAt.substring(0, 10)}</span>
+                                                : order.status === 'Pending'
+                                                    ? <span className='text-warning'>{order.status}</span>
+                                                    : order.status === 'Cancelled'
+                                                        ? <span className='text-danger'>{order.status}</span>
+                                                        : order.status === 'Expired'
+                                                            ? <span className='text-danger'>{order.status}</span>
+                                                            : order.status
+                                            }</td>
                                             <td className='text-center text-success'>
                                                 {order.isDelivered ? (
                                                     order.deliveredAt.substring(0, 10)

@@ -26,16 +26,14 @@ function ADMIN_ListOrdersStatusScreen() {
         );
         switch (status) {
             case 'pending':
-                setOrders(data.filter(order => order.isPaid === true && order.isDelivered === false))
+                setOrders(data.filter(order => order.status === 'Pending' || order.isDelivered === false))
                 break;
             case 'success':
-                setOrders(data.filter(order => order.isPaid === true && order.isDelivered === true))
+                setOrders(data.filter(order => order.status === 'Paid' && order.isDelivered === true))
                 break;
             case 'cancelled':
-                setOrders(data.filter(order => order.isPaid === false && order.isDelivered === false))
+                setOrders(data.filter(order => order.status === 'Cancelled' || order.status === 'Expired'))
                 break;
-            default:
-                setOrders(data)
         }
     }
 
@@ -56,30 +54,33 @@ function ADMIN_ListOrdersStatusScreen() {
                         <th>USER</th>
                         <th>DATE</th>
                         <th>TOTAL</th>
-                        <th className='text-center'>PAID</th>
+                        <th className='text-center'>STATUS</th>
                         <th className='text-center'>DELIVERED</th>
                         <th className='text-center'>MORE</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.map(order => (
+                    {orders.reverse().map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
                             <td>
-                                
+
                                 <Link to={`/admin/users/${order.user.id}`}>
-                                {order.user && order.user.name}
+                                    {order.user && order.user.name}
                                 </Link>
                             </td>
                             <td>{order.createdAt.substring(0, 10)}</td>
                             <td>${order.totalPrice}</td>
-                            <td className='text-center text-success'>
-                                {order.isPaid ? (
-                                    order.paidAt.substring(0, 10)
-                                ) : (
-                                    <i className='fas fa-times' style={{ color: 'red' }}></i>
-                                )}
-                            </td>
+                            <td className="text-center">{order.status === 'Paid'
+                                ? <span className='text-success'>{order.paidAt.substring(0, 10)}</span>
+                                : order.status === 'Pending'
+                                    ? <span className='text-warning'>{order.status}</span>
+                                    : order.status === 'Cancelled'
+                                        ? <span className='text-danger'>{order.status}</span>
+                                        : order.status === 'Expired'
+                                            ? <span className='text-danger'>{order.status}</span>
+                                            : order.status
+                            }</td>
                             <td className='text-center text-success'>
                                 {order.isDelivered ? (
                                     order.deliveredAt.substring(0, 10)
