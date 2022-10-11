@@ -12,7 +12,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ('user', 'paymentMethod', 'taxPrice', 'shippingPrice', 'totalPrice', 'status', 'paidAt', 'isDelivered', 'deliveredAt', 'createdAt', 'expiryDate')
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'get_user_email', 'product', 'name', 'qty', 'price', 'image', 'is_paided', 'is_delivered')
+    list_display = ('order', 'get_user_email', 'product', 'name', 'qty', 'price', 'image', 'payment_status' ,'is_delivered')
 
 class ShippingAddressAdmin(admin.ModelAdmin):
     list_display = ('order', 'get_user_email', 'address', 'city', 'postalCode', 'country', 'shippingPrice')

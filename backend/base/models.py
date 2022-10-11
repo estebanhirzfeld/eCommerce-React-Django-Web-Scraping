@@ -91,17 +91,15 @@ class OrderItem(models.Model):
     qty = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     image = models.CharField(max_length=500, null=True, blank=True)
+    
+
+    def payment_status(self):
+        if self.order is not None:
+            return self.order.status 
 
     def get_user_email(self):
         if self.order is not None:
             return self.order.user.email
-
-    def is_paided(self):
-        if self.order is not None:
-            if self.order.isPaid:
-                return '✅'
-            else:
-                return '❌'
 
     def is_delivered(self):
         if self.order is not None:
