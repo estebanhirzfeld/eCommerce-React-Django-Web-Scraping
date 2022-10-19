@@ -14,7 +14,7 @@ class Product(models.Model):
     # if user is deleted, set to null
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200, null=True, blank=True)
-    image = models.ImageField(null=True, blank=True)
+    image = models.ImageField(null=True, blank=True, default='/placeholder.png')
     brand = models.CharField(max_length=200, null=True, blank=True)
     category = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -121,6 +121,9 @@ class ShippingAddress(models.Model):
     country = models.CharField(max_length=100, null=True, blank=True)
     shippingPrice = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
+    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lon = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
 
     def get_user_email(self):
         if self.order is not None:

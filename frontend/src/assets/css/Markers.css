@@ -1,0 +1,15 @@
+.success {
+    filter: hue-rotate(-90deg);
+}
+
+.pending img {
+    filter: hue-rotate(187deg);
+}
+
+.expired img {
+    filter: hue-rotate(145deg);
+}
+
+.cancelled img {
+    filter: hue-rotate(125deg);
+}

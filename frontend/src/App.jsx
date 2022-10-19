@@ -21,11 +21,17 @@ import PaymentScreen from './screens/PaymentScreen.jsx'
 import PlaceOrderScreen from './screens/PlaceOrderScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
 
+import ADMIN_PanelScreen from './screens/ADMIN_PanelScreen.jsx'
+
 import ADMIN_ListUsersScreen from './screens/ADMIN_ListUsersScreen.jsx'
 import ADMIN_UserDetailsScreen from './screens/ADMIN_UserDetailsScreen.jsx'
+import ADMIN_EditUserScreen from './screens/ADMIN_EditUserScreen.jsx'
+
 import ADMIN_ListOrdersScreen from './screens/ADMIN_ListOrdersScreen.jsx'
 import ADMIN_ListOrdersStatusScreen from './screens/ADMIN_ListOrdersStatusScreen.jsx'
-import ADMIN_Panel from './screens/ADMIN_Panel.jsx'
+
+import ADMIN_ListProductsScreen from './screens/ADMIN_ListProductsScreen.jsx'
+import ADMIN_EditProductScreen from './screens/ADMIN_EditProductScreen.jsx'
 
 function App() {
 
@@ -110,6 +116,12 @@ function App() {
             </Container>
           }
           />
+          <Route path='/admin/user/:id/edit' element={
+            <Container>
+              <ADMIN_EditUserScreen/>
+            </Container>
+          }
+          />
           <Route path='admin/orders' element={
             <Container>
               <ADMIN_ListOrdersScreen/>
@@ -124,7 +136,19 @@ function App() {
           />
           <Route path='admin' element={
             <Container>
-              <ADMIN_Panel/>
+              <ADMIN_PanelScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin/products' element={
+            <Container>
+              <ADMIN_ListProductsScreen/>
+            </Container>
+          }
+          />
+          <Route path='admin/product/:id/edit' element={
+            <Container>
+              <ADMIN_EditProductScreen/>
             </Container>
           }
           />

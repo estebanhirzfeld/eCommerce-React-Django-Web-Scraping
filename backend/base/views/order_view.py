@@ -38,7 +38,9 @@ def addOrderItems(request):
             address=data['shippingAddress']['address'],
             city=data['shippingAddress']['city'],
             postalCode=data['shippingAddress']['postalCode'],
-            country=data['shippingAddress']['country']
+            country=data['shippingAddress']['country'],
+            lat=data['shippingAddress']['lat'],
+            lon=data['shippingAddress']['lon']
         )
         # (3) Create order items and set order to orderItem relationship
         for item in orderItems:

@@ -1,49 +1,59 @@
 import React, { useState, useEffect } from 'react'
+import '../assets/css/Markers.css'
+
+
 import { Link, useNavigate } from 'react-router-dom'
-import { LinkContainer } from 'react-router-bootstrap'
 import { Container, Col, Row, Form, Button, Table, Image } from 'react-bootstrap'
 
-import axios from "axios";
+
+import { greenIcon, redIcon, goldIcon } from '../components/LeafletIcons'
+import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet"
+import 'leaflet/dist/leaflet.css'
+
+import { listAllOrders } from '../actions/orderActions'
+import {useDispatch, useSelector} from 'react-redux'
+import { ordersListAdminReducer } from '../reducers/orderReducers'
+
+
 
 function ADMIN_ListOrdersScreen() {
 
-    const [orders, setOrders] = useState([])
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
 
-    const token = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')).token : null
-
-    const config = {
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
+    const [coords, setCoords] = useState([-34.608354, -58.438682])
+    
+    const ordersListAdmin = useSelector(state => state.ordersListAdmin)
+    const { loading, error, orders: orders } = ordersListAdmin
+    
+    const getOrders = () => {
+        dispatch(listAllOrders())
     }
-
-    const getOrders = async () => {
-        const { data } = await axios.get(
-            `http://localhost:8000/api/orders`,
-            config
-        );
-        setOrders(data)
-    }
-
+    
     useEffect(() => {
         getOrders()
     }, [])
+    
 
-    console.log(orders)
 
+    function ChangeView({ center, zoom }) {
+        const map = useMap()
+        map.flyTo(center, zoom)
+        return null
+    }
 
     return (
+
         <Container className='mt-5'>
             <h1 className='my-5 text-center'>Orders</h1>
 
-            <h2 className='text-center'>Total: {orders.length}</h2>
+            <h2 className='text-center'>Total: {orders?.length}</h2>
 
             <Row className='my-5 text-center'>
                 <Col xs={4}>
                     <Link to={'/admin/orders/pending'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.status === 'Pending' || order.isDelivered === false).length}
+                            {pendingOrder?.length}
                         </span>
                         <span>Pending</span>
                     </Link>
@@ -51,7 +61,7 @@ function ADMIN_ListOrdersScreen() {
                 <Col xs={4}>
                     <Link to={'/admin/orders/success'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.status === 'Paid' && order.isDelivered === true).length}
+                            {successOrder?.length}
                         </span>
                         <span>Success</span>
                     </Link>
@@ -59,7 +69,7 @@ function ADMIN_ListOrdersScreen() {
                 <Col xs={4}>
                     <Link to={'/admin/orders/cancelled'}>
                         <span className='form-control w-25 m-auto mb-3'>
-                            {orders.filter(order => order.status === 'Cancelled' || order.status === 'Expired').length}
+                            {cancelledOrder?.length + expiredOrder?.length}
                         </span>
                         <span>Cancelled</span>
                     </Link>
@@ -70,16 +80,112 @@ function ADMIN_ListOrdersScreen() {
 
 
             <Row className='mt-5'>
-                <Col xs={12} md={4}>
-                    <iframe src={`https://maps.google.com/maps?&hl=en&q=Teniente Mario Agustin Del Castillo 1824&t=&z=14&ie=UTF8&iwloc=B&output=embed`} height="350" style={{ border: '0', width: '100%' }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                </Col>
-                <Col xs={12} md={4}>
-                    <iframe src={`https://maps.google.com/maps?&hl=en&q=Teniente Mario Agustin Del Castillo 1824&t=&z=14&ie=UTF8&iwloc=B&output=embed`} height="350" style={{ border: '0', width: '100%' }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                </Col>
-                <Col xs={12} md={4}>
-                    <iframe src={`https://maps.google.com/maps?&hl=en&q=Teniente Mario Agustin Del Castillo 1824&t=&z=14&ie=UTF8&iwloc=B&output=embed`} height="350" style={{ border: '0', width: '100%' }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                </Col>
+                <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{ height: '400px', width: '100%' }}>
+
+                    <ChangeView center={coords} zoom={10} />
+                    <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+
+                    {/* Paid */}
+                    {successOrder?.map((order) => (
+                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
+                            icon={greenIcon}
+                            key={order.id} eventHandlers={{
+                                click: () =>
+                                    setCoords([order?.ShippingAddress?.lat +10, order?.ShippingAddress?.lon])
+                            }}
+
+                        >
+                            <Popup>
+                            <span className='text-success'>Paid</span>
+                                <Row>
+                                    {order?.OrderItems?.map((item,index) => (
+                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
+                                    ))}
+                                </Row>
+                                <Link to={`/order/${order.id}`}>
+                                    <p>Order: {order.id}</p>
+                                </Link>
+                                <p>Address: {order?.ShippingAddress?.address}</p>
+                            </Popup>
+                        </Marker>
+                    ))}
+                    {/* Pending */}
+                    {pendingOrder?.map((order) => (
+                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
+                            icon={goldIcon}
+                            key={order.id} eventHandlers={{
+                                click: () =>
+                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
+                            }}
+                        >
+                            <Popup>
+                            <span className='text-warning'>Pending</span>
+                                <Row>
+                                    {order?.OrderItems?.map((item,index) => (
+                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
+                                    ))}
+                                </Row>
+                                <Link to={`/order/${order.id}`}>
+                                    <p>Order: {order.id}</p>
+                                </Link>
+                                <p>Address: {order?.ShippingAddress?.address}</p>
+                            </Popup>
+                        </Marker>
+                    ))}
+                    {/* Cancelled */}
+                    {cancelledOrder?.map((order) => (
+                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
+                            icon={redIcon}
+                            key={order.id} eventHandlers={{
+                                click: () =>
+                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
+                            }}
+                        >
+                            <Popup>
+                            <span className='text-danger'>Cancelled</span>
+                                <Row>
+                                    {order?.OrderItems?.map((item,index) => (
+                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
+                                    ))}
+                                </Row>
+                                <Link to={`/order/${order.id}`}>
+                                    <p>Order: {order.id}</p>
+                                </Link>
+                                <p>Address: {order?.ShippingAddress?.address}</p>
+                            </Popup>
+                        </Marker>
+                    ))}
+                    {/* Expired */}
+                    {expiredOrder?.map((order) => (
+                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
+                            icon={redIcon}
+                            key={order.id} eventHandlers={{
+                                click: () =>
+                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
+                            }}
+                        >
+                            <Popup>
+                                    <span className='text-danger text-center'>Expired</span>
+                                <Row>
+                                    {order?.OrderItems?.map((item,index) => (
+                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
+                                    ))}
+                                </Row>
+                                <Link to={`/order/${order.id}`}>
+                                    <p style={{ maxWidth: '100px' }}>Order: {order.id}</p>
+                                </Link>
+                                <p>Address: {order?.ShippingAddress?.address}</p>
+                            </Popup>
+                        </Marker>
+                    ))}
+
+
+                </MapContainer>
+
             </Row>
+
 
             <h2 className='text-center my-5'>Most Selled</h2>
             <Row>

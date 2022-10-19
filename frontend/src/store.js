@@ -1,10 +1,10 @@
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 
-import { productListReducers, productDetailsReducers } from './reducers/productReducers';
+import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers } from './reducers/productReducers';
 import { cartReducer } from './reducers/cartReducers';
-import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer} from './reducers/userReducers';
-import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer} from './reducers/orderReducers';
+import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer } from './reducers/userReducers';
+import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer } from './reducers/orderReducers';
 
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -12,6 +12,10 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 const reducer = combineReducers({
     productList: productListReducers,
     productDetails: productDetailsReducers,
+    productDelete: productDeleteReducers,
+    productCreate: productCreateReducers,
+    productUpdate: productUpdateReducers,
+
     cart: cartReducer,
 
     login: userLoginReducer,
@@ -19,12 +23,16 @@ const reducer = combineReducers({
     userDetails: userDetailsReducer,
     userUpdateProfile: userUpdateProfileReducer,
     userList: userListReducer,
-    
+    userDelete: userDeleteReducer,
+    userUpdate: userUpdateReducer,
+
     orderCreate: orderCreateReducer,
     orderDetails: orderDetailsReducer,
     orderPay: orderPayReducer,
-    ordersList: ordersListReducer
-    
+    ordersList: ordersListReducer,
+
+    ordersListAdmin: ordersListAdminReducer,
+
 });
 
 const cartItemsFromStorage = localStorage.getItem('cartItems')
@@ -52,6 +60,8 @@ const initialState = {
 const middleware = [thunk];
 
 const store = createStore(reducer, initialState,
+    // applyMiddleware(...middleware)
+
     composeWithDevTools(applyMiddleware(...middleware)));
 
 export default store;

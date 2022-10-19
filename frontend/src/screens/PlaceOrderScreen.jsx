@@ -29,11 +29,11 @@ function PlaceOrderScreen() {
     cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)))
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2)
 
-    
+
     if (!cart.paymentMethod) {
         navigate('/payment')
     }
-    
+
     useEffect(() => {
         if (success) {
             navigate(`/order/${order.id}`)
@@ -41,9 +41,9 @@ function PlaceOrderScreen() {
             dispatch({ type: CART_CLEAR_ITEMS })
         }
     }, [success, navigate, order])
-    
-    
-    
+
+
+
     const placeOrderHandler = () => {
         dispatch(createOrder({
             orderItems: cart.cartItems,
@@ -55,14 +55,6 @@ function PlaceOrderScreen() {
             totalPrice: cart.totalPrice,
         }))
     }
-    
-    console.log(cart.cartItems, typeof(cart.cartItems))
-    console.log(cart.shippingAddress, typeof(cart.shippingAddress))
-    console.log(cart.paymentMethod, typeof(cart.paymentMethod))
-    console.log(cart.itemsPrice, typeof(cart.itemsPrice))
-    console.log(cart.shippingPrice, typeof(cart.shippingPrice))
-    console.log(cart.taxPrice, typeof(cart.taxPrice))
-    console.log(cart.totalPrice, typeof(cart.totalPrice))
 
     return (
         <div>
@@ -93,7 +85,7 @@ function PlaceOrderScreen() {
 
                         <ListGroup.Item>
                             <h2>Order Items</h2>
-                            {cart.cartItems.length === 0
+                            {cart?.cartItems?.length === 0
                                 ? <div className="alert alert-warning" role="alert">Your cart is empty</div>
                                 : (
                                     <ListGroup variant='flush'>
@@ -163,14 +155,18 @@ function PlaceOrderScreen() {
                             </ListGroup.Item>
 
                             <ListGroup.Item>
+                                {cart?.cartItems?.length === 0 
+                                ? <Button className='btn-block' type='button' disabled>Place Order</Button>
+                                :
                                 <Button
-                                    type='button'
-                                    className='btn-block'
-                                    disabled={cart.cartItems === 0}
-                                    onClick={placeOrderHandler}
+                                type='button'
+                                className='btn-block'
+                                disabled={cart.cartItems === 0}
+                                onClick={placeOrderHandler}
                                 >
                                     Place Order
                                 </Button>
+                                }
                             </ListGroup.Item>
 
                         </ListGroup>

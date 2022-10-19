@@ -7,6 +7,9 @@ import axios from "axios";
 
 function ADMIN_ListOrdersStatusScreen() {
 
+
+    const navigate = useNavigate()
+
     const { status } = useParams()
     const [orders, setOrders] = useState([])
 
@@ -38,6 +41,7 @@ function ADMIN_ListOrdersStatusScreen() {
     }
 
     useEffect(() => {
+
         getOrders()
     }, [])
 

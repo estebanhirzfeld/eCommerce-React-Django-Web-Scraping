@@ -17,6 +17,11 @@ import {
     ORDERS_LIST_SUCCESS,
     ORDERS_LIST_FAIL,
     ORDERS_LIST_RESET,
+
+    ORDERS_ALL_LIST_REQUEST,
+    ORDERS_ALL_LIST_SUCCESS,
+    ORDERS_ALL_LIST_FAIL,
+
 } from "../constants/orderConstants";
 
 
@@ -116,6 +121,27 @@ export const ordersListReducer = (state = { orders: [] }, action) => {
         case ORDERS_LIST_RESET:
             return {
                 orders: [],
+            };
+        default:
+            return state;
+    }
+}
+
+export const ordersListAdminReducer = (state = { orders: [] }, action) => {
+    switch (action.type) {
+        case ORDERS_ALL_LIST_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDERS_ALL_LIST_SUCCESS:
+            return {
+                loading: false,
+                orders: action.payload,
+            };
+        case ORDERS_ALL_LIST_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
             };
         default:
             return state;
