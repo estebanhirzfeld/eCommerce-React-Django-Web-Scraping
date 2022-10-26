@@ -45,6 +45,11 @@ function App() {
               <HomeScreen />
             </Container>
           } />
+          <Route path='/search/:keyword' element={
+            <Container>
+              <HomeScreen />
+            </Container>
+          } />
           <Route path='/product/:id' element={
             <Container>
               <ProductScreen />
@@ -88,7 +93,7 @@ function App() {
           />
           <Route path='/payment' element={
             <Container>
-              <PaymentScreen/>
+              <PaymentScreen />
             </Container>
           }
           />
@@ -100,55 +105,55 @@ function App() {
           />
           <Route path='/order/:id' element={
             <Container>
-              <OrderScreen/>
+              <OrderScreen />
             </Container>
           }
           />
           <Route path='/admin/users' element={
             <Container>
-              <ADMIN_ListUsersScreen/>
+              <ADMIN_ListUsersScreen />
             </Container>
           }
           />
-          <Route path='admin/users/:id' element={
+          <Route path='admin/user/:id' element={
             <Container>
-              <ADMIN_UserDetailsScreen/>
+              <ADMIN_UserDetailsScreen />
             </Container>
           }
           />
           <Route path='/admin/user/:id/edit' element={
             <Container>
-              <ADMIN_EditUserScreen/>
+              <ADMIN_EditUserScreen />
             </Container>
           }
           />
           <Route path='admin/orders' element={
             <Container>
-              <ADMIN_ListOrdersScreen/>
+              <ADMIN_ListOrdersScreen />
             </Container>
           }
           />
           <Route path='admin/orders/:status' element={
             <Container>
-              <ADMIN_ListOrdersStatusScreen/>
+              <ADMIN_ListOrdersStatusScreen />
             </Container>
           }
           />
           <Route path='admin' element={
             <Container>
-              <ADMIN_PanelScreen/>
+              <ADMIN_PanelScreen />
             </Container>
           }
           />
           <Route path='admin/products' element={
             <Container>
-              <ADMIN_ListProductsScreen/>
+              <ADMIN_ListProductsScreen />
             </Container>
           }
           />
           <Route path='admin/product/:id/edit' element={
             <Container>
-              <ADMIN_EditProductScreen/>
+              <ADMIN_EditProductScreen />
             </Container>
           }
           />

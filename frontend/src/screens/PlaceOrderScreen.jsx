@@ -51,6 +51,7 @@ function PlaceOrderScreen() {
             paymentMethod: cart.paymentMethod,
             itemsPrice: cart.itemsPrice,
             shippingPrice: cart.shippingPrice,
+            itemsPrice: cart.itemsPrice,
             taxPrice: cart.taxPrice,
             totalPrice: cart.totalPrice,
         }))

@@ -1,6 +1,8 @@
 import React, { useState } from "react"
 import { Form, Button, Container, Col } from "react-bootstrap"
 
+import SearchBar from "../components/SearchBar"
+
 const Test = () => {
 
     const [name, setName] = useState('')
@@ -35,9 +37,35 @@ const Test = () => {
         console.log('Order', data)
     }
 
+    const submitHandler = (e) => {
+        e.preventDefault();
+        console.log(search);
+    }
+
     return (
 
         <>
+
+            <h1>Search Bar</h1>
+            {/* <Form onSubmit={submitHandler} inline>
+                <Form.Control
+                    type='text'
+                    name='q'
+                    onChange={(e) => setKeyword(e.target.value)}
+                    className='mr-sm-2 ml-sm-5'
+                ></Form.Control>
+
+                <Button
+                    type='submit'
+                    variant='outline-success'
+                    className='p-2'
+                >
+                    Submit
+                </Button>
+            </Form> */}
+
+            <SearchBar />
+
             <Container>
                 <p>Product List</p>
                 {products.map((product, index) => (

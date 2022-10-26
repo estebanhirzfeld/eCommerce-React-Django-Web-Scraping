@@ -22,6 +22,15 @@ import {
     ORDERS_ALL_LIST_SUCCESS,
     ORDERS_ALL_LIST_FAIL,
 
+    ORDER_UPDATE_PAID_REQUEST,
+    ORDER_UPDATE_PAID_SUCCESS,
+    ORDER_UPDATE_PAID_FAIL,
+
+    ORDER_UPDATE_DELIVERED_REQUEST,
+    ORDER_UPDATE_DELIVERED_SUCCESS,
+    ORDER_UPDATE_DELIVERED_FAIL,
+
+
 } from "../constants/orderConstants";
 
 
@@ -139,6 +148,49 @@ export const ordersListAdminReducer = (state = { orders: [] }, action) => {
                 orders: action.payload,
             };
         case ORDERS_ALL_LIST_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderUpdatePaidReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_UPDATE_PAID_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_UPDATE_PAID_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_UPDATE_PAID_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+
+export const orderUpdateDeliveredReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_UPDATE_DELIVERED_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_UPDATE_DELIVERED_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_UPDATE_DELIVERED_FAIL:
             return {
                 loading: false,
                 error: action.payload,

@@ -119,13 +119,20 @@ def mercadoPagoWebhook(request):
         order.save()
     return Response('Payment was received')
 
-# @api_view(['PUT'])
-# @permission_classes([IsAuthenticated])
-# def updateOrderToPaid(request, pk):
-#     order = Order.objects.get(id=pk)
-#     order.isPaid = True
-#     order.paidAt = datetime.now()
-#     order.save()
-#     return Response('Order was paid')
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateOrderToPaid(request, pk):
+    order = Order.objects.get(id=pk)
+    order.isPaid = not order.isPaid
+    order.paidAt = datetime.now()
+    order.save()
+    return Response('Order was paid')
 
-
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateOrderToDelivered(request, pk):
+    order = Order.objects.get(id=pk)
+    order.isDelivered = not order.isDelivered
+    order.deliveredAt = datetime.now()
+    order.save()
+    return Response('Order was delivered')

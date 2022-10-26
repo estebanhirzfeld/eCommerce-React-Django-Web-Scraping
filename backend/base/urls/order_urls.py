@@ -6,6 +6,11 @@ urlpatterns = [
     path ('pay/', views.mercadoPagoWebhook, name='webhook'),
     path('add/', views.addOrderItems, name='orders-add'),
     path ('myorders/', views.getMyOrders, name='myorders'),
+
+    path('update/paid/<str:pk>/', views.updateOrderToPaid, name='paid'),
+    path('update/delivered/<str:pk>/', views.updateOrderToDelivered, name='delivered'),
+
+
     path ('<str:pk>/', views.getOrderById, name='user-order'),
     path('user/<str:pk>/', views.getOrdersByUser, name='orders'),
 

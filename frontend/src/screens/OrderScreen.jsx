@@ -3,36 +3,65 @@ import { useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getOrderDetails, payOrder } from '../actions/orderActions'
-import { Container, Row, Col, ListGroup, Image, Card } from 'react-bootstrap'
+import { Container, Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap'
 import { createOrder } from '../actions/orderActions'
+import {useNavigate} from 'react-router-dom'
 
+import { updateDeliverOrder, updatePaidOrder } from '../actions/orderActions'
 
 function OrderScreen() {
 
     const dispatch = useDispatch()
     const { id } = useParams()
-
+    const navigate = useNavigate()
 
     const orderPay = useSelector(state => state.orderPay)
-    const { paymentLink, success } = orderPay
+    const { paymentLink, success, error: errorPay } = orderPay
 
     const orderDetails = useSelector(state => state.orderDetails)
     const { order, loading, error } = orderDetails
 
+    const login = useSelector(state => state.login)
+    const { userInfo } = login
+
+    const orderUpdatePaid = useSelector(state => state.orderUpdatePaid)
+    const { success: successPaid } = orderUpdatePaid
+
+    const orderUpdateDelivered = useSelector(state => state.orderUpdateDelivered)
+    const { success: successDeliver } = orderUpdateDelivered
+
     useEffect(() => {
         dispatch(getOrderDetails(id))
 
-    }, [dispatch, id])
+    }, [dispatch, id, successPaid, successDeliver])
 
     useEffect(() => {
+
         if (success) {
             window.location.href = paymentLink
         }
-    }, [success, paymentLink])
+
+    }, [success, paymentLink, dispatch, successPaid, successDeliver])
 
     const payHandler = () => {
         dispatch(payOrder(id))
     }
+
+    const updatePaidHandler = () => {
+        dispatch(updatePaidOrder(id))
+    }
+
+    const updateDeliverHandler = () => {
+        if (!order.isPaid) {
+            if (window.confirm('Are you sure? This order is not paid yet')) {
+                dispatch(updateDeliverOrder(id))
+            }
+        } else {
+            dispatch(updateDeliverOrder(id))
+        }
+
+    }
+
 
     return (
         <Container className='mt-5'>
@@ -47,28 +76,13 @@ function OrderScreen() {
                                     {order.paymentMethod}
                                 </p>
 
-                                {order.status == 'Paid' ? (
-                                    <div className="alert alert-success" role="alert">
-                                        Paid on {order.paidAt}
-                                    </div>
-                                ) : order.status == 'Pending' ? (
-                                    <div className="alert alert-warning" role="alert">
-                                        Pending
-                                    </div>
-                                ) : order.status == 'Cancelled' ? (
-                                    <div className="alert alert-danger" role="alert">
-                                        Cancelled
-                                    </div>
-                                ) : order.status == 'Expired' ? (
-                                    <div className="alert alert-danger" role="alert">
-                                        Expired
-                                    </div>
-                                ) : (
-                                    <div className="alert alert-danger" role="alert">
-                                        {order.status}
-                                    </div>
-                                )}
-                                
+                                {order.isPaid ?
+                                    <div className='alert alert-success'>Paid on {order.paidAt}</div>
+                                    : new Date(order.expiryDate).getTime() < Date.now() ?
+                                        <div className='alert alert-danger'>Order Expired on {order.expiryDate.slice(0, 10)}</div>
+                                        : <div className='alert alert-danger'>Not Paid</div>
+                                }
+
                             </ListGroup.Item>
 
                             <ListGroup.Item>
@@ -133,7 +147,9 @@ function OrderScreen() {
                                 <ListGroup.Item>
                                     <Row>
                                         <Col>Items</Col>
-                                        <Col>${order.totalPrice}</Col>
+                                        <Col>${
+                                            order?.OrderItems?.reduce((acc, item) => acc + item.price * item.qty, 0)
+                                        }</Col>
                                     </Row>
                                 </ListGroup.Item>
                                 <ListGroup.Item>
@@ -155,7 +171,40 @@ function OrderScreen() {
                                     </Row>
                                 </ListGroup.Item>
                             </ListGroup>
+
                         </Card>
+
+                        {/* only show the button to the user who made the order */}
+
+                        {!order?.isPaid && order?.user?.id === userInfo?.id && (
+                            <ListGroup.Item>
+                                {errorPay || new Date(order.expiryDate).getTime() < Date.now() ?
+                                    <></>
+                                    : (
+                                        <Button type='button' className='btn-block w-100 my-5' onClick={payHandler}>
+                                            Pagar con Mercado Pago
+                                        </Button>)
+                                }
+                            </ListGroup.Item>
+                        )}
+
+                        <ListGroup.Item>
+
+                            {/* button to mark the order as paid */}
+                            {userInfo?.is_Admin && (
+                                <Button type='button' className='btn-block btn-outline-dark w-100 my-2' onClick={updatePaidHandler}>
+                                    Change Paid Status
+                                </Button>
+                            )}
+                            {/* button to mark the order as delivered */}
+                            {userInfo?.is_Admin && (
+                                <Button type='button' className='btn-block btn-outline-dark w-100 my-2' onClick={updateDeliverHandler}>
+                                    Change Deliver Status
+                                </Button>
+                            )}
+
+
+                        </ListGroup.Item>
                     </Col>
                 </Row>
             )}

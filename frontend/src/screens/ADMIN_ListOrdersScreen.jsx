@@ -1,43 +1,43 @@
-import React, { useState, useEffect } from 'react'
-import '../assets/css/Markers.css'
+import React, { useEffect, useState} from 'react'
 
+import { useDispatch, useSelector } from 'react-redux'
+import { listAllOrders } from '../actions/orderActions'
 
+import { Container, Row, Col, Table, Button, Image } from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
-import { Container, Col, Row, Form, Button, Table, Image } from 'react-bootstrap'
 
 
 import { greenIcon, redIcon, goldIcon } from '../components/LeafletIcons'
-import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet"
+import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'
-
-import { listAllOrders } from '../actions/orderActions'
-import {useDispatch, useSelector} from 'react-redux'
-import { ordersListAdminReducer } from '../reducers/orderReducers'
 
 
 
 function ADMIN_ListOrdersScreen() {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const dispatch = useDispatch()
 
-    const [coords, setCoords] = useState([-34.608354, -58.438682])
-    
+
+    const [coords, setCoords] = useState([-34.608354, -58.438682]);
+
+    const [successOrders, setSuccessOrders] = useState([]);
+    const [pendingOrders, setPendingOrders] = useState([]);
+    const [cancelledOrders, setCancelledOrders] = useState([]);
+
+    const login = useSelector(state => state.login)
+    const { userInfo } = login
+
     const ordersListAdmin = useSelector(state => state.ordersListAdmin)
-    const { loading, error, orders: orders } = ordersListAdmin
-    
-    const getOrders = () => {
-        dispatch(listAllOrders())
-    }
+    const { loading, error, orders } = ordersListAdmin
     
     useEffect(() => {
-        getOrders()
-    }, [])
+        dispatch(listAllOrders())
+    }, [dispatch])
     
-
-
-    function ChangeView({ center, zoom }) {
-        const map = useMap()
+    const ChangeView = ({ center, zoom }) => {
+        const map = useMap();
         map.flyTo(center, zoom)
         return null
     }
@@ -45,207 +45,163 @@ function ADMIN_ListOrdersScreen() {
     return (
 
         <Container className='mt-5'>
-            <h1 className='my-5 text-center'>Orders</h1>
+            {
+                userInfo && userInfo.is_Admin ? (
+                    <>
+                            <h1 className='text-center'>Total Orders {orders?.length}</h1>
+                        <Row className='text-center my-5'>
+                            <Col md={4}>
+                                Pending Orders {orders?.filter(order => order.status === 'Pending').length}
+                            </Col>
+                            <Col md={4}>
+                                Success Orders {orders?.filter(order => order.status === 'Success').length}
+                            </Col>
+                            <Col md={4}>
+                                Cancelled Orders {orders?.filter(order => order.status === 'Cancelled').length} 
+                            </Col>
+                        </Row>
 
-            <h2 className='text-center'>Total: {orders?.length}</h2>
+                        <Row className='mt-5'>
+                            <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{height:'400px', width:'100%'}}>
+                                <ChangeView center={coords} zoom={8} />
+                                <TileLayer
+                                url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+                                />
+                                {
+                                    orders?.filter(order => order.status === 'Success').map(order => (
+                                    <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                            icon={greenIcon}
+                                            key={order.id}
+                                    >
+                                            <Popup>
+                                                <span className='text-success'>Success</span>
+                                                <Row>
+                                                    {
+                                                        order?.OrderItems?.map((item,index) => (
+                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
+                                                        ))
+                                                        }
+                                                </Row>
+                                                <Link to={`/order/${order.id}`}>View Order</Link>
+                                                <p>{order.address}</p>
+                                            </Popup>
+                                        </Marker>
+                                    ))
+                                }
+                                {
+                                    orders?.filter(order => order.status === 'Pending').map(order => (
+                                        <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                            icon={goldIcon}
+                                            key={order.id}
+                                            >
+                                            <Popup>
+                                                <span className='text-warning'>Pending</span>
+                                                <Row>
+                                                    {
+                                                        order?.OrderItems?.map((item,index) => (
+                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} fluid rounded />
+                                                        ))
+                                                        }
+                                                </Row>
+                                                <Link to={`/order/${order.id}`}>View Order</Link>
+                                                <p>{order.address}</p>
+                                            </Popup>
+                                        </Marker>
+                                    ))
+                                }
+                                {
+                                    orders?.filter(order => order.status === 'Cancelled').map(order => (
+                                        <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                            icon={redIcon}
+                                            key={order.id}
+                                            >
+                                            <Popup>
+                                                <span className='text-danger'>Cancelled</span>
+                                                <Row>
+                                                    {
+                                                        order?.OrderItems?.map((item,index) => (
+                                                            <Image key={index}  src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
+                                                        ))
+                                                        }
+                                                </Row>
+                                                <Link to={`/order/${order.id}`}>View Order</Link>
+                                                <p>{order.address}</p>
+                                            </Popup>
+                                        </Marker>
+                                    ))
+                                }
+                            </MapContainer>
+                        </Row>
 
-            <Row className='my-5 text-center'>
-                <Col xs={4}>
-                    <Link to={'/admin/orders/pending'}>
-                        <span className='form-control w-25 m-auto mb-3'>
-                            {pendingOrder?.length}
-                        </span>
-                        <span>Pending</span>
-                    </Link>
-                </Col>
-                <Col xs={4}>
-                    <Link to={'/admin/orders/success'}>
-                        <span className='form-control w-25 m-auto mb-3'>
-                            {successOrder?.length}
-                        </span>
-                        <span>Success</span>
-                    </Link>
-                </Col>
-                <Col xs={4}>
-                    <Link to={'/admin/orders/cancelled'}>
-                        <span className='form-control w-25 m-auto mb-3'>
-                            {cancelledOrder?.length + expiredOrder?.length}
-                        </span>
-                        <span>Cancelled</span>
-                    </Link>
-                </Col>
-            </Row>
+                        <Row>
+                            <Col>
+                                <h1 className='text-center my-5'>Orders</h1>
+                                {
+                                    loading ? (
+                                        <h2>Loading...</h2>
+                                    ) : error ? (
+                                        <h2>{error}</h2>
+                                    ) : (
+                                        <Table striped bordered hover responsive className='table-sm'>
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>USER</th>
+                                                    <th>DATE</th>
+                                                    <th>TOTAL</th>
+                                                    <th className='text-center'>PAID</th>
+                                                    <th className='text-center'>DELIVERED</th>
+                                                    <th className='text-center'>STATUS</th>
+                                                    <th className='text-center'>MORE</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {orders
+                                                    .map(order => (
+                                                        <tr key={order.id}>
+                                                            <td>{order.id}</td>
+                                                            <td><Link to={`/admin/user/${order.user.id}`}>{order.user.name}</Link></td>
+                                                            <td>{order.createdAt.substring(0, 10)}</td>
+                                                            <td>${order.totalPrice}</td>
+                                                            <td className='text-center text-success'>{order.isPaid ? order.paidAt.substring(0, 10) : (
+                                                                <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                                            )}</td>
+                                                            <td className='text-center text-success'>{order.isDelivered ? order.deliveredAt.substring(0, 10) : (
+                                                                <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                                            )}</td>
+                                                            <td className='text-center'>
+                                                                {order.status === 'Pending' ? (
+                                                                    <span className='text-warning'>{order.status}</span>
+                                                                ) : order.status === 'Success' ? (
+                                                                    <span className='text-success'>{order.status}</span>
+                                                                ) : (
+                                                                    <span className='text-danger'>{order.status}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className='text-center'>
+                                                                <LinkContainer to={`/order/${order.id}`}>
+                                                                    <Button variant='light' className='btn-sm'>
+                                                                        Details
+                                                                    </Button>
+                                                                </LinkContainer>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </Table>
+                                    )
+                                }
+                            </Col>
+                        </Row>
+                    </>
+                ) : (
+                    <>
+                        <h1>Not Authorized</h1>
+                        <Link to='/'>Go shopping</Link>
+                    </>
+                )
 
-
-
-
-            <Row className='mt-5'>
-                <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{ height: '400px', width: '100%' }}>
-
-                    <ChangeView center={coords} zoom={10} />
-                    <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-
-                    {/* Paid */}
-                    {successOrder?.map((order) => (
-                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
-                            icon={greenIcon}
-                            key={order.id} eventHandlers={{
-                                click: () =>
-                                    setCoords([order?.ShippingAddress?.lat +10, order?.ShippingAddress?.lon])
-                            }}
-
-                        >
-                            <Popup>
-                            <span className='text-success'>Paid</span>
-                                <Row>
-                                    {order?.OrderItems?.map((item,index) => (
-                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
-                                    ))}
-                                </Row>
-                                <Link to={`/order/${order.id}`}>
-                                    <p>Order: {order.id}</p>
-                                </Link>
-                                <p>Address: {order?.ShippingAddress?.address}</p>
-                            </Popup>
-                        </Marker>
-                    ))}
-                    {/* Pending */}
-                    {pendingOrder?.map((order) => (
-                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
-                            icon={goldIcon}
-                            key={order.id} eventHandlers={{
-                                click: () =>
-                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
-                            }}
-                        >
-                            <Popup>
-                            <span className='text-warning'>Pending</span>
-                                <Row>
-                                    {order?.OrderItems?.map((item,index) => (
-                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
-                                    ))}
-                                </Row>
-                                <Link to={`/order/${order.id}`}>
-                                    <p>Order: {order.id}</p>
-                                </Link>
-                                <p>Address: {order?.ShippingAddress?.address}</p>
-                            </Popup>
-                        </Marker>
-                    ))}
-                    {/* Cancelled */}
-                    {cancelledOrder?.map((order) => (
-                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
-                            icon={redIcon}
-                            key={order.id} eventHandlers={{
-                                click: () =>
-                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
-                            }}
-                        >
-                            <Popup>
-                            <span className='text-danger'>Cancelled</span>
-                                <Row>
-                                    {order?.OrderItems?.map((item,index) => (
-                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
-                                    ))}
-                                </Row>
-                                <Link to={`/order/${order.id}`}>
-                                    <p>Order: {order.id}</p>
-                                </Link>
-                                <p>Address: {order?.ShippingAddress?.address}</p>
-                            </Popup>
-                        </Marker>
-                    ))}
-                    {/* Expired */}
-                    {expiredOrder?.map((order) => (
-                        <Marker position={[order?.ShippingAddress?.lat, order?.ShippingAddress?.lon]}
-                            icon={redIcon}
-                            key={order.id} eventHandlers={{
-                                click: () =>
-                                    setCoords([order?.ShippingAddress?.lat, order?.ShippingAddress?.lon])
-                            }}
-                        >
-                            <Popup>
-                                    <span className='text-danger text-center'>Expired</span>
-                                <Row>
-                                    {order?.OrderItems?.map((item,index) => (
-                                        <img key={index} src={`http://localhost:8000${item?.image}`} alt={item?.name} style={{ width: '100px' }} />
-                                    ))}
-                                </Row>
-                                <Link to={`/order/${order.id}`}>
-                                    <p style={{ maxWidth: '100px' }}>Order: {order.id}</p>
-                                </Link>
-                                <p>Address: {order?.ShippingAddress?.address}</p>
-                            </Popup>
-                        </Marker>
-                    ))}
-
-
-                </MapContainer>
-
-            </Row>
-
-
-            <h2 className='text-center my-5'>Most Selled</h2>
-            <Row>
-                <Col md={3} >
-                    <Form>
-                        <Form.Group controlId='filter'>
-                            <span>Period:</span>
-                            <Form.Control as='select'>
-                                <option>Year</option>
-                                <option>Month</option>
-                                <option>Week</option>
-                                <option>Day</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId='filter'>
-                            <span>Categorie:</span>
-                            <Form.Control as='select'>
-                                <option>Hoodies</option>
-                                <option>T-Shirts</option>
-                                <option>Shoes</option>
-                                <option>Accessories</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId='filter'>
-                            <span>Size:</span>
-                            <Form.Control as='select'>
-                                <option>XS</option>
-                                <option>S</option>
-                                <option>M</option>
-                                <option>L</option>
-                                <option>XL</option>
-                                <option>XXL</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId='filter'>
-                            <span>Color:</span>
-                            <Form.Control as='select'>
-                                <option>Black</option>
-                                <option>White</option>
-                                <option>Red</option>
-                                <option>Blue</option>
-                                <option>Green</option>
-                                <option>Yellow</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId='filter'>
-                            <span>Seller:</span>
-                            <Form.Control as='select'>
-                                <option>Satana</option>
-                                <option>Kitanas</option>
-                                <option>HippyKiller</option>
-                                <option>Zoldyck</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Form>
-                </Col>
-                <Col md={9} className='text-center'>
-                    <Image src={'https://reactjsexample.com/content/images/2021/12/Snipaste_2021-12-12_20-14-33.jpg'} fluid />
-                </Col>
-            </Row>
+            }
         </Container>
     )
 }

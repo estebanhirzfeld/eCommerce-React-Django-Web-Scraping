@@ -121,7 +121,7 @@ function ProfileScreen() {
                                             <th>ID</th>
                                             <th>DATE</th>
                                             <th>TOTAL</th>
-                                            <th className='text-center'>STATUS</th>
+                                            <th className='text-center'>PAID</th>
                                             <th className='text-center'>DELIVERED</th>
                                             <th className='text-center'>MORE</th>
                                         </tr>
@@ -135,21 +135,9 @@ function ProfileScreen() {
                                                         <td>{order.createdAt.substring(0, 10)}</td>
                                                         <td>${order.totalPrice}</td>
 
-                                                        {/* <td className="text-center text-success">{order.isPaid ? order.paidAt.substring(0, 10) : (
+                                                        <td className="text-center text-success">{order.isPaid ? order.paidAt.substring(0, 10) : (
                                                             <i className='fas fa-times' style={{ color: 'red' }}></i>
-                                                        )}</td> */}
-
-                                                        <td className="text-center">{order.status === 'Paid'
-                                                        ? <span className='text-success'>{order.paidAt.substring(0, 10)}</span>
-                                                        : order.status === 'Pending'
-                                                        ? <span className='text-warning'>{order.status}</span>
-                                                        : order.status === 'Cancelled'
-                                                        ? <span className='text-danger'>{order.status}</span>
-                                                        : order.status === 'Expired'
-                                                        ? <span className='text-danger'>{order.status}</span>
-                                                        : order.status 
-                                                        }</td>
-
+                                                        )}</td>
 
                                                         <td className="text-center text-success">{order.isDelivered ? order.deliveredAt.substring(0, 10) : (
                                                             <i className='fas fa-times' style={{ color: 'red' }}></i>

@@ -1,10 +1,10 @@
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 
-import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers } from './reducers/productReducers';
+import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers} from './reducers/productReducers.js';
 import { cartReducer } from './reducers/cartReducers';
 import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer } from './reducers/userReducers';
-import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer } from './reducers/orderReducers';
+import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer } from './reducers/orderReducers';
 
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -15,6 +15,8 @@ const reducer = combineReducers({
     productDelete: productDeleteReducers,
     productCreate: productCreateReducers,
     productUpdate: productUpdateReducers,
+
+    productCreateReview: productCreateReviewReducers,
 
     cart: cartReducer,
 
@@ -31,7 +33,11 @@ const reducer = combineReducers({
     orderPay: orderPayReducer,
     ordersList: ordersListReducer,
 
+
+
     ordersListAdmin: ordersListAdminReducer,
+    orderUpdatePaid: orderUpdatePaidReducer,
+    orderUpdateDelivered: orderUpdateDeliveredReducer,
 
 });
 

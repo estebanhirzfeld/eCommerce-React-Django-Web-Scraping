@@ -65,7 +65,7 @@ function ADMIN_ListUsersScreen() {
                                             </LinkContainer>
                                         </td>
                                         <td className='text-center'>
-                                            <LinkContainer to={`/admin/users/${user.id}`}>
+                                            <LinkContainer to={`/admin/user/${user.id}`}>
                                                 <Button variant='light' className='btn-sm'>
                                                     <i className='fa-solid fa-user'></i>
                                                 </Button>
