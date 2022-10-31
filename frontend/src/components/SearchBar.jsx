@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Row, Col } from 'react-bootstrap';
-import {useNavigate} from 'react-router-dom'
+import {createSearchParams, useNavigate} from 'react-router-dom'
 
 function SearchBar() {
 
@@ -12,7 +12,14 @@ function SearchBar() {
     const submitHandler = (e) => {
         e.preventDefault();
         if (keyword.trim()) {
-            navigate(`/search/${keyword}`)
+
+            navigate({
+                search: `${createSearchParams({
+                    keyword: keyword,
+                    page: 1
+                })}`
+            }
+            );
 
         } else {
             navigate('/')
@@ -21,7 +28,7 @@ function SearchBar() {
 
     return (
         <Form onSubmit={submitHandler} className='d-flex'>
-            <Row>
+            <Row className='align-items-center'>
                 <Col sm={12} md={8} lg={10}>
                     <Form.Control
                         type="text"

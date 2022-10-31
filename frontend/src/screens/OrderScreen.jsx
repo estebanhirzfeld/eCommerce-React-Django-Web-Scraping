@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getOrderDetails, payOrder } from '../actions/orderActions'
 import { Container, Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap'
 import { createOrder } from '../actions/orderActions'
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { updateDeliverOrder, updatePaidOrder } from '../actions/orderActions'
 
@@ -61,6 +61,10 @@ function OrderScreen() {
         }
 
     }
+
+
+    // srtingify the order object to display it in the console
+    console.log(JSON.stringify(order, null, 4))
 
 
     return (
@@ -148,7 +152,7 @@ function OrderScreen() {
                                     <Row>
                                         <Col>Items</Col>
                                         <Col>${
-                                            order?.OrderItems?.reduce((acc, item) => acc + item.price * item.qty, 0)
+                                            order?.OrderItems?.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)
                                         }</Col>
                                     </Row>
                                 </ListGroup.Item>

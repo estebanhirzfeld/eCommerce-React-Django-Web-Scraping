@@ -45,11 +45,6 @@ function App() {
               <HomeScreen />
             </Container>
           } />
-          <Route path='/search/:keyword' element={
-            <Container>
-              <HomeScreen />
-            </Container>
-          } />
           <Route path='/product/:id' element={
             <Container>
               <ProductScreen />

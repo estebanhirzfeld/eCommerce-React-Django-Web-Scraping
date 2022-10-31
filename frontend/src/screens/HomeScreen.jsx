@@ -1,15 +1,19 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { listProducts } from '../actions/productActions'
 import { was_clicked_reset } from '../actions/cartActions'
 
-import { useParams } from 'react-router-dom'
+import { productListReducers } from '../reducers/productReducers'
+
+// pagination
+import { Pagination } from 'react-bootstrap'
+
+import { useSearchParams } from 'react-router-dom'
 
 import ItemLoader from '../components/ItemLoader'
 
-import { Row, Col } from 'react-bootstrap'
+import { Row, Col, Button } from 'react-bootstrap'
 import Product from '../components/Product'
-import Paginate from '../components/Paginate'
 
 function HomeScreen() {
     const dispatch = useDispatch()
@@ -17,17 +21,17 @@ function HomeScreen() {
     const productList = useSelector(state => state.productList)
     const { loading, error, products, page, pages } = productList
 
-    const { keyword } = useParams()
+    const [searchParams] = useSearchParams();
+
+    const keyword = searchParams.get('keyword') ? searchParams.get('keyword') : ''
+    const [pageNumber, setPageNumber] = useState(searchParams.get('page') ? searchParams.get('page') : 1)
 
     useEffect(() => {
-        if (keyword) {
-            dispatch(listProducts(keyword))
-        } else {
-            dispatch(listProducts())
-        }
+        dispatch(listProducts(keyword, pageNumber))
         dispatch(was_clicked_reset())
+    }, [dispatch, keyword, pageNumber])
 
-    }, [dispatch, keyword])
+
 
     return (
         <div>
@@ -38,14 +42,30 @@ function HomeScreen() {
                     : products && products?.length > 0 ? (
                         <Row>
                             {products.map((product) => (
-                                <Col key={product.id} sm={6} md={6} lg={4} xl={3}>
+                                <Col key={product.id} sm={6} md={6} lg={4} xl={3} className='mb-5'>
                                     <Product product={product} />
                                 </Col>
                             ))}
-                            <Col className='mt-5 d-flex justify-content-center' sm={12} md={12} lg={12} xl={12}>
-                                <Paginate pages={pages} page={page} keyword={keyword} />
-                            </Col>
+
+                            {
+                                pages > 1 && (
+                                    <Pagination className='justify-content-center mt-5'>
+                                        <>
+                                            <Pagination.Prev onClick={() => setPageNumber(pageNumber - 1)} disabled={pageNumber === 1} />
+                                            {[...Array(pages).keys()].map((x) => (
+                                                <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => setPageNumber(x + 1)}>
+                                                    {x + 1}
+                                                </Pagination.Item>
+                                            ))}
+                                            <Pagination.Next onClick={() => setPageNumber(pageNumber + 1)} disabled={pageNumber === pages}/>
+                                        </>
+                                    </Pagination>
+                                )
+
+                            }
                         </Row>
+
+
 
                     ) : (
                         <p className='text-center mt-5'>No Products Found 😞</p>

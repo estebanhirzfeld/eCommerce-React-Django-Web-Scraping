@@ -28,15 +28,17 @@ import {
 } from "../constants/productConstants";
 
 
-export const listProducts = (keyword='', pageNumber='') => async (dispatch) => {
+export const listProducts = (keyword = '', pageNumber = 1) => async (dispatch) => {
 
     try {
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
-        // keyword + page
-        const { data } = await axios.get("http://localhost:8000/api/products?keyword="+keyword);
+        const { data } = await axios.get(`http://localhost:8000/api/products?keyword=${keyword}&page=${pageNumber}`);
 
-        dispatch({ type: PRODUCT_LIST_SUCCESS, payload: data });
+        dispatch({
+            type: PRODUCT_LIST_SUCCESS,
+            payload: data
+        });
 
     } catch (error) {
         dispatch({
@@ -157,34 +159,34 @@ export const updateProduct = (product) => async (dispatch, getState) => {
 }
 
 export const createProductReview = (productId, review) => async (dispatch, getState) => {
-    
-        try {
-            dispatch({ type: PRODUCT_CREATE_REVIEW_REQUEST });
-    
-            const { login: { userInfo } } = getState();
-    
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${userInfo.token}`
-                }
+
+    try {
+        dispatch({ type: PRODUCT_CREATE_REVIEW_REQUEST });
+
+        const { login: { userInfo } } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
             }
-    
-            const {data} = await axios.post(`http://localhost:8000/api/products/review/${productId}/`, review, config);
-    
-            dispatch({
-                type: PRODUCT_CREATE_REVIEW_SUCCESS,
-                payload: data
-            });
-            
-    
-        } catch (error) {
-            dispatch({
-                type: PRODUCT_CREATE_REVIEW_FAIL,
-                payload: error.response && error.response.data.detail
-                    ? error.response.data.detail
-                    : error.message
-            });
         }
-    
+
+        const { data } = await axios.post(`http://localhost:8000/api/products/review/${productId}/`, review, config);
+
+        dispatch({
+            type: PRODUCT_CREATE_REVIEW_SUCCESS,
+            payload: data
+        });
+
+
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_CREATE_REVIEW_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message
+        });
     }
+
+}
