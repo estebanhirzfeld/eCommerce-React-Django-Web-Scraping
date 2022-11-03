@@ -11,8 +11,8 @@ function CartList({ cartItems }, qty) {
 
     const dispatch = useDispatch()
 
-    const addToCartHandler = (id, qty) => {
-        dispatch(addToCart(id, qty))
+    const addToCartHandler = (id, qty, size, countInStock) => {
+        dispatch(addToCart(id, qty, size, countInStock))
     }
 
 
@@ -20,22 +20,25 @@ function CartList({ cartItems }, qty) {
         <>
             <Card className='mb-4 listCard removeArrows'>
                 {
-                    cartItems.map((item,index) => (
+                    cartItems.map((item, index) => (
                         <ListGroup key={index} variant='flush'>
                             <ListGroup.Item className=''>
                                 <Row className='text-center justify-content-center align-items-center'>
                                     <Col lg={5}><Image style={{ objectFit: 'cover', height: '100px', width: '100px' }} src={`http://127.0.0.1:8000${item.image}`} alt={item.name} fluid /></Col>
-                                    <Col lg={7}><Link to={`/product/${item.product}`}>{item.name}</Link></Col>
+                                    <Col lg={7}>
+                                        <Link to={`/product/${item.product}`}>{item.name} ({item.size})</Link>
+                                        </Col>
+                                    
                                     <Col>
                                         <Row className='justify-content-start align-items-center' >
                                             <Col lg={5}><span>Quantity:</span></Col>
                                             <Col lg={7}>
                                                 <Form.Control
-                                                as='select'
-                                                value={item.qty}
-                                                onChange={(e) => addToCartHandler(item.product, e.target.value)}>
+                                                    as='select'
+                                                    value={item.qty}
+                                                    onChange={(e) => addToCartHandler(item.product, Number(e.target.value), item.size, item.countInStock)}>
                                                     {
-                                                        [...Array(item.countInStock).keys()].map((x,index) => (
+                                                        [...Array(item.countInStock).keys()].map((x, index) => (
                                                             <option className='text-center' key={index} value={x + 1}>{x + 1}</option>
                                                         ))
                                                     }

@@ -57,6 +57,18 @@ function PlaceOrderScreen() {
         }))
     }
 
+
+console.log('orderItems',cart.cartItems)
+console.log('shippingAddress',cart.shippingAddress)
+console.log('paymentMethod',cart.paymentMethod)
+console.log('itemsPrice',cart.itemsPrice)
+console.log('shippingPrice',cart.shippingPrice)
+console.log('itemsPrice',cart.itemsPrice)
+console.log('taxPrice',cart.taxPrice)
+console.log('totalPrice',cart.totalPrice)
+console.log(cart.cartItems)
+    
+
     return (
         <div>
             <CheckoutSteps step1 step2 step3 step4 />
@@ -99,6 +111,7 @@ function PlaceOrderScreen() {
 
                                                     <Col>
                                                         <Link to={`/product/${item.product}`}>{item.name}</Link>
+                                                        <p className='my-1'>Size: {item.size}</p>
                                                     </Col>
 
                                                     <Col md={6}>

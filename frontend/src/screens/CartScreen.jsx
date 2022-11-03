@@ -17,10 +17,6 @@ function CartScreen() {
     
     const dispatch = useDispatch()
 
-    useEffect(() => {
-        
-    })
-
     const addToCartHandler = (id, qty) => {
         dispatch(addToCart(id, qty))
     }
@@ -29,10 +25,12 @@ function CartScreen() {
         navigate('/shipping')
     }
 
-    const removeFromCartHandler = (id) => {
-        dispatch(removeFromCart(id))
+    const removeFromCartHandler = (id, size) => {
+        dispatch(removeFromCart(id, size))
     }
     
+
+console.log('cartItems',cartItems)
 
     return (
         <Row>
@@ -45,14 +43,26 @@ function CartScreen() {
                 ) : (
                     <ListGroup variant='flush'>
                         {cartItems.map(item => (
-                            <ListGroup.Item className='my-2' key={item.product}>
+                            <ListGroup.Item className='my-2' key={item.product + item.size}>
                                 <Row>
                                     <Col className="col-4" md={2}>
                                         <Image style={{aspectRatio:'1/1', objectFit:'cover',}} src={`http://127.0.0.1:8000${item.image}`} alt={item.name} fluid rounded />
                                     </Col>
                                     <Col className="col-8" md={3}>
                                         <Link to={`/product/${item.product}`}>{item.name}</Link>
+                                        {
+                                            item.color ?
+                                            <>
+                                            <p className='mt-2'>Color: {item.color}</p>
+                                            <p className='mt-2'>Size: {item.size}</p>
+                                            </>
+
+                                            : null
+                                        }
+                                        <p className='mt-2'>Size: {item.size}</p>
+                                        
                                     </Col>
+                                    
                                     <Col className="text-center col-12 my-3" md={2}><span>${item.price}</span></Col>
                                     <Col className="col-6" md={2}>
                                         <Form.Control
@@ -60,11 +70,11 @@ function CartScreen() {
                                             value={item.qty}
                                             onChange={(e) =>
                                                 dispatch(
-                                                    addToCart(item.product, Number(e.target.value))
+                                                    addToCart(item.product, Number(e.target.value), item.size, item.countInStock)
                                                 )}
                                         >
                                             {[...Array(item.countInStock).keys()].map((x) => (
-                                                <option className='text-center' key={x + 1} value={x + 1}>
+                                                <option className='text-center' key={item.size + x} value={x + 1}>
                                                     {x + 1}
                                                 </option>
                                             ))}
@@ -75,7 +85,7 @@ function CartScreen() {
                                             className='col-12'
                                             type='button'
                                             variant='light'
-                                            onClick={() => removeFromCartHandler(item.product)}
+                                            onClick={() => removeFromCartHandler(item.product, item.size)}
                                         >
                                             <i className='fas fa-trash'></i>
                                         </Button>

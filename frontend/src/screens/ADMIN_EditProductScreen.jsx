@@ -28,7 +28,13 @@ const ADMIN_EditProductScreen = () => {
     const [image, setImage] = useState('')
     const [brand, setBrand] = useState('')
     const [category, setCategory] = useState('')
-    const [countInStock, setCountInStock] = useState(0)
+
+    const [stock, setStock] = useState(0)
+    const [size, setSize] = useState('')
+
+    const [sizes, setSizes] = useState([])
+    const [sizeToDel, setSizeToDel] = useState([])
+
     const [description, setDescription] = useState('')
     const [uploading, setUploading] = useState(false)
 
@@ -46,9 +52,8 @@ const ADMIN_EditProductScreen = () => {
                 setImage(product.image)
                 setBrand(product.brand)
                 setCategory(product.category)
-                setCountInStock(product.countInStock)
+                setSizes(product.sizes)
                 setDescription(product.description)
-                // }
             }
         }
     }, [dispatch, id, product, successUpdate, navigate])
@@ -90,10 +95,13 @@ const ADMIN_EditProductScreen = () => {
             image,
             brand,
             category,
-            countInStock,
-            description
+            sizes,
+            description,
+            sizeToDel
         }))
+        
     }
+
 
     return (
 
@@ -155,15 +163,117 @@ const ADMIN_EditProductScreen = () => {
                                 ></Form.Control>
                             </Form.Group>
 
-                            <Form.Group controlId='countInStock' className='my-3'>
-                                <Form.Label>Count In Stock</Form.Label>
-                                <Form.Control
-                                    type='number'
-                                    placeholder='Enter countInStock'
-                                    value={countInStock}
-                                    onChange={(e) => setCountInStock(e.target.value)}
-                                ></Form.Control>
+                            <Form.Group controlId='size' className='my-3'>
+
+                                <Form.Label>Size and Stock</Form.Label>
+
+
+                                <Row className='justify-content-md-center align-items-center'>
+                                    <Col md={5}>
+                                        <Form.Control
+                                            className='text-center'
+                                            type='text'
+                                            placeholder='Size'
+                                            value={size}
+                                            onChange={(e) => setSize((e.target.value).toUpperCase())}
+                                        ></Form.Control>
+                                    </Col>
+                                    <Col md={5}>
+                                        <Form.Control
+                                            className='text-center'
+                                            type='number'
+                                            placeholder='Stock'
+                                            value={stock}
+                                            onChange={(e) => setStock(e.target.value)}
+                                        ></Form.Control>
+                                    </Col>
+                                    {/* Add Button to add more sizes */}
+                                    <Col md={2}>
+                                        <Button variant='primary' className='my-3 w-100'
+                                            onClick={
+                                                // if size already exists, update stock
+                                                // else add new size
+                                                () => {
+                                                    if (sizes?.some((item) => item.size === size)) {
+                                                        console.log('size already exists')
+                                                        const newSizes = sizes.map((item) => {
+                                                            if (item.size === size) {
+                                                                return { size, stock }
+                                                            } else {
+                                                                return item
+                                                            }
+                                                        })
+                                                        setSizes(newSizes)
+                                                        setSize('')
+                                                        setStock('')
+                                                    } else {
+                                                        setSizes([...sizes, { size, stock }])
+                                                        setSize('')
+                                                        setStock('')
+                                                    }
+                                                }
+                                            }
+                                        >
+                                            <i className="fas fa-plus"></i>
+                                        </Button>
+                                    </Col>
+                                </Row>
+                                {
+
+                                    sizes?.map((size, index) => (
+
+                                        <Row key={index} className='justify-content-center align-items-center my-2'>
+
+                                            <Col md={5}>
+                                                <Form.Control
+                                                    className='text-center'
+                                                    type='text'
+                                                    placeholder='Enter size'
+                                                    value={size.size}
+                                                    onChange={(e) => {
+                                                        const values = [...sizes]
+                                                        values[index].size = e.target.value
+                                                        setSizes(values)
+                                                    }}
+                                                ></Form.Control>
+                                            </Col>
+                                            <Col md={5}>
+                                                <Form.Control
+                                                    className='text-center'
+                                                    type='number'
+                                                    placeholder='Enter stock'
+                                                    value={size.stock}
+                                                    onChange={(e) => {
+                                                        const values = [...sizes]
+                                                        values[index].stock = e.target.value
+                                                        setSizes(values)
+                                                    }}
+                                                ></Form.Control>
+                                            </Col>
+
+                                            <Col md={2}>
+                                                {/* Delete size button */}
+                                                <Button variant='danger' className='btn-sm w-100 h-100'
+                                                    onClick={
+                                                        () => {
+                                                            setSizes(sizes.filter((s, i) => i !== index))
+                                                            // if has id add to setSizeToDel
+                                                            if (size.id) {
+                                                                setSizeToDel([...sizeToDel, size.id])
+                                                            }
+                                                        }
+                                                    }
+                                                >
+                                                    <i className="fas fa-trash"></i>
+                                                </Button>
+                                            </Col>
+                                        </Row>
+                                    ))
+
+                                }
+
                             </Form.Group>
+
 
                             <Form.Group controlId='category' className='my-3'>
                                 <Form.Label>Category</Form.Label>

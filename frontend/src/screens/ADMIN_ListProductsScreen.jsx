@@ -42,6 +42,8 @@ function ADMIN_ListProductsScreen() {
         dispatch(createProduct())
     }
 
+    console.log('products', products)
+
 
     useEffect(() => {
         dispatch({ type: PRODUCT_CREATE_RESET })
@@ -60,6 +62,8 @@ function ADMIN_ListProductsScreen() {
         dispatch(listProducts(searchProduct))
     }
 
+
+    console.log('products', products)
 
     return (
         <Container className="mt-5">
@@ -110,7 +114,7 @@ function ADMIN_ListProductsScreen() {
                             <th>PRICE</th>
                             <th>CATEGORY</th>
                             <th>BRAND</th>
-                            <th className="text-center">STOCK</th>
+                            <th className="text-center">SIZES</th>
                             <th className='text-center'>ACTIONS</th>
                         </tr>
                     </thead>
@@ -125,7 +129,13 @@ function ADMIN_ListProductsScreen() {
                                 <td>{product.price}</td>
                                 <td>{product.category}</td>
                                 <td>{product.brand}</td>
-                                <td className="text-center">{product.countInStock}</td>
+                                <td className="text-center">
+                                    {
+                                        product.sizes?.map(p => (
+                                            <span key={p.id} className="badge badge-success text-dark">{p.size}</span>
+                                        ))
+                                    }
+                                </td>
                                 <td className='text-center'>
                                     <Button onClick={() => updateHandler(product.id)} variant="light" className="btn-sm">
                                         <i className="fas fa-edit"></i>

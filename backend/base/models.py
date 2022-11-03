@@ -23,8 +23,14 @@ class Product(models.Model):
     numReviews = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
-    countInStock = models.IntegerField(null=True, blank=True, default=0)
     createdAt = models.DateTimeField(auto_now_add=True)
+
+    def sizes(self):
+        sizes = self.size_set.all()
+        # create array of sizes.size
+        size_list = [size.size for size in sizes]
+        # return array of sizes.size
+        return size_list
 
     def __str__(self):
         return self.name
@@ -92,6 +98,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     qty = models.IntegerField(null=True, blank=True, default=0)
+    size = models.CharField(max_length=100, null=True, blank=True)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     image = models.CharField(max_length=500, null=True, blank=True)
     
@@ -141,3 +148,11 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return str(self.address)
+
+class Size(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.CharField(max_length=100, null=True, blank=True)
+    stock = models.IntegerField(null=True, blank=True, default=0)
+
+    def __str__(self):
+        return str(self.size)

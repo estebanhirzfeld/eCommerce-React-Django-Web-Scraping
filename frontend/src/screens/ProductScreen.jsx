@@ -23,6 +23,8 @@ import '../components/styles/CartToastNotification.css'
 
 function ProductScreen() {
 
+    const [stock, setStock] = useState(1)
+    const [size, setSize] = useState('')
     const [qty, setQty] = useState(1)
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
@@ -52,7 +54,7 @@ function ProductScreen() {
 
     const submitHandler = (e) => {
         e.preventDefault()
-        dispatch(createProductReview(id,{
+        dispatch(createProductReview(id, {
             rating,
             comment
         }))
@@ -60,12 +62,13 @@ function ProductScreen() {
     }
 
 
-    const addToCartHandler = (id, qty) => {
-        dispatch(addToCart(id, qty))
+    const addToCartHandler = (id, qty, size, countInStock) => {
+        dispatch(addToCart(id, qty, size, countInStock))
 
         CartToastNotification()
     }
 
+    console.log('product', product.sizes)
 
     return (
         <div>
@@ -109,7 +112,7 @@ function ProductScreen() {
                                             <Card>
                                                 <ListGroup variant='flush'>
                                                     <ListGroup.Item>
-                                                        <Row>
+                                                        <Row className='align-items-center justify-content-between'>
                                                             <Col>
                                                                 Price:
                                                             </Col>
@@ -118,56 +121,82 @@ function ProductScreen() {
                                                             </Col>
                                                         </Row>
                                                     </ListGroup.Item>
-                                                    <ListGroup.Item>
-                                                        <Row>
-                                                            <Col>
-                                                                Status:
+
+                                                    <ListGroup.Item className='text-center'>
+                                                        <Row className='justify-content-center align-items-center' >
+
+                                                            <Col md={6}>
+                                                                Size:
                                                             </Col>
-                                                            <Col>
-                                                                {product.countInStock > 0 ? `${product.countInStock} In Stock` : 'Out of Stock'}
+                                                            <Col xs='auto' className='my-1' md={6}>
+                                                                <Form.Control
+                                                                    as='select'
+                                                                    className='mr-sm-2 text-center'
+                                                                    id='inlineFormCustomSelect'
+                                                                    value={size.size}
+
+                                                                    // onChange call 2 functions, one to set the size and one to set the stock based on the size selected
+                                                                    onChange={(e) => {
+                                                                        setSize(e.target.value)
+                                                                        setStock(product.sizes.find((product) => product.size === e.target.value).stock)
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        product?.sizes?.map((size) => (
+                                                                            <option key={size.id} value={size.size}>{size.size}</option>
+                                                                        ))}
+                                                                </Form.Control>
                                                             </Col>
+
+
+                                                            {
+                                                                stock === 0 ?
+                                                                    <Col>
+                                                                        <Button className='mt-3 col-12 btn-block ' type='button' disabled={product.countInStock === 0}>
+                                                                            Send stock reminder <i className="fa-solid fa-bell"></i>
+                                                                        </Button>
+                                                                    </Col>
+                                                                    :
+                                                                    (
+                                                                        <>
+
+                                                                            <Col md={6}>
+                                                                                Quantity
+                                                                            </Col>
+                                                                            <Col xs='auto' className='my-1' md={6}>
+                                                                                <Form.Control
+                                                                                    as='select'
+                                                                                    className='mr-sm-2 text-center'
+                                                                                    id='inlineFormCustomSelect'
+                                                                                    value={qty}
+                                                                                    onChange={(e) => setQty(e.target.value)}
+                                                                                >
+                                                                                    {
+                                                                                        [...Array(stock).keys()].map((x) => (
+                                                                                            <option key={x + 1} value={x + 1}>
+                                                                                                {x + 1}
+                                                                                            </option>
+                                                                                        ))}
+                                                                                </Form.Control>
+                                                                            </Col>
+                                                                        </>
+                                                                    )
+
+                                                            }
+                                                        </Row>
+
+                                                        <Row className='justify-content-around align-items-center'>
+
+                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToCartHandler(product.id, qty)}>
+                                                                <i className="fa-solid fa-heart"></i>
+                                                            </Button>
+                                                            <Button onClick={() => addToCartHandler(product.id, qty, size, stock)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={stock === 0}>
+                                                                Add to Cart
+                                                            </Button>
                                                         </Row>
 
                                                     </ListGroup.Item>
-                                                    {product.countInStock <= 0 ?
-                                                        <ListGroup.Item className='text-center'>
-                                                            <Button className='mt-3 col-12 btn-block' type='button' disabled={product.countInStock === 0}>
-                                                                Send stock reminder <i className="fa-solid fa-bell"></i>
-                                                            </Button>
-                                                        </ListGroup.Item>
-                                                        :
-                                                        <ListGroup.Item className='text-center'>
-                                                            <Row className='justify-content-start align-items-center' >
-                                                                <Col lg={5}><span>Quantity:</span></Col>
-                                                                <Col lg={7}>
-                                                                    <Form.Control
-                                                                        className='text-center'
-                                                                        as='select'
-                                                                        value={qty}
-                                                                        onChange={(e) => setQty(e.target.value)}
-                                                                    >
-                                                                        {
-                                                                            [...Array(product.countInStock).keys()].map((x) => (
-                                                                                <option key={x + 1} value={x + 1}>
-                                                                                    {x + 1}
-                                                                                </option>
-                                                                            ))
-                                                                        }
-                                                                    </Form.Control>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row className='justify-content-around align-items-center'>
 
-                                                                <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToCartHandler(product.id, qty)}>
-                                                                    <i className="fa-solid fa-heart"></i>
-                                                                </Button>
-                                                                <Button onClick={() => addToCartHandler(product.id, qty)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={product.countInStock === 0}>
-                                                                    Add to Cart
-                                                                </Button>
-                                                            </Row>
-
-                                                        </ListGroup.Item>
-                                                    }
                                                 </ListGroup>
                                             </Card>
                                         </Col>
@@ -252,7 +281,7 @@ function ProductScreen() {
                             <h2>No Product Found</h2>
             }
             <div id="toast"><div id="img"><i className="fas fa-shopping-cart"></i></div><div id="desc">Product Added to Cart! </div></div>
-        </div>
+        </div >
     )
 }
 

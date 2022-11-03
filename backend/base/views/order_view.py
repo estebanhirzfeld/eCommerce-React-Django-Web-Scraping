@@ -50,11 +50,13 @@ def addOrderItems(request):
                 order=order,
                 name=product.name,
                 qty=item['qty'],
+                size=item['size'],
                 price=item['price'],
                 image=product.image.url
             )
             # (4) Update stock
-            product.countInStock -= int(item.qty)
+            # get stock from thar size
+            product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
             product.save()
             
         serializer = OrderSerializer(order, many=False)
@@ -97,13 +99,6 @@ def getOrdersByUser(request, pk):
     orders = Order.objects.filter(user=user)
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
-
-
-
-
-
-
-
 
 
 @api_view(['POST'])

@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-from base.models import Product, Review, Order, OrderItem
+from base.models import Product, Review, Order, OrderItem, Size
 from base.products import products
-from base.serializers import ProductSerializer
+from base.serializers import ProductSerializer, SizeSerializer
 
 from rest_framework import status
 
@@ -62,8 +62,33 @@ def updateProduct(request, pk):
     product.price = data['price']
     product.brand = data['brand']
     product.category = data['category']
-    product.countInStock = data['countInStock']
+
+
     product.description = data['description']
+
+    # for every size in the product create or update size model
+    
+    # compare size in the product with size in the database if was removed delete it from the database  
+    # if was added create it in the database
+    # if was updated update it in the database
+
+    for size in data['sizeToDel']:
+        Size.objects.filter(id=size).delete()
+
+    for size in data['sizes']:
+
+        if not 'id' in size:
+            size_model = Size.objects.create(
+                product=product,
+                size=size['size'],
+                stock=size['stock']
+            )
+            size_model.save()
+        else:
+            size_model = Size.objects.get(id=size['id'])
+            size_model.size = size['size']
+            size_model.stock = size['stock']
+            size_model.save()
 
     product.save()
 
@@ -89,7 +114,6 @@ def createProduct(request):
         brand='Sample brand',
         category='Sample category',
         price=0,
-        countInStock=0,
         description=''
     )
 
