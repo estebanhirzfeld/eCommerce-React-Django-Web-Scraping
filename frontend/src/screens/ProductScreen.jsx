@@ -16,7 +16,7 @@ import CartList from '../components/CartList'
 import { listProductDetails, createProductReview } from '../actions/productActions'
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants'
 
-import { addToCart, removeFromCart } from '../actions/cartActions'
+import { addToCart, getCart, removeFromCart } from '../actions/cartActions'
 
 import CartToastNotification from '../components/CartToastNotification'
 import '../components/styles/CartToastNotification.css'
@@ -62,9 +62,9 @@ function ProductScreen() {
     }
 
 
-    const addToCartHandler = (id, qty, size, countInStock) => {
-        dispatch(addToCart(id, qty, size, countInStock))
-
+    const addToCartHandler = (id, qty, size,) => {
+        dispatch(addToCart(id, qty, size))
+        dispatch(getCart())
         CartToastNotification()
     }
 
@@ -106,7 +106,10 @@ function ProductScreen() {
                                     </Col>
 
                                     {was_clicked
-                                        ? <Col md={4}><CartList qty={qty} cartItems={cartItems} /></Col>
+                                        ? 
+                                        <Col md={4}>
+                                            <CartList/>
+                                            </Col>
                                         :
                                         <Col md={3}>
                                             <Card>
@@ -187,10 +190,10 @@ function ProductScreen() {
 
                                                         <Row className='justify-content-around align-items-center'>
 
-                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToCartHandler(product.id, qty)}>
+                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={()=> {alert('added to favorites')}}>
                                                                 <i className="fa-solid fa-heart"></i>
                                                             </Button>
-                                                            <Button onClick={() => addToCartHandler(product.id, qty, size, stock)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={stock === 0}>
+                                                            <Button onClick={() => addToCartHandler(product.id, qty, size)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={stock === 0}>
                                                                 Add to Cart
                                                             </Button>
                                                         </Row>

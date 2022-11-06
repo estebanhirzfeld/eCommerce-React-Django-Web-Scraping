@@ -23,7 +23,9 @@ function ShippingScreen() {
     const [coords, setCoords] = useState([-34.608354, -58.438682])
 
     const cart = useSelector((state) => state.cart)
-    const { shippingAddress } = cart
+    let { shippingAddress } = cart
+
+    shippingAddress = []
 
     const [address, setAddress] = useState(shippingAddress.address)
     const [city, setCity] = useState(shippingAddress.city)

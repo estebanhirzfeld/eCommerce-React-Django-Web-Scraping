@@ -198,11 +198,12 @@ const ADMIN_EditProductScreen = () => {
                                                         console.log('size already exists')
                                                         const newSizes = sizes.map((item) => {
                                                             if (item.size === size) {
-                                                                return { size, stock }
+                                                                return {  id: item.id, size: item.size, stock: stock}
                                                             } else {
                                                                 return item
                                                             }
                                                         })
+                                                        console.log('newSizes', newSizes)
                                                         setSizes(newSizes)
                                                         setSize('')
                                                         setStock('')

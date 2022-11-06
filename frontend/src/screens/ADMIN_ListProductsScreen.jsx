@@ -59,7 +59,14 @@ function ADMIN_ListProductsScreen() {
 
     const searchProductHandler = (e) => {
         e.preventDefault()
-        dispatch(listProducts(searchProduct))
+
+        // if searchProduct === '' then show all products
+        
+        if (e.target.value === '' || searchProduct === '') {
+            dispatch(listProducts())
+        } else {
+            dispatch(listProducts(searchProduct))
+        }
     }
 
 
@@ -78,9 +85,7 @@ function ADMIN_ListProductsScreen() {
                                 type="text"
                                 name="q"
                                 value={searchProduct}
-                                
-                                onChange={(e) => { searchProductHandler(e); setSearchProduct(e.target.value) }}
-
+                                onChange={(e) => { searchProductHandler(e); setSearchProduct((e.target.value).trim()) }}
                                 placeholder="Search Products..."
                                 className="mr-sm-2 ml-sm-5"
                             ></Form.Control>

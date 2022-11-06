@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Review, Order, OrderItem, ShippingAddress, Size
+from .models import Product, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem
 # Register your models here.
 
 class ProductAdmin(admin.ModelAdmin):
@@ -23,6 +23,15 @@ class ShippingAddressAdmin(admin.ModelAdmin):
 class SizeAdmin(admin.ModelAdmin):
     list_display = ('product','size','stock')
 
+
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'createdAt')
+
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ('cart', 'product', 'qty', 'size')
+
+admin.site.register(Cart, CartAdmin)
+admin.site.register(CartItem, CartItemAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Order, OrderAdmin)

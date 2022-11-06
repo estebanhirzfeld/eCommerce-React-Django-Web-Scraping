@@ -57,6 +57,8 @@ function ProfileScreen() {
         }
     }
 
+    console.log(user)
+
     return (
         <Row>
             <Col md={3}>

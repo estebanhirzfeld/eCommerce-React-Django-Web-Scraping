@@ -22,7 +22,7 @@ def addOrderItems(request):
     orderItems = data['orderItems']
 
     if orderItems and len(orderItems) == 0:
-        return Response({'detail': 'No Order Items'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'No Order Items'}, status=status.HTTP_400_BAD_REQUEST)
     else:
         # (1) Create order
         order = Order.objects.create(
@@ -54,10 +54,19 @@ def addOrderItems(request):
                 price=item['price'],
                 image=product.image.url
             )
+
             # (4) Update stock
+
+            # if qty > stock, return error
+            if item.qty > product.size_set.filter(size=item.size).first().stock:
+                return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            else:
             # get stock from thar size
-            product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
-            product.save()
+                product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
+                product.save()
+
+            
             
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
@@ -80,9 +89,9 @@ def getOrderById(request, pk):
             serializer = OrderSerializer(order, many=False)
             return Response(serializer.data)
         else:
-            Response({'detail': 'Not authorized to view this order'}, status=status.HTTP_400_BAD_REQUEST)
+            Response({'message': 'Not authorized to view this order'}, status=status.HTTP_400_BAD_REQUEST)
     except:
-        return Response({'detail': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
