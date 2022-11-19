@@ -1,3 +1,6 @@
+from django.core.files.base import ContentFile
+from PIL import Image
+import requests
 import time
 import json
 import random
@@ -17,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from django.contrib.auth.models import User
 
 from base.models import Product, ProductImage, Review, Order, OrderItem, Size
 from base.products import products
@@ -216,6 +220,8 @@ def createReview(request, pk):
 @api_view(['GET'])
 def scrapeProducts(request):
 
+    user = User.objects.get(id=1)
+
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
 
     options = webdriver.ChromeOptions()
@@ -370,7 +376,7 @@ def scrapeProducts(request):
     # create product model
         product = Product(
 
-            user= request.user,
+            user= user,
             brand='Scrapped Product',
             name = name,
             price = price,
@@ -386,11 +392,15 @@ def scrapeProducts(request):
 
         # create product image model
         for image in images_list:
+            # donwload image and create image model
+            image_content = requests.get(image).content
+            image_name = image.split('/')[-1]
+            image_file = ContentFile(image_content, image_name)
+
             product_image = ProductImage(
                 product = product,
-                image = image,
+                image = image_file,
             )
-
             product_image.save()
 
         # create product size model
@@ -407,6 +417,7 @@ def scrapeProducts(request):
 
     print('Products scraped n saved in products.json ;)')
     driver.quit()
+
 
 
 
