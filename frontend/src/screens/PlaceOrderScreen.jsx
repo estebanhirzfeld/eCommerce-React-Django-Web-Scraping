@@ -7,67 +7,93 @@ import CheckoutSteps from '../components/CheckoutSteps'
 import { createOrder } from '../actions/orderActions'
 import { payOrder } from '../actions/orderActions'
 
-import { CART_CLEAR_ITEMS } from '../constants/cartConstants'
+
+import { getCart, clearCart} from '../actions/cartActions'
 import { ORDER_CREATE_RESET } from '../constants/orderConstants'
+
+import { getAddress } from '../actions/addressActions'
+
 
 function PlaceOrderScreen() {
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const cart = useSelector((state) => state.cart)
+    const cart = useSelector(state => state.cart)
+    const { cartItems, loading, error: errorCart } = cart
+
+    const addresses = useSelector(state => state.addresses)
+    const { shippingAddresses } = addresses
 
     const orderCreate = useSelector((state) => state.orderCreate)
     const { order, success, error } = orderCreate
 
-    const addDecimals = (num) => {
-        return (Math.round(num * 100) / 100).toFixed(2)
-    }
+    const [itemsPrice, setItemsPrice] = useState(0)
+    const [shippingPrice, setShippingPrice] = useState(0)
+    const [totalPrice, setTotalPrice] = useState(0)
 
-    cart.itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)
-    cart.shippingPrice = addDecimals(cart.itemsPrice > 15000 ? 0 : 800)
-    cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)))
-    cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2)
+    const [address, setAddress] = useState('')
+    const [postalCode, setPostalCode] = useState('')
+    const [city, setCity] = useState('')
+    const [province, setProvince] = useState('')
 
-
+useEffect(() => {
+    // if not paymentMethod redirect to payment screen
     if (!cart.paymentMethod) {
         navigate('/payment')
     }
+    // if not shippingAddress redirect to shipping screen
+}, [cart, navigate])
+
+
+    useEffect(() => {
+        dispatch(getCart())
+        dispatch(getAddress())
+    }, [dispatch])
+
+    useEffect(() => {
+        if (shippingAddresses.length > 0) {
+            setAddress(shippingAddresses[0].address)
+            setPostalCode(shippingAddresses[0].postalCode)
+            setCity(shippingAddresses[0].city)
+            setProvince(shippingAddresses[0].province)
+        }
+        if (cartItems) {
+            setItemsPrice(cartItems.reduce((acc, item) => acc + item.product.price * item.qty, 0).toFixed(2))
+            setShippingPrice(itemsPrice > 15000 ? 0 : 800)
+            setTotalPrice((Number(itemsPrice) + Number(shippingPrice)).toFixed(2))
+        }
+    }, [cartItems, shippingAddresses, itemsPrice, shippingPrice, totalPrice])
 
     useEffect(() => {
         if (success) {
             navigate(`/order/${order.id}`)
             dispatch({ type: ORDER_CREATE_RESET })
-            dispatch({ type: CART_CLEAR_ITEMS })
+            dispatch(clearCart())
+            if (cartItems.length === 0) {
+                navigate('/')
+            }
         }
     }, [success, navigate, order])
 
-
-
     const placeOrderHandler = () => {
+        console.log('shippingAddress', shippingAddresses[0])
         dispatch(createOrder({
-            orderItems: cart.cartItems,
-            shippingAddress: cart.shippingAddress,
             paymentMethod: cart.paymentMethod,
-            itemsPrice: cart.itemsPrice,
-            shippingPrice: cart.shippingPrice,
-            itemsPrice: cart.itemsPrice,
-            taxPrice: cart.taxPrice,
-            totalPrice: cart.totalPrice,
+            shippingPrice: shippingPrice,
+            orderItems: cartItems,
+            shippingAddress: Number(shippingAddresses[0].id),
+            itemsPrice: itemsPrice,
+            totalPrice: totalPrice
         }))
+
+            console.log('paymentMethod', cart.paymentMethod,)
+            console.log('shippingPrice', shippingPrice,)
+            console.log('orderItems', cartItems,)
+            console.log('shippingAddress', shippingAddresses[0].id,)
+            console.log('itemsPrice', itemsPrice,)
+            console.log('totalPrice', totalPrice)
     }
-
-
-console.log('orderItems',cart.cartItems)
-console.log('shippingAddress',cart.shippingAddress)
-console.log('paymentMethod',cart.paymentMethod)
-console.log('itemsPrice',cart.itemsPrice)
-console.log('shippingPrice',cart.shippingPrice)
-console.log('itemsPrice',cart.itemsPrice)
-console.log('taxPrice',cart.taxPrice)
-console.log('totalPrice',cart.totalPrice)
-console.log(cart.cartItems)
-    
 
     return (
         <div>
@@ -80,11 +106,11 @@ console.log(cart.cartItems)
 
                             <p>
                                 <strong>Shipping: </strong>
-                                {cart.shippingAddress.address},  {cart.shippingAddress.city}
+                                {address},  {city}
                                 {'  '}
-                                {cart.shippingAddress.postalCode},
+                                {postalCode},
                                 {'  '}
-                                {cart.shippingAddress.country}
+                                {province}
                             </p>
                         </ListGroup.Item>
 
@@ -106,17 +132,19 @@ console.log(cart.cartItems)
                                             <ListGroup.Item key={index}>
                                                 <Row>
                                                     <Col md={1}>
-                                                        <Image src={`http://127.0.0.1:8000${item.image}`} alt={item.name} fluid rounded />
+                                                        <Image src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
                                                     </Col>
 
                                                     <Col>
-                                                        <Link to={`/product/${item.product}`}>{item.name}</Link>
+                                                        <Link to={`/product/${item.product.id}`}>{item.product.name}</Link>
                                                         <p className='my-1'>Size: {item.size}</p>
                                                     </Col>
 
                                                     <Col md={6}>
-                                                        {item.qty} X ${item.price} = ${(item.qty * item.price).toFixed(2)}
+                                                        {item.qty} X ${item.product.price} = ${(item.qty * item.product.price).toFixed(2)}
+                                                        {item.stock <= 0 || item.stock < item.qty ? <p className='text-danger'>Out of stock</p> : null}
                                                     </Col>
+                                                    
                                                 </Row>
                                             </ListGroup.Item>
                                         ))}
@@ -138,28 +166,25 @@ console.log(cart.cartItems)
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Items:</Col>
-                                    <Col>${cart.itemsPrice}</Col>
+                                    <Col>${itemsPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Shipping:</Col>
-                                    <Col>${cart.shippingPrice}</Col>
-                                </Row>
-                            </ListGroup.Item>
-
-                            <ListGroup.Item>
-                                <Row>
-                                    <Col>Tax:</Col>
-                                    <Col>${cart.taxPrice}</Col>
+                                    <Col>
+                                    {shippingPrice === 0 ?
+                                        <span className='text-success'>Free!</span>
+                                    : `$${shippingPrice}`}
+                                    </Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Total:</Col>
-                                    <Col>${cart.totalPrice}</Col>
+                                    <Col>${totalPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
 

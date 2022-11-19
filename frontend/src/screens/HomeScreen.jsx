@@ -32,7 +32,6 @@ function HomeScreen() {
     }, [dispatch, keyword, pageNumber])
 
 
-
     return (
         <div>
             <h1 className='text-center' >Latest Products</h1>

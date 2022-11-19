@@ -13,6 +13,8 @@ import ItemDetailLoader from '../components/itemDetailsLoader'
 import CartList from '../components/CartList'
 
 // actions
+import { getWishlist, addToWishlist, removeFromWishlist } from '../actions/listsActions'
+
 import { listProductDetails, createProductReview } from '../actions/productActions'
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants'
 
@@ -23,17 +25,21 @@ import '../components/styles/CartToastNotification.css'
 
 function ProductScreen() {
 
-    const [stock, setStock] = useState(1)
+    const [was_added, setWasAdded] = useState(false)
+    const [stock, setStock] = useState('')
     const [size, setSize] = useState('')
     const [qty, setQty] = useState(1)
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
+
+    const [image, setImage] = useState('')
 
     const { id } = useParams()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    // UseSelector
     const login = useSelector(state => state.login)
     const { userInfo } = login
 
@@ -41,16 +47,27 @@ function ProductScreen() {
     const { success: successProductReview, error: errorProductReview, loading: loadingProductReview } = productCreateReview
 
     const productDetails = useSelector(state => state.productDetails)
-    const { loading, error, product } = productDetails
+    const { loading, error, product, success } = productDetails
 
     const cart = useSelector(state => state.cart)
     const { cartItems, was_clicked } = cart
 
+    const wishlist = useSelector(state => state.wishlist)
+    const { wishlistItems, loading: loadingWishlist, success: successWishlist, error: errorWishlist } = wishlist
+
+
     useEffect(() => {
         dispatch(listProductDetails(id))
-
+        dispatch(getWishlist())
     }, [dispatch, id, successProductReview, errorProductReview])
 
+    useEffect(() => {
+        if (success) {
+            setSize(product.sizes[0]?.size)
+            setStock(product.sizes[0]?.stock)
+            setImage(product.images[0]?.image)
+        }
+    }, [product, success])
 
     const submitHandler = (e) => {
         e.preventDefault()
@@ -58,17 +75,47 @@ function ProductScreen() {
             rating,
             comment
         }))
-
     }
 
 
     const addToCartHandler = (id, qty, size,) => {
-        dispatch(addToCart(id, qty, size))
-        dispatch(getCart())
-        CartToastNotification()
+        // if the user is not logged in, redirect to login page
+        if (!userInfo) {
+            navigate('/login?redirect=shipping')
+        } else {
+            dispatch(addToCart(id, qty, size))
+            dispatch(getCart())
+            CartToastNotification()
+        }
     }
 
-    console.log('product', product.sizes)
+    const addToWishlistHandler = (id) => {
+        // if the user is not logged in, redirect to login page
+        if (!userInfo) {
+            navigate('/login?redirect=shipping')
+        } else {
+            if (was_added) {
+                dispatch(removeFromWishlist(id))
+                setWasAdded(false)
+            } else {
+                dispatch(addToWishlist(id))
+                setWasAdded(true)
+            }
+        }
+    }
+
+    useEffect(() => {
+
+        // if product is in wishlist, set the state to true
+        if (wishlistItems.find(item => item.product.id === parseInt(id))) {
+            setWasAdded(true)
+        } else {
+            setWasAdded(false)
+        }
+
+    }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
+
+    console.log(product)
 
     return (
         <div>
@@ -79,10 +126,35 @@ function ProductScreen() {
                         : product ?
                             <Container>
                                 <Row>
-                                    <Col md={5}>
-                                        <Image src={`http://127.0.0.1:8000${product.image}`} alt={product.name} fluid />
-                                        {/* <Image src={product.images[0]} alt={product.name} fluid /> */}
+                                    <Col md={1}>
+                                        {/* column of images */}
+                                        <Row>
+                                            {
+                                                product.images ?
+                                                    product.images.map((image, index) => (
+                                                        <Col md={12} className={'mb-2'} key={index}>
+                                                            <Image
+                                                            src={`http://localhost:8000${image.image}`}
+                                                            alt={product.name}
+                                                            fluid
+                                                            // onhover change the main image
+                                                            onMouseOver={() => setImage(image.image)}
+                                                            />
+                                                        </Col>
+                                                    ))
+                                                    : null
+                                            }
+                                        </Row>
+
                                     </Col>
+                                    <Col md={4}>
+                                        <Image
+                                        src={`http://127.0.0.1:8000${image}`}
+                                        alt={product.name}
+                                        fluid />
+
+                                    </Col>
+
                                     <Col md={was_clicked ? 3 : 4}>
                                         <ListGroup variant='flush'>
                                             <ListGroup.Item>
@@ -106,10 +178,10 @@ function ProductScreen() {
                                     </Col>
 
                                     {was_clicked
-                                        ? 
+                                        ?
                                         <Col md={4}>
-                                            <CartList/>
-                                            </Col>
+                                            <CartList />
+                                        </Col>
                                         :
                                         <Col md={3}>
                                             <Card>
@@ -136,7 +208,7 @@ function ProductScreen() {
                                                                     as='select'
                                                                     className='mr-sm-2 text-center'
                                                                     id='inlineFormCustomSelect'
-                                                                    value={size.size}
+                                                                    value={size}
 
                                                                     // onChange call 2 functions, one to set the size and one to set the stock based on the size selected
                                                                     onChange={(e) => {
@@ -190,8 +262,8 @@ function ProductScreen() {
 
                                                         <Row className='justify-content-around align-items-center'>
 
-                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={()=> {alert('added to favorites')}}>
-                                                                <i className="fa-solid fa-heart"></i>
+                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToWishlistHandler(product.id)}>
+                                                                <i className="fa-solid fa-heart" style={{ color: was_added ? 'red' : 'black' }}></i>
                                                             </Button>
                                                             <Button onClick={() => addToCartHandler(product.id, qty, size)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={stock === 0}>
                                                                 Add to Cart

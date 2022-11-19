@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card } from 'react-bootstrap'
 import Rating from './Rating'
 import { Link } from 'react-router-dom'
@@ -8,11 +8,35 @@ import './styles/Product.css'
 
 function Product({ product }) {
 
+    const [isHovered, setIsHovered] = React.useState(false)
+    const [image, setImage] = useState('')
+
+    useEffect(() => {
+        setImage(product.images[0]?.image)
+    }, [product])
+
+    useEffect(() => {
+        if (isHovered && product.images[1]) {
+            setImage(product.images[1]?.image)
+        } else {
+            setImage(product.images[0]?.image)
+        }
+
+    }, [isHovered])
+
+    console.log(isHovered)
+
     return (
         <Card className='h-100 my-3 rounded'>
             <Link to={`/product/${product.id}`}>
-                <Card.Img className='cardImage'  src={`http://127.0.0.1:8000${product.image}`} variant='top' />
-                {/* <Card.Img className='cardImage' src={product.images[0]} variant='top' /> */}
+                <Card.Img
+                    className='cardImage'
+                    variant='top'
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    src={`http://localhost:8000${image}`}
+                />
+
             </Link>
             <Card.Body >
                 <Link to={`/product/${product.id}`}>
@@ -30,7 +54,7 @@ function Product({ product }) {
                     </div>
                 </Card.Text>
                 <Card.Text as='h3'>
-                    {product.price }
+                    ${product.price}
                 </Card.Text>
             </Card.Body>
         </Card>

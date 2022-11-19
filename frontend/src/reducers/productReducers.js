@@ -23,6 +23,10 @@ import {
     PRODUCT_UPDATE_FAIL,
     PRODUCT_UPDATE_RESET,
 
+    PRODUCT_IMAGE_DELETE_REQUEST,
+    PRODUCT_IMAGE_DELETE_SUCCESS,
+    PRODUCT_IMAGE_DELETE_FAIL,
+
     PRODUCT_CREATE_REVIEW_REQUEST,
     PRODUCT_CREATE_REVIEW_SUCCESS,
     PRODUCT_CREATE_REVIEW_FAIL,
@@ -56,13 +60,23 @@ export const productDetailsReducers = (state = { product: { reviews: [] } }, act
 
     switch (action.type) {
         case PRODUCT_DETAILS_REQUEST:
-            return { loading: true, ...state }
+            return {
+                loading: true,
+                ...state 
+            }
 
         case PRODUCT_DETAILS_SUCCESS:
-            return { loading: false, product: action.payload }
+            return {
+                loading: false,
+                success: true,
+                product: action.payload 
+            }
 
         case PRODUCT_DETAILS_FAIL:
-            return { loading: false, error: action.payload }
+            return {
+                loading: false,
+                error: action.payload 
+            }
 
         case PRODUCT_DETAILS_RESET:
             return {}
@@ -126,6 +140,22 @@ export const productUpdateReducers = (state = { product: {} }, action) => {
 
         case PRODUCT_UPDATE_RESET:
             return { product: {} }
+        default:
+            return state
+    }
+}
+
+export const productImageDeleteReducers = (state = {}, action) => {
+    switch (action.type) {
+        case PRODUCT_IMAGE_DELETE_REQUEST:
+            return { loading: true }
+
+        case PRODUCT_IMAGE_DELETE_SUCCESS:
+            return { loading: false, success: true }
+
+        case PRODUCT_IMAGE_DELETE_FAIL:
+            return { loading: false, error: action.payload }
+
         default:
             return state
     }

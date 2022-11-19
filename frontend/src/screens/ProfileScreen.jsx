@@ -45,7 +45,7 @@ function ProfileScreen() {
                 setEmail(user.email)
             }
         }
-    }, [dispatch, navigate, userInfo, user, success, orders])
+    }, [dispatch, navigate, userInfo, user, success])
 
 
     const submitHandler = (e) => {

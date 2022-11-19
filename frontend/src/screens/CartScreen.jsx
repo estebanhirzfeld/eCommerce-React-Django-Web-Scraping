@@ -15,29 +15,33 @@ function CartScreen() {
     const [isOutOfStock, setIsOutOfStock] = useState(false)
 
     const cart = useSelector(state => state.cart)
-    const { cartItems, loading } = cart
+    const { cartItems, loading, error, success } = cart
 
     const dispatch = useDispatch()
 
     const checkoutHandler = () => {
-        navigate('/shipping')
+        if ( error ) {
+            navigate('/login?redirect=shipping')
+        } else {
+            navigate('/shipping')
+        }
     }
 
-    const removeFromCartHandler = (id, size) => {
-        dispatch(removeFromCart(id, size))
+    const removeFromCartHandler = (cartItemId) => {
+        dispatch(removeFromCart(cartItemId))
     }
 
     useEffect(() => {
         dispatch(getCart())
-
-        // if one of the items in the cart is out of stock, set isOutOfStock to true
-        cartItems.forEach(item => {
-            if (item.stock === 0) {
-                setIsOutOfStock(true)
-            }
-        })
-
     }, [dispatch])
+
+    useEffect(() => {
+        if (cartItems) {
+            // if at least one item is out of stock, show the message
+            setIsOutOfStock(cartItems.some(item => item.qty > item.stock))
+        }
+    }, [cartItems, loading, error, success, dispatch,navigate])
+
 
     const addToCartHandler = (id, qty, size) => {
         dispatch(addToCart(id, qty, size))
@@ -48,22 +52,22 @@ function CartScreen() {
     return (
         <Row>
             <Col md={8}>
-                <h1>Shopping Cart</h1>
-                {cartItems ? (
+                <h1>Shopping Cart | Saved for Later</h1>
+                {cartItems && cartItems.length > 0 ? (
                     <ListGroup variant='flush'>
                         {cartItems.map(item => (
 
                             <ListGroup.Item className='my-2' key={item.product.id + item.size}>
-                                
+
                                 <Row>
                                     <Col className="col-4" md={2}>
-                                        <Image style={{ aspectRatio: '1/1', objectFit: 'cover', }} src={`http://127.0.0.1:8000${item.product.image}`} alt={item.product.name} fluid rounded />
+                                        <Image style={{ aspectRatio: '1/1', objectFit: 'cover', }} src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
                                     </Col>
                                     <Col className="col-8" md={3}>
                                         <Link to={`/product/${item.product.id}`}>{item.product.name}</Link>
                                         <p className='mt-2'>Size: {item.size}</p>
                                         {
-                                            item.stock === 0 ? <p className='text-danger'>Out of stock</p> : null
+                                            item.stock <= 0 ? <p className='text-danger'>Out of stock</p> : null
                                         }
                                     </Col>
 
@@ -89,7 +93,7 @@ function CartScreen() {
                                             className='col-12'
                                             type='button'
                                             variant='light'
-                                        // onClick={() => removeFromCartHandler(item.product, item.size)}
+                                        onClick={() => removeFromCartHandler(item.id)}
                                         >
                                             <i className='fas fa-trash'></i>
                                         </Button>
@@ -118,13 +122,16 @@ function CartScreen() {
                             <Button
                                 type='button'
                                 className='btn-block'
-                                disabled={isOutOfStock}
+                                disabled={isOutOfStock || error || !cartItems || cartItems.length === 0}
                                 onClick={checkoutHandler}
                             >
                                 Proceed To Checkout
                             </Button>
                         </ListGroup.Item>
                     </ListGroup>
+                {
+                    isOutOfStock ? <p className='text-danger text-center mt-3'>Some items are out of stock</p> : null
+                }
                 </Card>
             </Col>
         </Row>

@@ -1,10 +1,13 @@
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 
-import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers} from './reducers/productReducers.js';
+import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers } from './reducers/productReducers.js';
 import { cartReducer } from './reducers/cartReducers';
 import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer } from './reducers/userReducers';
 import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer } from './reducers/orderReducers';
+import { addressReducer, addressCreateReducer } from './reducers/addressReducers';
+
+import { wishlistReducer, saveForLaterReducer } from './reducers/listsReducers';
 
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -15,10 +18,13 @@ const reducer = combineReducers({
     productDelete: productDeleteReducers,
     productCreate: productCreateReducers,
     productUpdate: productUpdateReducers,
+    productImageDelete: productImageDeleteReducers,
 
     productCreateReview: productCreateReviewReducers,
 
     cart: cartReducer,
+    wishlist: wishlistReducer,
+    saveForLater: saveForLaterReducer,
 
     login: userLoginReducer,
     register: userRegisterReducer,
@@ -33,6 +39,8 @@ const reducer = combineReducers({
     orderPay: orderPayReducer,
     ordersList: ordersListReducer,
 
+    addresses: addressReducer,
+    addressCreate: addressCreateReducer,
 
 
     ordersListAdmin: ordersListAdminReducer,
@@ -42,7 +50,7 @@ const reducer = combineReducers({
 });
 
 const cartItemsFromStorage = localStorage.getItem('cartItems')
-    ? JSON.parse(localStorage.getItem('cartItems')) 
+    ? JSON.parse(localStorage.getItem('cartItems'))
     : [];
 
 const userInfoFromStorage = localStorage.getItem('userInfo')

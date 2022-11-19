@@ -22,6 +22,11 @@ import {
     ORDERS_ALL_LIST_SUCCESS,
     ORDERS_ALL_LIST_FAIL,
 
+    
+    ORDER_USER_LIST_REQUEST,
+    ORDER_USER_LIST_FAIL,
+    ORDER_USER_LIST_SUCCESS,
+
     ORDER_UPDATE_PAID_REQUEST,
     ORDER_UPDATE_PAID_SUCCESS,
     ORDER_UPDATE_PAID_FAIL,
@@ -145,9 +150,31 @@ export const ordersListAdminReducer = (state = { orders: [] }, action) => {
         case ORDERS_ALL_LIST_SUCCESS:
             return {
                 loading: false,
+                success: true,
                 orders: action.payload,
             };
         case ORDERS_ALL_LIST_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderUserListReducer = (state = { orders: [] }, action) => {
+    switch (action.type) {
+        case ORDER_USER_LIST_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_USER_LIST_SUCCESS:
+            return {
+                loading: false,
+                orders: action.payload,
+            };
+        case ORDER_USER_LIST_FAIL:
             return {
                 loading: false,
                 error: action.payload,

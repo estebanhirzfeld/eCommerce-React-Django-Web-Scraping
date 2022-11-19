@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Container, Row, Col, Form, Button } from 'react-bootstrap'
+import { Container, Row, Col, Form, Button, Image } from 'react-bootstrap'
 
-import { listProductDetails, updateProduct } from '../actions/productActions'
+import { listProductDetails, updateProduct, deleteProductImage } from '../actions/productActions'
 import { PRODUCT_DETAILS_RESET, PRODUCT_UPDATE_RESET } from '../constants/productConstants'
 
 import { useNavigate } from 'react-router-dom'
@@ -11,17 +11,26 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 
+
+import '..//components//styles///EditProductScreen.css'
+
 const ADMIN_EditProductScreen = () => {
 
     const { id } = useParams()
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    const login = useSelector(state => state.login)
+    const { userInfo } = login
+
     const productDetails = useSelector(state => state.productDetails)
     const { loading, error, product } = productDetails
 
     const productUpdate = useSelector(state => state.productUpdate)
     const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = productUpdate
+
+    const productImageDelete = useSelector(state => state.productImageDelete)
+    const { loading: loadingImageDelete, error: errorImageDelete, success: successImageDelete } = productImageDelete
 
     const [name, setName] = useState('')
     const [price, setPrice] = useState(0)
@@ -49,7 +58,9 @@ const ADMIN_EditProductScreen = () => {
             } else {
                 setName(product.name)
                 setPrice(product.price)
-                setImage(product.image)
+                if (product.image) {
+                    setImage(product.image)
+                }
                 setBrand(product.brand)
                 setCategory(product.category)
                 setSizes(product.sizes)
@@ -58,33 +69,38 @@ const ADMIN_EditProductScreen = () => {
         }
     }, [dispatch, id, product, successUpdate, navigate])
 
-    const uploadFileHandler = async (e) => {
-        const file = e.target.files[0]
+    const uploadFilesHandler = async (e) => {
+        const files = e.target.files
+        const length = files.length
         const formData = new FormData()
-        formData.append('image', file)
-        formData.append('id', id)
+        formData.append('product_id', id)
+        formData.append('images', files[0])
+        for (let i = 1; i < length; i++) {
+            formData.append('images', files[i])
+        }
 
         setUploading(true)
 
         try {
             const config = {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${userInfo.token}`
                 }
             }
 
             const { data } = await axios.post('http://localhost:8000/api/products/upload/', formData, config)
 
             setImage(data)
+            console.log(data)
             setUploading(false)
+            dispatch(listProductDetails(id))
         } catch (error) {
             console.error(error)
             setImage('Error uploading file: ' + error.message)
             setUploading(false)
         }
     }
-
-
 
     const submitHandler = (e) => {
         e.preventDefault()
@@ -99,9 +115,22 @@ const ADMIN_EditProductScreen = () => {
             description,
             sizeToDel
         }))
-        
+
     }
 
+    const deleteProductImageHandler = (id) => {
+        if (window.confirm('Are you sure?')) {
+            dispatch(deleteProductImage(id))
+        } else
+            return
+    }
+
+    useEffect(() => {
+        if (successImageDelete) {
+            dispatch({ type: PRODUCT_UPDATE_RESET })
+            dispatch(listProductDetails(id))
+        }
+    }, [dispatch, id, successImageDelete])
 
     return (
 
@@ -135,7 +164,7 @@ const ADMIN_EditProductScreen = () => {
                                 ></Form.Control>
                             </Form.Group>
 
-                            <Form.Group controlId='image' className='my-3'>
+                            <Form.Group controlId='images' className='my-3'>
                                 <Form.Label>Image</Form.Label>
                                 <Form.Control
                                     type='text'
@@ -143,11 +172,39 @@ const ADMIN_EditProductScreen = () => {
                                     value={image}
                                     onChange={(e) => setImage(e.target.value)}
                                 ></Form.Control>
+
+                                {/* display imagenes overflow scroll */}
+                                <Row
+                                    // overflow scroll
+                                    className='my-3 
+                                w-100
+                                overflow-scroll
+                                overflow-y-hidden
+                                flex-nowrap
+                                '
+                                >
+                                    {
+                                        product.images?.map((image, index) => (
+                                            <Col md={4} className='productImageContainer'>
+                                                <img src={`http://localhost:8000${image.image}`} alt={name} className='productImage' />
+                                                <div className='imageDeleteDiv'>
+                                                    {/* trash button on center */}
+                                                    <Button className='deleteButton' onClick={() => { deleteProductImageHandler(image.id) }
+                                                    } variant='danger'>
+                                                        <i className="fas fa-trash-alt" style={{ color: 'white', fontSize: '2rem' }}></i>
+                                                    </Button>
+                                                </div>
+                                            </Col>
+                                        ))
+                                    }
+                                </Row>
+
                                 <Form.Control
                                     className='my-3'
                                     type='file'
                                     label='Choose File'
-                                    onChange={uploadFileHandler}
+                                    multiple
+                                    onChange={uploadFilesHandler}
                                 ></Form.Control>
                                 {uploading && <h2>Uploading...</h2>}
                             </Form.Group>
@@ -198,7 +255,7 @@ const ADMIN_EditProductScreen = () => {
                                                         console.log('size already exists')
                                                         const newSizes = sizes.map((item) => {
                                                             if (item.size === size) {
-                                                                return {  id: item.id, size: item.size, stock: stock}
+                                                                return { id: item.id, size: item.size, stock: stock }
                                                             } else {
                                                                 return item
                                                             }
@@ -308,7 +365,7 @@ const ADMIN_EditProductScreen = () => {
                 </Col>
             </Row>
 
-        </Container>
+        </Container >
     )
 }
 

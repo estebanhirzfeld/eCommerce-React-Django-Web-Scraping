@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import {listProductDetails} from '../actions/productActions';
-
 
 import {
 
@@ -14,29 +12,18 @@ import {
     ADD_TO_CART_SUCCESS,
     ADD_TO_CART_FAIL,
 
-    REMOVE_FROM_CART,
+    REMOVE_FROM_CART_REQUEST,
+    REMOVE_FROM_CART_SUCCESS,
+    REMOVE_FROM_CART_FAIL,
+
+    CART_CLEAR_ITEMS_REQUEST,
+    CART_CLEAR_ITEMS_SUCCESS,
+    CART_CLEAR_ITEMS_FAIL,
+
     WAS_CLICKED_RESET,
     CART_SAVE_SHIPPING_ADDRESS,
     CART_SAVE_PAYMENT_METHOD
 } from '../constants/cartConstants';
-
-// export const addToCart = (productId, qty, size, countInStock) => async (dispatch, getState) => {
-//     const { data } = await axios.get(`http://localhost:8000/api/products/${productId}`);
-//     dispatch({
-//         type: ADD_TO_CART,
-//         payload: {
-//             product: data.id,
-//             name: data.name,
-//             image: data.image,
-//             price: data.price,
-//             countInStock,
-//             size,
-//             qty,
-//         },
-//     });
-//     localStorage.setItem('cartItems', JSON.stringify(getState().cart.cartItems));
-// }
-
 
 export const getCart = () => async (dispatch, getState) => {
     try {
@@ -58,7 +45,7 @@ export const getCart = () => async (dispatch, getState) => {
         const { data } = await axios.get(`http://localhost:8000/api/cart/`, config)
 
         dispatch({
-            type: GET_CART_SUCCESS, 
+            type: GET_CART_SUCCESS,
             payload: data
         })
 
@@ -73,7 +60,6 @@ export const getCart = () => async (dispatch, getState) => {
     }
 }
 
-
 export const addToCart = (productId, qty, size) => async (dispatch, getState) => {
     try {
         dispatch({
@@ -86,7 +72,7 @@ export const addToCart = (productId, qty, size) => async (dispatch, getState) =>
 
         const config = {
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 Authorization: `Bearer ${userInfo.token}`,
             },
         }
@@ -108,7 +94,7 @@ export const addToCart = (productId, qty, size) => async (dispatch, getState) =>
             type: ADD_TO_CART_SUCCESS,
             payload: data,
         });
-        
+
     } catch (error) {
         dispatch({
             type: ADD_TO_CART_FAIL,
@@ -120,28 +106,80 @@ export const addToCart = (productId, qty, size) => async (dispatch, getState) =>
     }
 }
 
+export const removeFromCart = (cartItemId) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: REMOVE_FROM_CART_REQUEST,
+        });
 
+        const {
+            login: { userInfo },
+        } = getState();
 
-export const removeFromCart = (productId,size) => (dispatch, getState) => {
-    dispatch({
-        // type: REMOVE_FROM_CART,
-        payload: { productId,size },
-    });
-    localStorage.setItem('cartItems', JSON.stringify(getState().cart.cartItems));
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        }
+
+        const { data } = await axios.delete(`http://localhost:8000/api/cart/remove/${cartItemId}/`, config);
+
+        dispatch({
+            type: REMOVE_FROM_CART_SUCCESS,
+            payload: data,
+        });
+
+    } catch (error) {
+        dispatch({
+            type: REMOVE_FROM_CART_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
+export const clearCart = () => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: CART_CLEAR_ITEMS_REQUEST,
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        }
+
+        const { data } = await axios.delete(`http://localhost:8000/api/cart/clear/`, config);
+
+        dispatch({
+            type: CART_CLEAR_ITEMS_SUCCESS,
+            payload: data,
+        });
+
+    } catch (error) {
+        dispatch({
+            type: CART_CLEAR_ITEMS_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
 }
 
 export const was_clicked_reset = () => (dispatch) => {
     dispatch({
         type: WAS_CLICKED_RESET,
     });
-}
-
-export const saveShippingAddress = (data) => (dispatch) => {
-    dispatch({
-        type: CART_SAVE_SHIPPING_ADDRESS,
-        payload: data,
-    });
-    localStorage.setItem('shippingAddress', JSON.stringify(data));
 }
 
 export const savePaymentMethod = (data) => (dispatch) => {
@@ -151,3 +189,4 @@ export const savePaymentMethod = (data) => (dispatch) => {
     });
     localStorage.setItem('paymentMethod', JSON.stringify(data));
 }
+

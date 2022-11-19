@@ -20,6 +20,7 @@ import ShippingScreen from './screens/ShippingScreen.jsx'
 import PaymentScreen from './screens/PaymentScreen.jsx'
 import PlaceOrderScreen from './screens/PlaceOrderScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
+import WishlistScreen from './screens/WishListScreen.jsx'
 
 import ADMIN_PanelScreen from './screens/ADMIN_PanelScreen.jsx'
 
@@ -55,6 +56,13 @@ function App() {
               <CartScreen />
             </Container>
           } />
+
+          <Route path='/wishlist/' element={
+            <Container>
+              <WishlistScreen />
+            </Container>
+          } />
+
           <Route path='/test'
             element={
               <Container>
@@ -62,6 +70,7 @@ function App() {
               </Container>
             }
           />
+          
           <Route path='/login' element={
             <Container>
               <LoginScreen />

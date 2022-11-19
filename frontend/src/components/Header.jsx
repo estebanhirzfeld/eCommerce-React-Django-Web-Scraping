@@ -30,11 +30,13 @@ function Header() {
     <header>
       <Navbar bg="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand as={Link} to="/">Django + React</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">Zoldyck</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <SearchBar />
             <Nav className="ms-auto">
+              {/* wishlist*/}
+              <Nav.Link as={Link} to="/wishlist"><i className="fas fa-heart"></i> Wishlist</Nav.Link>
               <Nav.Link as={Link} to="/cart"><i className="fas fa-shopping-cart"></i> Cart</Nav.Link>
               {
                 userInfo ? (

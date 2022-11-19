@@ -68,7 +68,6 @@ export const createOrder = (order) => async (dispatch, getState) => {
     }
 }
 
-
 export const getOrderDetails = (id) => async (dispatch, getState) => {
     try {
         dispatch({
@@ -102,6 +101,39 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
     }
 }
 
+export const getUserOrders = (id) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDERS_LIST_REQUEST,
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };
+
+        const { data } = await axios.get(`http://localhost:8000/api/orders/user/${id}/`, config);
+
+        dispatch({
+            type: ORDERS_LIST_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDERS_LIST_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
 
 export const payOrder = (orderId, paymentResult) => async (dispatch, getState) => {
     try {
@@ -127,7 +159,6 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
             const url = "https://api.mercadopago.com/checkout/preferences";
 
             let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
-            console.log(orderNames, typeof (orderNames));
             const body = {
                 "items": [
                     {
@@ -185,7 +216,6 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
         });
     }
 }
-
 
 export const listOrders = () => async (dispatch, getState) => {
     try {

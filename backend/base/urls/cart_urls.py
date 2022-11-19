@@ -3,7 +3,7 @@ from base.views import cart_view as views
 
 urlpatterns = [
     path('', views.getCartItems, name='cart'),
-    path('add/<str:pk>/', views.addCartItems, name='add-cart'),
-    path('remove/', views.removeCartItems, name='cart-remove'),
+    path('remove/<str:pk>/', views.removeFromCart, name='remove-from-cart'),
+    path('add/<str:pk>/', views.addToCart, name='add-cart'),
     path('clear/', views.clearCartItems, name='cart-clear'),
 ]

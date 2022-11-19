@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Form, Row, Col } from 'react-bootstrap';
-import {createSearchParams, useNavigate} from 'react-router-dom'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 
 function SearchBar() {
 
@@ -34,9 +34,27 @@ function SearchBar() {
                         type="text"
                         name="search"
                         onChange={(e) => setKeyword(e.target.value)}
-                        placeholder="Search Products..."
+                        value={keyword}
+                        placeholder={"Search Products..."}
                         className="mr-sm-2 ml-sm-5"
-                    ></Form.Control>
+                    >
+                    </Form.Control>
+                    {/* Clear search button */}
+                    {/* {keyword ?
+                        <Button
+                            type="button"
+                            variant="light"
+                            onClick={() => setKeyword('')}
+                            style={{ marginTop:'-71px', zIndex: '-100', marginLeft: '187px' }}
+                        >
+                            <i className="fas fa-times"></i>
+                        </Button>
+                        : null} */}
+
+
+
+
+
                 </Col>
                 <Col sm={12} md={4} lg={2}>
                     <Button

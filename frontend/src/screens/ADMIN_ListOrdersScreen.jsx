@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { listAllOrders } from '../actions/orderActions'
@@ -8,10 +8,11 @@ import { LinkContainer } from 'react-router-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 
 
+import CustomCarrousel from '../components/Carrousel'
+
 import { greenIcon, redIcon, goldIcon } from '../components/LeafletIcons'
 import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'
-
 
 
 function ADMIN_ListOrdersScreen() {
@@ -22,25 +23,36 @@ function ADMIN_ListOrdersScreen() {
 
     const [coords, setCoords] = useState([-34.608354, -58.438682]);
 
-    const [successOrders, setSuccessOrders] = useState([]);
     const [pendingOrders, setPendingOrders] = useState([]);
+    const [successOrders, setSuccessOrders] = useState([]);
     const [cancelledOrders, setCancelledOrders] = useState([]);
 
     const login = useSelector(state => state.login)
     const { userInfo } = login
 
     const ordersListAdmin = useSelector(state => state.ordersListAdmin)
-    const { loading, error, orders } = ordersListAdmin
-    
+    const { loading, error, orders, success} = ordersListAdmin
+
+
+    useEffect(() => {
+        if(success){
+            setPendingOrders(orders?.filter(order => order.status === 'Pending'))
+            setSuccessOrders(orders?.filter(order => order.status === 'Success'))
+            setCancelledOrders(orders?.filter(order => order.status === 'Cancelled'))
+        }
+    }, [orders, success, error, dispatch, loading])
+
     useEffect(() => {
         dispatch(listAllOrders())
     }, [dispatch])
-    
+
     const ChangeView = ({ center, zoom }) => {
         const map = useMap();
         map.flyTo(center, zoom)
         return null
     }
+
+    console.log(orders)
 
     return (
 
@@ -48,39 +60,37 @@ function ADMIN_ListOrdersScreen() {
             {
                 userInfo && userInfo.is_Admin ? (
                     <>
-                            <h1 className='text-center'>Total Orders {orders?.length}</h1>
+                        <h1 className='text-center'>Total Orders {orders?.length}</h1>
                         <Row className='text-center my-5'>
                             <Col md={4}>
-                                Pending Orders {orders?.filter(order => order.status === 'Pending').length}
+                                Pending Orders {pendingOrders?.length}
                             </Col>
                             <Col md={4}>
-                                Success Orders {orders?.filter(order => order.status === 'Success').length}
+                                Success Orders {successOrders?.length}
                             </Col>
                             <Col md={4}>
-                                Cancelled Orders {orders?.filter(order => order.status === 'Cancelled').length} 
+                                Cancelled Orders {cancelledOrders?.length}
                             </Col>
                         </Row>
 
                         <Row className='mt-5'>
-                            <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{height:'400px', width:'100%'}}>
+                            <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{ height: '400px', width: '100%' }}>
                                 <ChangeView center={coords} zoom={8} />
                                 <TileLayer
-                                url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+                                    url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
                                 />
                                 {
-                                    orders?.filter(order => order.status === 'Success').map(order => (
-                                    <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                    // successOrders
+                                    successOrders?.map(order => (
+                                        <Marker
+                                            position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
                                             icon={greenIcon}
                                             key={order.id}
-                                    >
+                                        >
                                             <Popup>
                                                 <span className='text-success'>Success</span>
                                                 <Row>
-                                                    {
-                                                        order?.OrderItems?.map((item,index) => (
-                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
-                                                        ))
-                                                        }
+                                                    <CustomCarrousel items={order.OrderItems} />
                                                 </Row>
                                                 <Link to={`/order/${order.id}`}>View Order</Link>
                                                 <p>{order.address}</p>
@@ -89,19 +99,17 @@ function ADMIN_ListOrdersScreen() {
                                     ))
                                 }
                                 {
-                                    orders?.filter(order => order.status === 'Pending').map(order => (
-                                        <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                    // pendingOrders
+                                    pendingOrders?.map(order => (
+                                        <Marker
+                                            position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
                                             icon={goldIcon}
                                             key={order.id}
-                                            >
+                                        >
                                             <Popup>
                                                 <span className='text-warning'>Pending</span>
                                                 <Row>
-                                                    {
-                                                        order?.OrderItems?.map((item,index) => (
-                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} fluid rounded />
-                                                        ))
-                                                        }
+                                                    <CustomCarrousel items={order.OrderItems} />
                                                 </Row>
                                                 <Link to={`/order/${order.id}`}>View Order</Link>
                                                 <p>{order.address}</p>
@@ -110,19 +118,21 @@ function ADMIN_ListOrdersScreen() {
                                     ))
                                 }
                                 {
-                                    orders?.filter(order => order.status === 'Cancelled').map(order => (
-                                        <Marker position={[order.ShippingAddress?.lat, order.ShippingAddress?.lon]}
+                                    // cancelledOrders
+                                    cancelledOrders?.map(order => (
+                                        <Marker
+                                            position={[order.shippingAddress?.lat, order.shippingAddress?.lon]}
                                             icon={redIcon}
                                             key={order.id}
-                                            >
+                                        >
                                             <Popup>
                                                 <span className='text-danger'>Cancelled</span>
                                                 <Row>
                                                     {
-                                                        order?.OrderItems?.map((item,index) => (
-                                                            <Image key={index}  src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
+                                                        order?.OrderItems?.map((item, index) => (
+                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
                                                         ))
-                                                        }
+                                                    }
                                                 </Row>
                                                 <Link to={`/order/${order.id}`}>View Order</Link>
                                                 <p>{order.address}</p>

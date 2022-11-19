@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import Order
 
+
 def updateOrder(sender, instance, **kwargs):
     order = instance
     if order.isPaid and order.isDelivered:
@@ -19,7 +20,6 @@ def updateUser(sender, instance, **kwargs):
     user = instance
     if user.email != '':
         user.username = user.email
-
 
 # Order
 pre_save.connect(updateOrder, sender=Order)

@@ -127,7 +127,7 @@ function ADMIN_ListProductsScreen() {
                         {products.map(product => (
                             <tr key={product.id}>
                                 <td>{product.id}</td>
-                                <td className="text-center"><img src={`http://localhost:8000${product.image}`} alt={product.name} style={{ width: '50px' }} /></td>
+                                <td className="text-center"><img src={`http://localhost:8000${product.images[0]?.image}`} alt={product.name} style={{ width: '50px' }} /></td>
                                 <td>
                                     <Link to={`/product/${product.id}`}>{product.name}</Link>
                                 </td>

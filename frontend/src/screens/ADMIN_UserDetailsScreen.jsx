@@ -4,6 +4,8 @@ import { LinkContainer } from 'react-router-bootstrap'
 import { Container, Col, Row, Form, Button, Table } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
 
+import { useDispatch, useSelector } from 'react-redux'
+import { getUserOrders } from '../actions/orderActions'
 
 import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet"
 import 'leaflet/dist/leaflet.css'
@@ -12,6 +14,10 @@ import axios from "axios";
 function ADMIN_UserDetailsScreen() {
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const ordersList = useSelector(state => state.ordersList)
+    const { loading, error, orders } = ordersList
 
     const { id } = useParams()
     const [user, setUser] = useState()
@@ -35,25 +41,10 @@ function ADMIN_UserDetailsScreen() {
         setUser(data)
     }
 
-    const getUserOrders = async () => {
-        const { data } = await axios.get(
-            `http://localhost:8000/api/orders/user/${id}/`,
-            config
-        );
-        setUserOrders(data)
-        setAddress(`${userOrders[0].ShippingAddress?.country}, ${userOrders[0].ShippingAddress?.city}, Teniente Mario Agustin ${userOrders[0].ShippingAddress?.address}, ${userOrders[0].ShippingAddress?.postalCode}`)
-    }
-
     useEffect(() => {
-
         getUserDetails()
-        getUserOrders()
-    }, [])
-
-    useEffect(() => {
-        getUserOrders()
-    }, [userOrders])
-
+        dispatch(getUserOrders(id))
+    }, [dispatch, id])
 
     function ChangeView({ center, zoom }) {
         const map = useMap()
@@ -73,44 +64,56 @@ function ADMIN_UserDetailsScreen() {
                                 <h2>User Info</h2>
                                 <p>Name: {user.name} </p>
                                 <p>Email Address: {user.email}</p>
-                                <p>Last Location:
+                                {/* <p>Last Location:
                                     {userOrders && userOrders.length > 0 ?
                                         (
                                             <Link to={`/order/${userOrders.at(-1).id}`}> {userOrders.at(-1).ShippingAddress?.address}, {userOrders.at(-1).ShippingAddress?.city} {userOrders.at(-1).ShippingAddress?.postalCode}, {userOrders.at(-1).ShippingAddress?.country}</Link>
                                         ) : (
                                             <p>No orders found</p>
                                         )
-                                    }</p>
-                                    <Link to={`/admin/user/${user.id}/edit`}><Button className='my-3'>Edit User</Button></Link>
+                                    }
+                                    </p> */}
+                                <p> Last Address: {
+                                    ordersList && ordersList.orders && ordersList.orders.length > 0 ?
+                                        (
+                                            <Link to={`/order/${ordersList.orders.at(-1).id}`}> {ordersList.orders.at(-1).shippingAddress?.address}, {ordersList.orders.at(-1).shippingAddress?.city} {ordersList.orders.at(-1).shippingAddress?.postalCode}, {ordersList.orders.at(-1).shippingAddress?.country}</Link>
+                                        ) : (
+                                            <p>No Address found</p>
+                                        )
+                                }
+                                </p>
+
+                                <Link to={`/admin/user/${user.id}/edit`}><Button className='my-3'>Edit User</Button></Link>
                             </Col>
                             <Col md={7}>
-                                {address ? (
-                                    // 
-                                    <MapContainer center={[userOrders.at(-1).ShippingAddress.lat, userOrders.at(-1).ShippingAddress.lon]} zoom={13} scrollWheelZoom={false} style={{ height: '350px', width: '100%' }}>
-                                    
-                                        <ChangeView center={
-                                            [userOrders.at(-1).ShippingAddress.lat, userOrders.at(-1).ShippingAddress.lon]
-                                        } zoom={18} />
+                                {ordersList ?
+                                    <MapContainer
+                                        center={[ordersList.orders.at(-1).shippingAddress.lat, ordersList.orders.at(-1).shippingAddress.lon]}
+                                        zoom={13}
+                                        scrollWheelZoom={false}
+                                        style={{ height: '350px', width: '100%' }}>
+
+                                        <ChangeView
+                                            center={[ordersList.orders.at(-1).shippingAddress.lat, ordersList.orders.at(-1).shippingAddress.lon]}
+                                            zoom={18} />
                                         <TileLayer
-                                            // attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                         />
                                         {/* draggable marker */}
-                                        <Marker position={[userOrders.at(-1).ShippingAddress.lat, userOrders.at(-1).ShippingAddress.lon]}>
+                                        <Marker
+                                            position={[ordersList.orders.at(-1).shippingAddress.lat, ordersList.orders.at(-1).shippingAddress.lon]}
+                                        >
                                             <Popup>
-                                                {address}
+                                                <span>{ordersList.orders.at(-1).shippingAddress.address}</span>
                                             </Popup>
                                         </Marker>
                                     </MapContainer>
-                                ) :
-                                    (
-                                        <p>No address found</p>
-                                    )
+                                    : <p>No Address found</p>
                                 }
                             </Col>
                         </Row>
                         <h2 className='text-center my-5'>{user.name}'s Orders</h2>
-                        {userOrders ? (
+                        {ordersList ?
                             <Table striped bordered hover responsive className='table-sm '>
                                 <thead>
                                     <tr>
@@ -118,39 +121,28 @@ function ADMIN_UserDetailsScreen() {
                                         <th>DATE</th>
                                         <th>TOTAL</th>
                                         <th>METHOD</th>
-                                        <th className='text-center'>STATUS</th>
+                                        <th className='text-center'>PAID</th>
                                         <th className='text-center'>DELIVERED</th>
                                         <th className='text-center'>MORE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {userOrders.reverse().map(order => (
+                                    {ordersList.orders.map(order => (
                                         <tr key={order.id}>
                                             <td>{order.id}</td>
                                             <td>{order.createdAt.substring(0, 10)}</td>
                                             <td>${order.totalPrice}</td>
                                             <td>{order.paymentMethod}</td>
-                                            <td className="text-center">{order.status === 'Paid'
-                                                ? <span className='text-success'>{order.paidAt.substring(0, 10)}</span>
-                                                : order.status === 'Pending'
-                                                    ? <span className='text-warning'>{order.status}</span>
-                                                    : order.status === 'Cancelled'
-                                                        ? <span className='text-danger'>{order.status}</span>
-                                                        : order.status === 'Expired'
-                                                            ? <span className='text-danger'>{order.status}</span>
-                                                            : order.status
-                                            }</td>
-                                            <td className='text-center text-success'>
-                                                {order.isDelivered ? (
-                                                    order.deliveredAt.substring(0, 10)
-                                                ) : (
-                                                    <i className='fas fa-times' style={{ color: 'red' }}></i>
-                                                )}
-                                            </td>
+                                            <td className="text-center text-success">{order.isPaid ? order.paidAt.substring(0, 10) : (
+                                                <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                            )}</td>
+                                            <td className="text-center text-success">{order.isDelivered ? order.deliveredAt.substring(0, 10) : (
+                                                <i className='fas fa-times' style={{ color: 'red' }}></i>
+                                            )}</td>
                                             <td className='text-center'>
                                                 <LinkContainer to={`/order/${order.id}`}>
-                                                    <Button className='btn-sm' variant='light'>
-                                                        Details
+                                                    <Button variant='light' className='btn-sm'>
+                                                        <i className='fas fa-info'></i>
                                                     </Button>
                                                 </LinkContainer>
                                             </td>
@@ -158,9 +150,8 @@ function ADMIN_UserDetailsScreen() {
                                     ))}
                                 </tbody>
                             </Table>
-                        ) :
-                            (<h2>There are no orders</h2>)
 
+                            : <p>No orders found</p>
                         }
                     </>
                 )

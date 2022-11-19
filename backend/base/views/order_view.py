@@ -20,38 +20,35 @@ def addOrderItems(request):
     user = request.user
     data = request.data
     orderItems = data['orderItems']
+    shippingAddress = ShippingAddress.objects.get(id=data['shippingAddress'])
 
     if orderItems and len(orderItems) == 0:
         return Response({'message': 'No Order Items'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not shippingAddress:
+        return Response({'message': 'No Shipping Address'}, status=status.HTTP_400_BAD_REQUEST)
+        
     else:
         # (1) Create order
+        # (2) find shipping address by id
         order = Order.objects.create(
             user=user,
             paymentMethod=data['paymentMethod'],
-            taxPrice=data['taxPrice'],
             shippingPrice=data['shippingPrice'],
-            totalPrice=data['totalPrice']
+            totalPrice=data['totalPrice'],
+            shippingAddress=shippingAddress
         )
-        # (2) Create shipping address
-        shipping = ShippingAddress.objects.create(
-            order=order,
-            address=data['shippingAddress']['address'],
-            city=data['shippingAddress']['city'],
-            postalCode=data['shippingAddress']['postalCode'],
-            country=data['shippingAddress']['country'],
-            lat=data['shippingAddress']['lat'],
-            lon=data['shippingAddress']['lon']
-        )
+
         # (3) Create order items and set order to orderItem relationship
         for item in orderItems:
-            product = Product.objects.get(id=item['product'])
+            product = Product.objects.get(id=item['product']['id'])
             item = OrderItem.objects.create(
                 product=product,
                 order=order,
                 name=product.name,
                 qty=item['qty'],
                 size=item['size'],
-                price=item['price'],
+                price=product.price,
                 image=product.image.url
             )
 
@@ -62,11 +59,9 @@ def addOrderItems(request):
                 return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
             
             else:
-            # get stock from thar size
+            # get stock from that size
                 product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
                 product.save()
-
-            
             
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)

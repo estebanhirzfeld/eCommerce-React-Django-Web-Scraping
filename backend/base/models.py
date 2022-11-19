@@ -14,7 +14,7 @@ class Product(models.Model):
     # if user is deleted, set to null
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200, null=True, blank=True)
-    image = models.ImageField(null=True, blank=True, default='/placeholder.png')
+    # image = models.ImageField(null=True, blank=True, default='/placeholder.png')
     brand = models.CharField(max_length=200, null=True, blank=True)
     category = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -24,6 +24,7 @@ class Product(models.Model):
     price = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
+    is_scraped = models.BooleanField(default=False)
 
     def sizes(self):
         sizes = self.size_set.all()
@@ -34,6 +35,13 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ImageField(null=True, blank=True)
+
+    def __str__(self):
+        return self.product.name
 
 
 class Review(models.Model):
@@ -54,8 +62,7 @@ class Order(models.Model):
     # if user is deleted, set to null
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     paymentMethod = models.CharField(max_length=200, null=True, blank=True)
-    taxPrice = models.DecimalField(
-        max_digits=7, decimal_places=2, null=True, blank=True)
+    shippingAddress = models.ForeignKey('shippingAddress', on_delete=models.SET_NULL, null=True)
     shippingPrice = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
     totalPrice = models.DecimalField(
@@ -78,9 +85,9 @@ class Order(models.Model):
     deliveredAt = models.DateTimeField(
         auto_now_add=False, null=True, blank=True)
 
-# expires in 2 minutes
+# expires in 1 day
     def expiration():
-        return now() + timedelta(minutes=2)
+        return now() + timedelta(days=1)
 
     expiryDate = models.DateTimeField(default=expiration, auto_now_add=False, null=True, blank=True)
 
@@ -130,24 +137,53 @@ class OrderItem(models.Model):
 
 
 class ShippingAddress(models.Model):
-    order = models.OneToOneField(
-        Order, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=200, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
     address = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
     postalCode = models.CharField(max_length=100, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
-    shippingPrice = models.DecimalField(
-        max_digits=7, decimal_places=2, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+
+    PROVINCE_CHOICES = (
+        ("Capital Federal", "Capital Federal"), 
+        ("Gran Buenos Aires", "Gran Buenos Aires"), 
+        ("Buenos Aires", "Buenos Aires"), 
+        ("Catamarca", "Catamarca"), 
+        ("Chaco", "Chaco"), 
+        ("Chubut", "Chubut"), 
+        ("Córdoba", "Córdoba"), 
+        ("Corrientes", "Corrientes"), 
+        ("Entre Ríos", "Entre Ríos"), 
+        ("Formosa", "Formosa"), 
+        ("Jujuy", "Jujuy"), 
+        ("La Pampa", "La Pampa"), 
+        ("La Rioja", "La Rioja"), 
+        ("Mendoza", "Mendoza"), 
+        ("Misiones", "Misiones"), 
+        ("Neuquén", "Neuquén"), 
+        ("Río Negro", "Río Negro"), 
+        ("Salta", "Salta"), 
+        ("San Juan", "San Juan"), 
+        ("San Luis", "San Luis"), 
+        ("Santa Cruz", "Santa Cruz"), 
+        ("Santa Fe", "Santa Fe"), 
+        ("Santiago del Estero", "Santiago del Estero"), 
+        ("Tierra del Fuego", "Tierra del Fuego"), 
+        ("Tucumán", "Tucumán")
+    )
+
+    province = models.CharField(max_length=100, choices=PROVINCE_CHOICES, null=True, blank=True)
+
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     lon = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
-
-    def get_user_email(self):
-        if self.order is not None:
-            return self.order.user.email
+    class Meta:
+        verbose_name_plural = 'Shipping Addresses'
 
     def __str__(self):
         return str(self.address)
+        
 
 class Size(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -160,7 +196,8 @@ class Size(models.Model):
 # # Cart & CartItem models
 
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    # one cart per user
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -172,6 +209,39 @@ class CartItem(models.Model):
     qty = models.IntegerField(null=True, blank=True, default=0)
     size = models.CharField(max_length=100, null=True, blank=True)
     stock = models.IntegerField(null=True, blank=True, default=0)
+
+    def __str__(self):
+        return str(self.product)
+
+# # Wishlist & WishlistItem models
+class Wishlist(models.Model):
+    # one wishlist per user
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user)
+
+class WishlistItem(models.Model):
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.product)
+
+# SavedForLater & SavedForLaterItem models
+
+class SavedForLater(models.Model):
+    # one saved for later list per user
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user)
+
+class SavedForLaterItem(models.Model):
+    savedForLater = models.ForeignKey(SavedForLater, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.product)

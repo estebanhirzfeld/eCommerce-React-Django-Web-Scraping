@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getOrderDetails, payOrder } from '../actions/orderActions'
 import { Container, Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap'
-import { createOrder } from '../actions/orderActions'
 import { useNavigate } from 'react-router-dom'
 
 import { updateDeliverOrder, updatePaidOrder } from '../actions/orderActions'
@@ -32,7 +31,6 @@ function OrderScreen() {
 
     useEffect(() => {
         dispatch(getOrderDetails(id))
-
     }, [dispatch, id, successPaid, successDeliver])
 
     useEffect(() => {
@@ -61,11 +59,6 @@ function OrderScreen() {
         }
 
     }
-
-
-    // srtingify the order object to display it in the console
-    console.log(JSON.stringify(order, null, 4))
-
 
     return (
         <Container className='mt-5'>
@@ -101,9 +94,9 @@ function OrderScreen() {
                                 </p>
                                 <p>
                                     <strong>Address: </strong>
-                                    {order.ShippingAddress.address}, {order.ShippingAddress.city}{' '}
-                                    {order.ShippingAddress.postalCode},{' '}
-                                    {order.ShippingAddress.country}
+                                    {order.shippingAddress.address}, {order.shippingAddress.city}{' '}
+                                    {order.shippingAddress.postalCode},{' '}
+                                    {order.shippingAddress.province}
                                 </p>
                                 {order.isDelivered ? (
                                     <div className="alert alert-success" role="alert">
@@ -160,12 +153,6 @@ function OrderScreen() {
                                     <Row>
                                         <Col>Shipping</Col>
                                         <Col>${order.shippingPrice}</Col>
-                                    </Row>
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <Row>
-                                        <Col>Tax</Col>
-                                        <Col>${order.taxPrice}</Col>
                                     </Row>
                                 </ListGroup.Item>
                                 <ListGroup.Item>

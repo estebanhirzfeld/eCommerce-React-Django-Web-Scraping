@@ -11,23 +11,19 @@ from rest_framework import status
 
 from django.contrib.auth.models import User
 
-# getCartItems
-# addCartItems
-# removeCartItems
-# clearCartItems
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getCartItems(request):
     user = request.user
-    cart = Cart.objects.get(user=user)
+    # if user has no cart, create one
+    cart, created = Cart.objects.get_or_create(user=user)
     cartItems = cart.cartitem_set.all()
     serializer = CartItemSerializer(cartItems, many=True)
     return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def addCartItems(request, pk):
+def addToCart(request, pk):
     user = request.user
     product = Product.objects.get(id=pk)
 
@@ -56,26 +52,36 @@ def addCartItems(request, pk):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def removeCartItems(request):
+def removeFromCart(request, pk):
     user = request.user
-    product = request.data['product']
     cart = Cart.objects.get(user=user)
-    productExists = cart.cartitem_set.filter(product=product).exists()
-
-    if productExists:
-        cartItem = cart.cartitem_set.get(product=product)
-        cartItem.delete()
-    else:
-        return Response({'message': 'Product does not exist in cart'}, status=status.HTTP_400_BAD_REQUEST)
-
-    serializer = CartSerializer(cart, many=False)
+    cartItem = cart.cartitem_set.get(id=pk)
+    cartItem.delete()
+    cartItems = cart.cartitem_set.all()
+    serializer = CartItemSerializer(cartItems, many=True)
     return Response(serializer.data)
 
+# @api_view(['PUT'])
+# @permission_classes([IsAuthenticated])
+# def updateCartItems(request, pk):
+#     user = request.user
+#     cart = Cart.objects.get(user=user)
+#     cartItem = cart.cartitem_set.get(id=pk)
+#     cartItem.qty = request.data['qty']
+#     cartItem.save()
+#     cartItems = cart.cartitem_set.all()
+#     serializer = CartItemSerializer(cartItems, many=True)
+#     return Response(serializer.data)
+
+# clearCartItems
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def clearCartItems(request):
     user = request.user
     cart = Cart.objects.get(user=user)
     cart.cartitem_set.all().delete()
-    serializer = CartSerializer(cart, many=False)
+    
+    # rerurn cartitem serializer
+    cartItems = cart.cartitem_set.all()
+    serializer = CartItemSerializer(cartItems, many=True)
     return Response(serializer.data)
