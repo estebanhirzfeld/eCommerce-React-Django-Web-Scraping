@@ -28,6 +28,7 @@ function ProductScreen() {
     const [was_added, setWasAdded] = useState(false)
     const [stock, setStock] = useState('')
     const [size, setSize] = useState('')
+    const [color, setColor] = useState('')
     const [qty, setQty] = useState(1)
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
@@ -63,9 +64,8 @@ function ProductScreen() {
 
     useEffect(() => {
         if (success) {
-            setSize(product.sizes[0]?.size)
-            setStock(product.sizes[0]?.stock)
-            setImage(product.images[0]?.image)
+            // console.log('Colors:', product.colors[0]['Red'].sizes[0]['S'].stock)
+            console.log('Colors:', product.colors)
         }
     }, [product, success])
 
@@ -134,11 +134,11 @@ function ProductScreen() {
                                                     product.images.map((image, index) => (
                                                         <Col md={12} className={'mb-2'} key={index}>
                                                             <Image
-                                                            src={`http://localhost:8000${image.image}`}
-                                                            alt={product.name}
-                                                            fluid
-                                                            // onhover change the main image
-                                                            onMouseOver={() => setImage(image.image)}
+                                                                src={`http://localhost:8000${image.image}`}
+                                                                alt={product.name}
+                                                                fluid
+                                                                // onhover change the main image
+                                                                onMouseOver={() => setImage(image.image)}
                                                             />
                                                         </Col>
                                                     ))
@@ -149,9 +149,9 @@ function ProductScreen() {
                                     </Col>
                                     <Col md={4}>
                                         <Image
-                                        src={`http://127.0.0.1:8000${image}`}
-                                        alt={product.name}
-                                        fluid />
+                                            src={`http://127.0.0.1:8000${image}`}
+                                            alt={product.name}
+                                            fluid />
 
                                     </Col>
 
@@ -199,6 +199,45 @@ function ProductScreen() {
 
                                                     <ListGroup.Item className='text-center'>
                                                         <Row className='justify-content-center align-items-center' >
+
+                                                            {/* Colors */}
+                                                            <Col md={6}>
+                                                                Color:
+                                                            </Col>
+                                                            <Col xs='auto' className='my-1' md={6}>
+                                                                <Form.Control
+                                                                    as='select'
+                                                                    className='mr-sm-2 text-center'
+                                                                    id='inlineFormCustomSelect'
+                                                                    value={color}
+
+                                                                    // onChange call 2 functions, one to set the size and one to set the stock based on the size selected
+                                                                    onChange={(e) => {
+                                                                        // setSize(e.target.value)
+                                                                        // setStock(product.sizes.find((product) => product.size === e.target.value).stock)
+                                                                        setColor(e.target.value)
+                                                                    }}
+                                                                >
+                                                                    {/* {
+                                                                        product?.sizes?.map((size) => (
+                                                                            <option key={size.id} value={size.size}>{size.size}</option>
+                                                                        ))} */}
+                                                                    {
+                                                                        product.colors?.map((color) => {
+                                                                            color = Object.keys(color)[0]
+
+                                                                            return (
+                                                                                <option key={color.id} value={color[0]}>
+                                                                                    {color}
+                                                                                </option>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                                                
+                                                                        
+                                                                    }
+                                                                </Form.Control>
+                                                            </Col>
 
                                                             <Col md={6}>
                                                                 Size:

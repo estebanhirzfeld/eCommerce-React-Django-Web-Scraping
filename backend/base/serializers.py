@@ -1,10 +1,13 @@
+from collections import OrderedDict
 from dataclasses import fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Product, ProductImage, Order, OrderItem, ShippingAddress, Review, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem
+from .models import Product, ProductImage, Order, OrderItem, ShippingAddress, Review, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Cart
+
+
 class CartItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField(read_only=True)
     stock = serializers.SerializerMethodField(read_only=True)
@@ -39,6 +42,8 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['cartItems', 'createdAt']
 
 # Wishlist
+
+
 class WishlistItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField(read_only=True)
 
@@ -50,6 +55,7 @@ class WishlistItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = WishlistItem
         fields = ['product', 'id']
+
 
 class WishlistSerializer(serializers.ModelSerializer):
     wishlistItems = serializers.SerializerMethodField(read_only=True)
@@ -64,6 +70,8 @@ class WishlistSerializer(serializers.ModelSerializer):
         fields = ['wishlistItems', 'createdAt']
 
 # SavedForLater
+
+
 class SavedForLaterItemSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField(read_only=True)
     stock = serializers.SerializerMethodField(read_only=True)
@@ -84,6 +92,7 @@ class SavedForLaterItemSerializer(serializers.ModelSerializer):
         model = SavedForLaterItem
         fields = ['product', 'qty', 'size', 'stock', 'id']
 
+
 class SavedForLaterSerializer(serializers.ModelSerializer):
     savedForLaterItems = serializers.SerializerMethodField(read_only=True)
 
@@ -96,11 +105,14 @@ class SavedForLaterSerializer(serializers.ModelSerializer):
         model = SavedForLater
         fields = ['savedForLaterItems', 'createdAt']
 
+
 class ShippingAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShippingAddress
-        fields = ['address', 'city', 'postalCode', 'province', 'id', 'lat', 'lon']
+        fields = ['address', 'city', 'postalCode',
+                  'province', 'id', 'lat', 'lon']
+
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
@@ -117,7 +129,6 @@ class UserSerializer(serializers.ModelSerializer):
         cart = obj.cart_set.all()
         serializer = CartSerializer(cart, many=True)
         return serializer.data
-
 
     class Meta:
         model = User
@@ -154,7 +165,57 @@ class ReviewSerializer(serializers.ModelSerializer):
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
-        fields = ['id', 'size', 'stock']
+        fields = ['size']
+
+    def to_representation(self, obj):
+        return {
+            obj.size: {
+                'stock': self.context['stock'],
+            }
+        }
+
+
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    size = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = ProductAttribute
+        fields = ['size', 'stock']
+
+    def get_size(self, obj):
+        size = obj.size
+        serializer = SizeSerializer(
+            size, many=True, context={'stock': obj.stock})
+        return serializer.data
+
+    def to_representation(self, obj):
+        return self.get_size(obj)[0]
+
+
+
+class NoNullSerializer(serializers.ModelSerializer):
+    def to_representation(self, obj):
+        ret = super().to_representation(obj)
+        return {k: v for k, v in ret.items() if v is not None}
+
+class ColorSerializer(serializers.ModelSerializer):
+    sizes = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Color
+        fields = ['color', 'sizes']
+
+    def get_sizes(self, obj):
+        product = self.context['product']
+        sizes = obj.productattribute_set.filter(color=obj)
+        serializer = ProductAttributeSerializer(sizes, many=True)
+        return serializer.data
+
+    def to_representation(self, obj):
+        return {
+        obj.color: {
+            'sizes': self.get_sizes(obj),
+        }}
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -165,21 +226,21 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField(read_only=True)
-    sizes = serializers.SerializerMethodField(read_only=True)
+    colors = serializers.SerializerMethodField(read_only=True)
     images = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
-        fields = ['brand','category','createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'sizes', 'reviews', 'images']
+        fields = ['brand', 'category', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images']
+
+    def get_colors(self, obj):
+        colors = Color.objects.all()
+        serializer = ColorSerializer(colors, many=True, context={'product': obj})
+        return serializer.data
 
     def get_images(self, obj):
         images = obj.productimage_set.all()
         serializer = ProductImageSerializer(images, many=True)
-        return serializer.data
-
-    def get_sizes(self, obj):
-        sizes = obj.size_set.all()
-        serializer = SizeSerializer(sizes, many=True)
         return serializer.data
 
     def get_reviews(self, obj):

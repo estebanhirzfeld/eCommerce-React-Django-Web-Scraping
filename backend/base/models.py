@@ -14,7 +14,6 @@ class Product(models.Model):
     # if user is deleted, set to null
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200, null=True, blank=True)
-    # image = models.ImageField(null=True, blank=True, default='/placeholder.png')
     brand = models.CharField(max_length=200, null=True, blank=True)
     category = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -23,15 +22,19 @@ class Product(models.Model):
     numReviews = models.IntegerField(null=True, blank=True, default=0)
     price = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
-    createdAt = models.DateTimeField(auto_now_add=True)
+
     is_scraped = models.BooleanField(default=False)
 
-    def sizes(self):
-        sizes = self.size_set.all()
-        # create array of sizes.size
-        size_list = [size.size for size in sizes]
-        # return array of sizes.size
-        return size_list
+    original_url = models.URLField(max_length=200, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
+
+    # def colors(self):
+    #     colors = self.color_set.all()
+    #     color_list = [color.color for color in colors]
+    #     return color_list
 
     def __str__(self):
         return self.name
@@ -39,6 +42,8 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ImageField(null=True, blank=True)
+
+    original_url = models.URLField(max_length=300, null=True, blank=True)
 
     def __str__(self):
         return self.product.name
@@ -108,7 +113,6 @@ class OrderItem(models.Model):
     size = models.CharField(max_length=100, null=True, blank=True)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     image = models.CharField(max_length=500, null=True, blank=True)
-    
 
     def payment_status(self):
         if self.order is not None:
@@ -186,15 +190,34 @@ class ShippingAddress(models.Model):
         
 
 class Size(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     size = models.CharField(max_length=100, null=True, blank=True)
-    stock = models.IntegerField(null=True, blank=True, default=0)
 
     def __str__(self):
         return str(self.size)
 
-# # Cart & CartItem models
+class Color(models.Model):
+    color = models.CharField(max_length=100, null=True, blank=True)
 
+    def __str__(self):
+        return str(self.color)
+
+class ProductAttribute (models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    color = models.ManyToManyField(Color, blank=True)
+    size = models.ManyToManyField(Size, blank=True)
+    stock = models.IntegerField(null=True, blank=True, default=0)
+
+    def colors(self):
+        return "\n".join([p.color for p in self.color.all()])
+
+    def sizes(self):
+        return "\n".join([p.size for p in self.size.all()])
+
+    def __str__(self):
+        return str(self.product)
+
+
+# # Cart & CartItem models
 class Cart(models.Model):
     # one cart per user
     user = models.OneToOneField(User, on_delete=models.CASCADE)

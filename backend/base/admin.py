@@ -1,12 +1,15 @@
 from django.contrib import admin
-from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem
+from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute
 # Register your models here.
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'price',
-    'sizes',
+    # 'sizes',
+    # 'colors',
     'category', 'brand',
-    'rating', 'numReviews')
+    # 'rating', 'numReviews',
+    # 'is_scraped'
+    )
 
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image')
@@ -34,7 +37,28 @@ class ShippingAddressAdmin(admin.ModelAdmin):
     )
 
 class SizeAdmin(admin.ModelAdmin):
-    list_display = ('product','size','stock')
+    list_display = (
+        # 'product',
+        'size',
+        'id',
+        # 'stock'
+        )
+
+class ColorAdmin(admin.ModelAdmin):
+    list_display = (
+        # 'product',
+        'color',
+        # 'sizes',
+        # 'stock'
+        )
+
+class ProductAttributeAdmin(admin.ModelAdmin):
+    list_display = (
+        'product',
+        'colors',
+        'sizes',
+        'stock'
+        )
 
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')
@@ -68,5 +92,7 @@ admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(ShippingAddress, ShippingAddressAdmin)
 admin.site.register(Size, SizeAdmin)
+admin.site.register(Color, ColorAdmin)
+admin.site.register(ProductAttribute, ProductAttributeAdmin)
 
 

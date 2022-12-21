@@ -1,3 +1,5 @@
+# from base.scrape import getProductsLinks
+from decimal import Decimal
 from django.core.files.base import ContentFile
 from PIL import Image
 import requests
@@ -218,208 +220,19 @@ def createReview(request, pk):
 
 
 @api_view(['GET'])
-def scrapeProducts(request):
-
-    user = User.objects.get(id=1)
-
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
-
-    options = webdriver.ChromeOptions()
-    options.headless = True
-    options.add_argument(f'user-agent={user_agent}')
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--allow-running-insecure-content')
-    options.add_argument("--disable-extensions")
-    options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--start-maximized")
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(executable_path="chromedriver.exe", options=options)
+def scrapeProducts(request, pk):
+    return Response('Scraping...')
 
 
-    # driver = webdriver.Chrome('./chromedriver.exe')
 
-    driver.get('https://www.satanaclothes.com/productos/?mpage=1')
-    driver.maximize_window()
-
-    products_links = []
-    products_data = []
-    scrolls_counter = 0
-
-    # product-item
-    try:
-        products = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@data-component,'product-list-item')]"))
-        )
-    except:
-        print('error finding products')
-        driver.save_screenshot('error.png')
-
-    for product in products:
-        
-        try:
-            # link = product.find_element(By.XPATH, ".//a").get_attribute('href')
-            # products_links.append(link)
-            link = WebDriverWait(product, 10).until(EC.presence_of_element_located((By.XPATH, ".//a"))).get_attribute('href')
-            products_links.append(link)
-        except:
-            print('error finding link')
-            driver.save_screenshot('error.png')
-
-    for link in products_links:
-
-        driver.get(link)
-
-        scrolls_counter = 0
-        while scrolls_counter < 1:
-            scrolls_counter += 1
-            driver.find_element(By.XPATH, '//body').send_keys(Keys.CONTROL+Keys.END)
-            print("scrolled down")
-            
-            driver.find_element(By.XPATH, '//body').send_keys(Keys.CONTROL+Keys.HOME)
-            sleep(random.uniform(2, 3))
-            print("scrolled up")
-
-        print('Link: ', link)
-
-        # get product name    
-        try:
-            name = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//h1"))).text
-            print('Name: ', name)
-        except:
-            print('error finding name')
-            driver.save_screenshot('error.png')
-
-        try:
-            price = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//span[@id='price_display']"))).text
-            print('Price: ', price)
-        except:
-            print('error finding price')
-            driver.save_screenshot('error.png')
-
-        # get product images
-        images_list = []
-
-        try:
-            images = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='cloud-zoom-wrap']/a")))
-            for image in images:
-                images_list.append(image.get_attribute('href'))
-                print(image.get_attribute('href'))
-        except:
-            print('error finding images')
-            driver.save_screenshot('error.png')
-
-        # get product description
-        description = []
-        try:
-            words = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class,'js-product-left-col')]/div[contains(@class,'product-description')]/p")))
-            for word in words:
-                description.append(word.text)
-            print('Description: ', description)
-        except:
-            print('error finding description')
-            driver.save_screenshot('error.png')
-
-
-        # get product sizes
-        sizes_list = []
-    #     sizes = driver.find_elements(By.XPATH, "//div[contains(@data-variant,'Talle')]/div/a")
-        try:
-            sizes = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@data-variant,'Talle')]/div/a")))
-            
-            for size in sizes:
-                actions = ActionChains(driver)
-
-            # move to element to click
-                try:
-                    buy_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class,'product-buy-container')]/input")))
-                    actions.move_to_element(buy_button).perform()
-                except:
-                    print('error finding buy button')
-                    driver.save_screenshot('error.png')
-
-                # every size is a object with size and stock
-                size_object = {}
-
-                size_object['size'] = size.get_attribute('data-option')
-                
-                size.click()
-
-                # if size is not available set stock to 0 and continue
-                try:
-                    buy_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class,'product-buy-container')]/input")))
-                    if buy_button.get_attribute('disabled'):
-                        size_object['stock'] = 0
-                    else:
-                        size_object['stock'] = 10
-                except:
-                    size_object = {}
-
-                print(size_object)
-                sizes_list.append(size_object)
-        except:
-            print('error finding sizes')
-            driver.save_screenshot('error.png')
-
-
-        # get Category
-        try:
-            category = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//a[@class='breadcrumb-crumb']"))).text
-            print('Category: ', category)
-        except:
-            print('error finding category')
-            driver.save_screenshot('error.png')
-
-    # create product model
-        product = Product(
-
-            user= user,
-            brand='Scrapped Product',
-            name = name,
-            price = price,
-            # image = images_list,
-            description = description,
-            category = category,
-            # sizes = sizes_list,
-            url = link,
-            is_scraped = True,
-        )
-
-        product.save()
-
-        # create product image model
-        for image in images_list:
-            # donwload image and create image model
-            image_content = requests.get(image).content
-            image_name = image.split('/')[-1]
-            image_file = ContentFile(image_content, image_name)
-
-            product_image = ProductImage(
-                product = product,
-                image = image_file,
-            )
-            product_image.save()
-
-        # create product size model
-        for size in sizes_list:
-            product_size = Size(
-                product = product,
-                size = size['size'],
-                stock = size['stock'],
-            )
-
-            product_size.save()
-
-    print("scraped product")
-
-    print('Products scraped n saved in products.json ;)')
-    driver.quit()
+# @api_view(['GET'])
+# def scrapeProducts(request):
+#     # delete all products with is_scraped = True
+#     Product.objects.filter(is_scraped=True).delete()
 
 
 
 
 
-
+# commamd to see python libraries installed in the virtual environment
+# pip freeze
