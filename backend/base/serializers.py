@@ -161,82 +161,42 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
-
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
         fields = ['size']
 
-    def to_representation(self, obj):
-        return {
-            obj.size: {
-                'stock': self.context['stock'],
-            }
-        }
-
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ['color']
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
-    size = serializers.SerializerMethodField(read_only=True)
+    color = serializers.StringRelatedField(many=True)
+    size = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = ProductAttribute
-        fields = ['size', 'stock']
+        fields = ['color', 'size', 'stock']
 
-    def get_size(self, obj):
-        size = obj.size
-        serializer = SizeSerializer(
-            size, many=True, context={'stock': obj.stock})
-        return serializer.data
-
-    def to_representation(self, obj):
-        return self.get_size(obj)[0]
-
-
-
-class NoNullSerializer(serializers.ModelSerializer):
-    def to_representation(self, obj):
-        ret = super().to_representation(obj)
-        return {k: v for k, v in ret.items() if v is not None}
-
-class ColorSerializer(serializers.ModelSerializer):
-    sizes = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Color
-        fields = ['color', 'sizes']
-
-    def get_sizes(self, obj):
-        product = self.context['product']
-        sizes = obj.productattribute_set.filter(color=obj)
-        serializer = ProductAttributeSerializer(sizes, many=True)
-        return serializer.data
-
-    def to_representation(self, obj):
-        return {
-        obj.color: {
-            'sizes': self.get_sizes(obj),
-        }}
-
-
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['image', 'id']
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        result = {}
+        for color in data['color']:
+            result[color] = {
+                data['size'][0]: data['stock']
+            }
+        return result
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    colors = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField(read_only=True)
-    colors = serializers.SerializerMethodField(read_only=True)
     images = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = ['brand', 'category', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images']
-
-    def get_colors(self, obj):
-        colors = Color.objects.all()
-        serializer = ColorSerializer(colors, many=True, context={'product': obj})
-        return serializer.data
 
     def get_images(self, obj):
         images = obj.productimage_set.all()
@@ -248,6 +208,27 @@ class ProductSerializer(serializers.ModelSerializer):
         serializer = ReviewSerializer(reviews, many=True)
         return serializer.data
 
+    def get_colors(self, instance):
+        product_attributes = ProductAttribute.objects.filter(product=instance)
+        serializer = ProductAttributeSerializer(product_attributes, many=True)
+        return serializer.data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        result = {}
+        for attribute in data['colors']:
+            for color, sizes in attribute.items():
+                if color not in result:
+                    result[color] = {}
+                result[color].update(sizes)
+        data['colors'] = result
+        return data
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'id']
 
 class OrderSerializer(serializers.ModelSerializer):
     OrderItems = serializers.SerializerMethodField(read_only=True)

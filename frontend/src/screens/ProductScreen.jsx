@@ -27,8 +27,8 @@ function ProductScreen() {
 
     const [was_added, setWasAdded] = useState(false)
     const [stock, setStock] = useState('')
-    const [size, setSize] = useState('')
     const [color, setColor] = useState('')
+    const [sizes, setSizes] = useState('');
     const [qty, setQty] = useState(1)
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
@@ -47,8 +47,6 @@ function ProductScreen() {
     const productCreateReview = useSelector(state => state.productCreateReview)
     const { success: successProductReview, error: errorProductReview, loading: loadingProductReview } = productCreateReview
 
-    const productDetails = useSelector(state => state.productDetails)
-    const { loading, error, product, success } = productDetails
 
     const cart = useSelector(state => state.cart)
     const { cartItems, was_clicked } = cart
@@ -62,12 +60,19 @@ function ProductScreen() {
         dispatch(getWishlist())
     }, [dispatch, id, successProductReview, errorProductReview])
 
+
+    const productDetails = useSelector(state => state.productDetails)
+    const { loading, error, product, success } = productDetails
+
     useEffect(() => {
-        if (success) {
-            // console.log('Colors:', product.colors[0]['Red'].sizes[0]['S'].stock)
-            console.log('Colors:', product.colors)
+
+        if (success && product?.colors) {
+            setColor(Object.keys(product.colors)[0])
+            setSizes(Object.keys(product.colors[Object.keys(product.colors)[0]])[0])
         }
-    }, [product, success])
+
+    }, [product, success, color, sizes, productDetails])
+
 
     const submitHandler = (e) => {
         e.preventDefault()
@@ -76,7 +81,6 @@ function ProductScreen() {
             comment
         }))
     }
-
 
     const addToCartHandler = (id, qty, size,) => {
         // if the user is not logged in, redirect to login page
@@ -115,7 +119,14 @@ function ProductScreen() {
 
     }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
 
-    console.log(product)
+
+    const handleColorChange = event => {
+        setColor(event.target.value)
+    };
+
+    const handleSizeChange = event => {
+        setSizes(event.target.value)
+    };
 
     return (
         <div>
@@ -205,61 +216,28 @@ function ProductScreen() {
                                                                 Color:
                                                             </Col>
                                                             <Col xs='auto' className='my-1' md={6}>
-                                                                <Form.Control
-                                                                    as='select'
-                                                                    className='mr-sm-2 text-center'
-                                                                    id='inlineFormCustomSelect'
-                                                                    value={color}
 
-                                                                    // onChange call 2 functions, one to set the size and one to set the stock based on the size selected
-                                                                    onChange={(e) => {
-                                                                        // setSize(e.target.value)
-                                                                        // setStock(product.sizes.find((product) => product.size === e.target.value).stock)
-                                                                        setColor(e.target.value)
-                                                                    }}
-                                                                >
-                                                                    {/* {
-                                                                        product?.sizes?.map((size) => (
-                                                                            <option key={size.id} value={size.size}>{size.size}</option>
-                                                                        ))} */}
-                                                                    {
-                                                                        product.colors?.map((color) => {
-                                                                            color = Object.keys(color)[0]
+                                                                {success && product?.colors && (
+                                                                    <Form.Control as="select" onChange={handleColorChange}>
+                                                                        {Object.keys(product?.colors || {}).map(color => (
+                                                                            <option key={color} value={color}>{color}</option>
+                                                                        ))}
+                                                                    </Form.Control>
+                                                                )}
 
-                                                                            return (
-                                                                                <option key={color.id} value={color[0]}>
-                                                                                    {color}
-                                                                                </option>
-                                                                            )
-                                                                        })
-                                                                    }
-                                                                                                
-                                                                        
-                                                                    }
-                                                                </Form.Control>
                                                             </Col>
 
                                                             <Col md={6}>
                                                                 Size:
                                                             </Col>
                                                             <Col xs='auto' className='my-1' md={6}>
-                                                                <Form.Control
-                                                                    as='select'
-                                                                    className='mr-sm-2 text-center'
-                                                                    id='inlineFormCustomSelect'
-                                                                    value={size}
-
-                                                                    // onChange call 2 functions, one to set the size and one to set the stock based on the size selected
-                                                                    onChange={(e) => {
-                                                                        setSize(e.target.value)
-                                                                        setStock(product.sizes.find((product) => product.size === e.target.value).stock)
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        product?.sizes?.map((size) => (
-                                                                            <option key={size.id} value={size.size}>{size.size}</option>
+                                                                {success && color && product?.colors && (
+                                                                    <Form.Control as="select" onChange={handleSizeChange}>
+                                                                        {color && sizes && product.colors[color] && Object.keys(product.colors[color]).map(size => (
+                                                                            <option key={size} value={size}>{size}</option>
                                                                         ))}
-                                                                </Form.Control>
+                                                                    </Form.Control>
+                                                                )}
                                                             </Col>
 
 
@@ -278,20 +256,17 @@ function ProductScreen() {
                                                                                 Quantity
                                                                             </Col>
                                                                             <Col xs='auto' className='my-1' md={6}>
-                                                                                <Form.Control
-                                                                                    as='select'
-                                                                                    className='mr-sm-2 text-center'
-                                                                                    id='inlineFormCustomSelect'
-                                                                                    value={qty}
-                                                                                    onChange={(e) => setQty(e.target.value)}
-                                                                                >
-                                                                                    {
-                                                                                        [...Array(stock).keys()].map((x) => (
-                                                                                            <option key={x + 1} value={x + 1}>
-                                                                                                {x + 1}
-                                                                                            </option>
-                                                                                        ))}
-                                                                                </Form.Control>
+
+                                                                                {
+                                                                                    success && sizes && (
+                                                                                        <Form.Control as="select">
+                                                                                            {Array.from(Array(product.colors[color][sizes] + 1).keys()).map(i => (
+                                                                                                <option key={i} value={i + 1}>{i + 1}</option>
+                                                                                            ))}
+                                                                                        </Form.Control>
+                                                                                    )
+                                                                                }
+
                                                                             </Col>
                                                                         </>
                                                                     )
