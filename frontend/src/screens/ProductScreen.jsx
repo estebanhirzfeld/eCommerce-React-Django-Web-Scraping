@@ -11,6 +11,7 @@ import { Row, Col, Card, Image, ListGroup, Button, Form, Container } from 'react
 import Rating from '../components/Rating'
 import ItemDetailLoader from '../components/itemDetailsLoader'
 import CartList from '../components/CartList'
+import Selectors from '../components/Selectors'
 
 // actions
 import { getWishlist, addToWishlist, removeFromWishlist } from '../actions/listsActions'
@@ -23,13 +24,54 @@ import { addToCart, getCart, removeFromCart } from '../actions/cartActions'
 import CartToastNotification from '../components/CartToastNotification'
 import '../components/styles/CartToastNotification.css'
 
+const ColorSelector = ({ colors }) => {
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [availableSizes, setAvailableSizes] = useState([]);
+
+    const handleChange = (event) => {
+        const color = event.target.value;
+        setSelectedColor(color);
+        setAvailableSizes(Object.keys(colors[color]));
+    }
+
+    return (
+        <Form.Control as="select" value={selectedColor} onChange={handleChange}>
+            <option value={null}>Select a color</option>
+            {Object.keys(colors).map((color) => (
+                <option key={color} value={color}>
+                    {color}
+                </option>
+            ))}
+        </Form.Control>
+    );
+};
+
+const SizeSelector = ({ colors, selectedColor }) => {
+    const [selectedSize, setSelectedSize] = useState(null);
+    const [availableQuantity, setAvailableQuantity] = useState(0);
+
+    const handleChange = (event) => {
+        const size = event.target.value;
+        setSelectedSize(size);
+        setAvailableQuantity(colors[selectedColor][size]);
+    }
+
+    return (
+        <select value={selectedSize} onChange={handleChange}>
+            <option value={null}>Select a size</option>
+            {availableSizes.map((size) => (
+                <option key={size} value={size}>
+                    {size}
+                </option>
+            ))}
+        </select>
+    );
+};
+
 function ProductScreen() {
 
     const [was_added, setWasAdded] = useState(false)
     const [stock, setStock] = useState('')
-    const [color, setColor] = useState('')
-    const [sizes, setSizes] = useState('');
-    const [qty, setQty] = useState(1)
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
 
@@ -66,12 +108,12 @@ function ProductScreen() {
 
     useEffect(() => {
 
-        if (success && product?.colors) {
-            setColor(Object.keys(product.colors)[0])
-            setSizes(Object.keys(product.colors[Object.keys(product.colors)[0]])[0])
-        }
+        // if (success && product?.colors) {
+        //     setColor(Object.keys(product.colors)[0])
+        //     setSizes(Object.keys(product.colors[Object.keys(product.colors)[0]])[0])
+        // }
 
-    }, [product, success, color, sizes, productDetails])
+    }, [product, success, productDetails])
 
 
     const submitHandler = (e) => {
@@ -118,15 +160,6 @@ function ProductScreen() {
         }
 
     }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
-
-
-    const handleColorChange = event => {
-        setColor(event.target.value)
-    };
-
-    const handleSizeChange = event => {
-        setSizes(event.target.value)
-    };
 
     return (
         <div>
@@ -210,67 +243,13 @@ function ProductScreen() {
 
                                                     <ListGroup.Item className='text-center'>
                                                         <Row className='justify-content-center align-items-center' >
-
-                                                            {/* Colors */}
-                                                            <Col md={6}>
-                                                                Color:
-                                                            </Col>
-                                                            <Col xs='auto' className='my-1' md={6}>
-
-                                                                {success && product?.colors && (
-                                                                    <Form.Control as="select" onChange={handleColorChange}>
-                                                                        {Object.keys(product?.colors || {}).map(color => (
-                                                                            <option key={color} value={color}>{color}</option>
-                                                                        ))}
-                                                                    </Form.Control>
-                                                                )}
-
-                                                            </Col>
-
-                                                            <Col md={6}>
-                                                                Size:
-                                                            </Col>
-                                                            <Col xs='auto' className='my-1' md={6}>
-                                                                {success && color && product?.colors && (
-                                                                    <Form.Control as="select" onChange={handleSizeChange}>
-                                                                        {color && sizes && product.colors[color] && Object.keys(product.colors[color]).map(size => (
-                                                                            <option key={size} value={size}>{size}</option>
-                                                                        ))}
-                                                                    </Form.Control>
-                                                                )}
-                                                            </Col>
-
-
                                                             {
-                                                                stock === 0 ?
-                                                                    <Col>
-                                                                        <Button className='mt-3 col-12 btn-block ' type='button' disabled={product.countInStock === 0}>
-                                                                            Send stock reminder <i className="fa-solid fa-bell"></i>
-                                                                        </Button>
-                                                                    </Col>
-                                                                    :
-                                                                    (
-                                                                        <>
-
-                                                                            <Col md={6}>
-                                                                                Quantity
-                                                                            </Col>
-                                                                            <Col xs='auto' className='my-1' md={6}>
-
-                                                                                {
-                                                                                    success && sizes && (
-                                                                                        <Form.Control as="select">
-                                                                                            {Array.from(Array(product.colors[color][sizes] + 1).keys()).map(i => (
-                                                                                                <option key={i} value={i + 1}>{i + 1}</option>
-                                                                                            ))}
-                                                                                        </Form.Control>
-                                                                                    )
-                                                                                }
-
-                                                                            </Col>
-                                                                        </>
-                                                                    )
-
+                                                                success && product?.colors ? (
+                                                                    <Selectors
+                                                                        colors={product.colors}
+                                                                    ></Selectors>
+                                                                )
+                                                                    : null
                                                             }
                                                         </Row>
 
@@ -373,5 +352,7 @@ function ProductScreen() {
         </div >
     )
 }
+
+
 
 export default ProductScreen

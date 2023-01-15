@@ -219,9 +219,7 @@ def createReview(request, pk):
 
 
 
-@api_view(['GET'])
-def scrapeProducts(request, pk):
-    return Response('Scraping...')
+
 
 
 
