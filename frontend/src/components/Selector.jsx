@@ -11,6 +11,7 @@ function Selector({ label, handleChange, options }) {
                 <Form.Control
                     as="select"
                     onClick={handleChange}
+                    className='text-center'
                 >
                     {
                         options ?

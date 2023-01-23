@@ -6,9 +6,11 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'price',
     # 'sizes',
     # 'colors',
-    'category', 'brand',
+    'category',
+    # 'brand',
     # 'rating', 'numReviews',
-    # 'is_scraped'
+    'is_scraped',
+    'is_active',
     )
 
 class ProductImageAdmin(admin.ModelAdmin):
@@ -64,7 +66,15 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')
 
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ('cart', 'product', 'qty', 'size')
+    list_display = ('cart',
+    'product',
+    'qty',
+    'get_size',
+    'get_color',
+    # 'size',
+    # 'color',
+    # 'stock'
+    )
 
 class WishlistAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')

@@ -60,7 +60,7 @@ export const getCart = () => async (dispatch, getState) => {
     }
 }
 
-export const addToCart = (productId, qty, size) => async (dispatch, getState) => {
+export const addToCart = (productId, qty, size, color) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ADD_TO_CART_REQUEST,
@@ -77,17 +77,10 @@ export const addToCart = (productId, qty, size) => async (dispatch, getState) =>
             },
         }
 
-        console.log(
-            {
-                productId,
-                qty,
-                size
-            }
-        );
-
         const { data } = await axios.post(`http://localhost:8000/api/cart/add/${productId}/`, {
-            size: size.toUpperCase(),
-            qty: parseInt(qty)
+            size, 
+            color,
+            qty: parseInt(qty),
         }, config);
 
         dispatch({

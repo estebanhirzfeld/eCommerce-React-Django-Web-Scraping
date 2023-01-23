@@ -1,4 +1,4 @@
-from base.models import Product, ProductImage, Review, Order, OrderItem, Size
+from base.models import Product, ProductImage, Review, Order, OrderItem, Size, Color, ProductAttribute
 from django.contrib.auth.models import User
 
 from decimal import Decimal
@@ -523,17 +523,76 @@ for store in stores:
                             color_obj['sizes'] = sizes_list
                     colors_list.append(color_obj)
 
+
         product = {
             'name': name,
             'price': price,
             'images': len(images),
             'description': description,
             'category': category,
-            'colors': colors_list,
             'link': driver.current_url,
             'time_scraped': time.time()
         }
         products_list.append(product)
+
+        user = User.objects.get(id=1)
+
+        product = Product(
+            user=user,
+            name=name,
+            price=price,
+            description=description,
+            category=category,
+            original_url=driver.current_url,
+            time_scraped=time.time(),
+            is_scraped=True,
+
+        )
+
+        product.save()
+
+        for image in images:
+            image_content = requests(image).content
+            image_name = image.split('/')[-1]
+            image_file = ContentFile(image_content, image_name)
+
+            product_image = ProductImage(
+                product=product,
+                image=image_file
+            )
+            product_image.save()
+
+        for color in colors_list:
+            # if color doesn't exist, create it
+            try:
+                color_obj = Color.objects.get(name=color['color'])
+            except:
+                color_obj = Color(
+                    name=color['color']
+                )
+                color_obj.save()
+
+            for size in color['sizes']:
+                # if size doesn't exist, create it
+                try:
+                    size_obj = Size.objects.get(name=size['size'])
+                except:
+                    size_obj = Size(
+                        name=size['size']
+                    )
+                    size_obj.save()
+
+            # attributes
+            product_attribute = ProductAttribute(
+                product=product,
+                color=color_obj,
+                size=size_obj,
+                stock=size['stock']
+            )
+            product_attribute.save()
+
+        print('product saved')
+
 
         total_name_time = total_name_time + name_time
         total_price_time = total_price_time + price_time
@@ -545,18 +604,18 @@ for store in stores:
 
 
     print(len(error_log_list), 'errors_log found')
-    print(len(products), 'products found')
-    print(len(links), 'links found')
+    # print(len(products), 'products found')
+    # print(len(links), 'links found')
 
-    print('average name time:', total_name_time / len(products))
-    print('average price time:', total_price_time / len(products))
-    print('average images time:', total_images_time / len(products))
-    print('average words time:', total_words_time / len(products))
-    print('average category time:', total_category_time / len(products))
-    print('average buy button time:', total_buy_button_time / len(products))
-    print('average sizes time:', total_sizes_time / len(products))
+    # print('average name time:', total_name_time / len(products))
+    # print('average price time:', total_price_time / len(products))
+    # print('average images time:', total_images_time / len(products))
+    # print('average words time:', total_words_time / len(products))
+    # print('average category time:', total_category_time / len(products))
+    # print('average buy button time:', total_buy_button_time / len(products))
+    # print('average sizes time:', total_sizes_time / len(products))
 
-    print('average time per element:', (total_name_time + total_price_time + total_images_time + total_words_time + total_category_time + total_buy_button_time + total_sizes_time) / len(products))
+    # print('average time per element:', (total_name_time + total_price_time + total_images_time + total_words_time + total_category_time + total_buy_button_time + total_sizes_time) / len(products))
 
     scraping_time = time.time() - scraping_time
     print('Scraping time:', scraping_time, 'seconds, average time per product:', scraping_time / len(products), 'seconds, (', len(products), 'products )')

@@ -51,7 +51,7 @@ function WishlistScreen() {
                                                     <Link to={`/product/${item.product.id}`}>
                                                         {item.product.name}
                                                     </Link>
-                                                    <p>{item.product.description}</p>
+                                                    {/* <p>{item.product.description}</p> */}
                                                 </Col>
                                                 <Col md={12}>
                                                     {item.product.price}

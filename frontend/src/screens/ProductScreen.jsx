@@ -24,56 +24,13 @@ import { addToCart, getCart, removeFromCart } from '../actions/cartActions'
 import CartToastNotification from '../components/CartToastNotification'
 import '../components/styles/CartToastNotification.css'
 
-const ColorSelector = ({ colors }) => {
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [availableSizes, setAvailableSizes] = useState([]);
-
-    const handleChange = (event) => {
-        const color = event.target.value;
-        setSelectedColor(color);
-        setAvailableSizes(Object.keys(colors[color]));
-    }
-
-    return (
-        <Form.Control as="select" value={selectedColor} onChange={handleChange}>
-            <option value={null}>Select a color</option>
-            {Object.keys(colors).map((color) => (
-                <option key={color} value={color}>
-                    {color}
-                </option>
-            ))}
-        </Form.Control>
-    );
-};
-
-const SizeSelector = ({ colors, selectedColor }) => {
-    const [selectedSize, setSelectedSize] = useState(null);
-    const [availableQuantity, setAvailableQuantity] = useState(0);
-
-    const handleChange = (event) => {
-        const size = event.target.value;
-        setSelectedSize(size);
-        setAvailableQuantity(colors[selectedColor][size]);
-    }
-
-    return (
-        <select value={selectedSize} onChange={handleChange}>
-            <option value={null}>Select a size</option>
-            {availableSizes.map((size) => (
-                <option key={size} value={size}>
-                    {size}
-                </option>
-            ))}
-        </select>
-    );
-};
-
 function ProductScreen() {
 
     const [was_added, setWasAdded] = useState(false)
     const [stock, setStock] = useState('')
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
+    
 
     const [image, setImage] = useState('')
 
@@ -88,7 +45,6 @@ function ProductScreen() {
 
     const productCreateReview = useSelector(state => state.productCreateReview)
     const { success: successProductReview, error: errorProductReview, loading: loadingProductReview } = productCreateReview
-
 
     const cart = useSelector(state => state.cart)
     const { cartItems, was_clicked } = cart
@@ -108,12 +64,11 @@ function ProductScreen() {
 
     useEffect(() => {
 
-        // if (success && product?.colors) {
-        //     setColor(Object.keys(product.colors)[0])
-        //     setSizes(Object.keys(product.colors[Object.keys(product.colors)[0]])[0])
-        // }
+        if (success && product?.images) {
+            setImage(product.images[0].image)
+        }
 
-    }, [product, success, productDetails])
+    }, [success, product])
 
 
     const submitHandler = (e) => {
@@ -124,12 +79,13 @@ function ProductScreen() {
         }))
     }
 
-    const addToCartHandler = (id, qty, size,) => {
+    const addToCartHandler = (id, qty, size, color) => {
         // if the user is not logged in, redirect to login page
         if (!userInfo) {
             navigate('/login?redirect=shipping')
         } else {
-            dispatch(addToCart(id, qty, size))
+            dispatch(addToCart(id, qty, size, color))
+            // dispatch(addToCart(106, 1, 'M', 'Negro'))
             dispatch(getCart())
             CartToastNotification()
         }
@@ -258,7 +214,13 @@ function ProductScreen() {
                                                             <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToWishlistHandler(product.id)}>
                                                                 <i className="fa-solid fa-heart" style={{ color: was_added ? 'red' : 'black' }}></i>
                                                             </Button>
-                                                            <Button onClick={() => addToCartHandler(product.id, qty, size)} className='mt-3 col-8 col-md-12 col-lg-8 btn-block' type='button' disabled={stock === 0}>
+                                                            <Button
+                                                            // onClick={() => addToCartHandler(id, qty, size, color)}
+                                                            onClick={() => addToCartHandler(id, qty, size, color)}
+                                                            className='mt-3 col-8 col-md-12 col-lg-8 btn-block'
+                                                            type='button'
+                                                            disabled={stock === 0}
+                                                            >
                                                                 Add to Cart
                                                             </Button>
                                                         </Row>

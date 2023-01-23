@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from base.models import Cart, CartItem, Product
+from base.models import Cart, CartItem, Product, ProductAttribute, Size, Color
 from base.serializers import CartSerializer, CartItemSerializer
 
 from rest_framework import status
@@ -27,27 +27,58 @@ def addToCart(request, pk):
     user = request.user
     product = Product.objects.get(id=pk)
 
+    size = Size.objects.get(size=request.data['size'])
+    color = Color.objects.get(color=request.data['color'])
+
+    productAttribute = ProductAttribute.objects.get(product=product, size=size, color=color)
+
     # if user has no cart, create one
     cart, created = Cart.objects.get_or_create(user=user)
+    
+    print('----------------------------\n')
+    print('product: ', product)
+    print('----------------------------\n')
+    print('size: ', size)
+    print('----------------------------\n')
+    print('color: ', color)
+    print('----------------------------\n')
+    print('productAttribute: ', productAttribute)
+    print('----------------------------\n')
 
-    productExists = cart.cartitem_set.filter(product=product, size=request.data['size']).exists()
+    productExists = CartItem.objects.filter(cart=cart, product=product, productAttribute=productAttribute).exists()
 
     if productExists:
-        cartItem = cart.cartitem_set.get(product=product , size=request.data['size'])
-        cartItem.qty = request.data['qty']
+        print('----------------------------\n')
+        print('product exists')
+        print('----------------------------\n')
+        cartItem = CartItem.objects.get(cart=cart, product=product, productAttribute=productAttribute)
+        if cartItem.qty >= productAttribute.stock:
+            cartItem.qty = productAttribute.stock
+        else:
+            cartItem.qty += 1
+            
         cartItem.save()
     else:
+        print('----------------------------\n')
+        print('product does not exist')
+        print('----------------------------\n')
         cartItem = CartItem.objects.create(
-            product=product,
             cart=cart,
-            qty=request.data['qty'],
-            size=request.data['size']
+            product=product,
+            productAttribute=productAttribute,
+            qty=1
         )
         cartItem.save()
 
-    cartItems = cart.cartitem_set.all()
+    cartItems = CartItem.objects.filter(cart=cart, cart__user=user)
     serializer = CartItemSerializer(cartItems, many=True)
     return Response(serializer.data)
+
+
+
+
+
+
 
 
 @api_view(['DELETE'])

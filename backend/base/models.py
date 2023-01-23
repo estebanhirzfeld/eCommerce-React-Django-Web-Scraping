@@ -230,8 +230,21 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.IntegerField(null=True, blank=True, default=0)
-    size = models.CharField(max_length=100, null=True, blank=True)
-    stock = models.IntegerField(null=True, blank=True, default=0)
+    productAttribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE, null=True, blank=True)
+
+    def get_size(self):
+        if self.productAttribute is not None:
+            size = self.productAttribute.size.all()
+            if size:
+                return size[0].size
+        return None
+        
+    def get_color(self):
+        if self.productAttribute is not None:
+            color = self.productAttribute.color.all()
+            if color:
+                return color[0].color
+        return None
 
     def __str__(self):
         return str(self.product)

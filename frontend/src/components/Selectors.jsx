@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import Selector from './Selector';
-import { Col, Button } from 'react-bootstrap'
+import { Row, Col, Button } from 'react-bootstrap'
 
 function Selectors({ colors }) {
 
     const [color, setColor] = useState('');
     const [size, setSize] = useState('');
-    const [qty, setQty] = useState(0);
+    const [qty, setQty] = useState(1);
 
     useEffect(() => {
         const initialColor = colors && Object.keys(colors).length > 0 ? Object.keys(colors)[0] : 'No color available';
         setColor(initialColor);
         const initialSize = colors && Object.keys(colors).length > 0 && colors[initialColor] && Object.keys(colors[initialColor]).length > 0 ? Object.keys(colors[initialColor])[0] : 'No size available';
         setSize(initialSize);
-        const initialQty = colors && Object.keys(colors).length > 0 && colors[initialColor] && colors[initialColor][initialSize] ? 1 : 'No qty available';
+        const initialQty = colors && Object.keys(colors).length > 0 && colors[initialColor] && colors[initialColor][initialSize] ? 1 : 0;
         setQty(initialQty);
     }, [colors])
 
@@ -25,6 +25,7 @@ function Selectors({ colors }) {
                 handleChange={(e) => {
                     setColor(e.target.value);
                     if (Object.keys(colors[e.target.value]).length === 1) setSize(Object.keys(colors[e.target.value])[0]);
+
                 }}
             />
 
@@ -33,7 +34,12 @@ function Selectors({ colors }) {
                     <Selector
                         label="Size"
                         options={Object.keys(colors[color])}
-                        handleChange={(e) => { setSize(e.target.value) }}
+                        handleChange={(e) => {
+                            setSize(e.target.value);
+                            if (colors[color][e.target.value] === 0) {
+                                setQty(1);
+                            }
+                        }}
                     />
                 )
             }
@@ -56,14 +62,6 @@ function Selectors({ colors }) {
                     )
                 )
             }
-
-            <Button
-                onClick={() => {
-                    alert(`Color: ${color}, Size: ${size}, Qty: ${qty}`)
-                }}
-            />
-
-
         </>
 
     )

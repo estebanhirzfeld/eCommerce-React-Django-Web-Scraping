@@ -11,5 +11,5 @@ urlpatterns = [
     path('create/', views.createProduct, name='product-create'),
     path('<int:pk>/', views.getProduct, name='product'),
 
-    path('scrape/<int:pk>/', views.scrapeProducts, name='products-scrape'),
+    path('scrape/', views.scrapeProducts, name='products-scrape'),
 ]

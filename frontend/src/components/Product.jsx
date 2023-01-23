@@ -24,8 +24,6 @@ function Product({ product }) {
 
     }, [isHovered])
 
-    console.log(isHovered)
-
     return (
         <Card className='h-100 my-3 rounded'>
             <Link to={`/product/${product.id}`}>

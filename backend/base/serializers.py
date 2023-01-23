@@ -1,3 +1,4 @@
+
 from collections import OrderedDict
 from dataclasses import fields
 from rest_framework import serializers
@@ -5,28 +6,41 @@ from django.contrib.auth.models import User
 from .models import Product, ProductImage, Order, OrderItem, ShippingAddress, Review, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute
 from rest_framework_simplejwt.tokens import RefreshToken
 
-# Cart
-
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField(read_only=True)
-    stock = serializers.SerializerMethodField(read_only=True)
-
-    # get stock of product for that size
-    def get_stock(self, obj):
-        product = obj.product
-        size = obj.size
-        stock = product.size_set.get(size=size).stock
-        return stock
+    product = serializers.SerializerMethodField()
+    size = serializers.SerializerMethodField()
+    color = serializers.SerializerMethodField()
+    stock = serializers.SerializerMethodField()
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product','size', 'color', 'qty', 'stock']
 
     def get_product(self, obj):
         product = obj.product
         serializer = ProductSerializer(product, many=False)
         return serializer.data
 
-    class Meta:
-        model = CartItem
-        fields = ['product', 'qty', 'size', 'stock', 'id']
+    def get_size(self, obj):
+        if obj.productAttribute is not None:
+            size = obj.productAttribute.size.all()
+            if size:
+                return size[0].size
+        return None
+    
+    def get_color(self, obj):
+        if obj.productAttribute is not None:
+            color = obj.productAttribute.color.all()
+            if color:
+                return color[0].color
+        return None
+    
+    def get_stock(self, obj):
+        if obj.productAttribute is not None:
+            return obj.productAttribute.stock
+        return None
+
+
 
 
 class CartSerializer(serializers.ModelSerializer):
