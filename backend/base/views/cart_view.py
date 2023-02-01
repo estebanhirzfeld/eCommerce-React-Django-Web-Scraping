@@ -52,11 +52,12 @@ def addToCart(request, pk):
         print('product exists')
         print('----------------------------\n')
         cartItem = CartItem.objects.get(cart=cart, product=product, productAttribute=productAttribute)
-        if cartItem.qty >= productAttribute.stock:
+        cartItem.qty = request.data['qty']
+        if cartItem.qty == 0:
+            cartItem.delete()
+        if cartItem.qty > productAttribute.stock:
             cartItem.qty = productAttribute.stock
-        else:
-            cartItem.qty += 1
-            
+
         cartItem.save()
     else:
         print('----------------------------\n')
@@ -66,7 +67,7 @@ def addToCart(request, pk):
             cart=cart,
             product=product,
             productAttribute=productAttribute,
-            qty=1
+            qty=request.data['qty']
         )
         cartItem.save()
 

@@ -30,7 +30,7 @@ function Header() {
     <header>
       <Navbar bg="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand as={Link} to="/">Zoldyck</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">React + Django</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <SearchBar />

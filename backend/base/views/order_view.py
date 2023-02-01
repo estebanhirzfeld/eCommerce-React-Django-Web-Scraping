@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from base.models import Product, Order, OrderItem, ShippingAddress
+from base.models import Product, Order, OrderItem, ShippingAddress, ProductAttribute, ProductImage, Size, Color
 from base.serializers import ProductSerializer, OrderSerializer, ShippingAddressSerializer
 
 from rest_framework import status
@@ -48,19 +48,29 @@ def addOrderItems(request):
                 name=product.name,
                 qty=item['qty'],
                 size=item['size'],
+                color=item['color'],
                 price=product.price,
-                image=product.image.url
+                image=product.productimage_set.first().image.url
             )
 
             # (4) Update stock
 
             # if qty > stock, return error
-            if item.qty > product.size_set.filter(size=item.size).first().stock:
+            # if item.qty > product.size_set.filter(size=item.size).first().stock:
+            #     return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # use qty from ProductAttribute model
+            # if item.qty > product.productattribute_set.filter(size=item.size, color=item.color).first().stock:
+            if item.qty > product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).first().stock:
                 return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
             
+            # if qty <= stock, update stock
             else:
             # get stock from that size
-                product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
+                # product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
+                # product.save()
+                # product.productattribute_set.filter(size=item.size, color=item.color).update(stock=product.productattribute_set.filter(size=item.size, color=item.color).first().stock - int(item.qty))
+                product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).update(stock=product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).first().stock - int(item.qty))
                 product.save()
             
         serializer = OrderSerializer(order, many=False)

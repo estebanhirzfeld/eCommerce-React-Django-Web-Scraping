@@ -12,6 +12,7 @@ class ProductAdmin(admin.ModelAdmin):
     'is_scraped',
     'is_active',
     )
+    search_fields = ('name', 'price', 'category', 'is_scraped', 'is_active')
 
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image')
@@ -61,6 +62,7 @@ class ProductAttributeAdmin(admin.ModelAdmin):
         'sizes',
         'stock'
         )
+    search_fields = ['product__name']
 
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')

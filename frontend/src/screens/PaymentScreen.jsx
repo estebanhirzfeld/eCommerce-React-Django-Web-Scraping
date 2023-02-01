@@ -9,6 +9,7 @@ import { savePaymentMethod } from '../actions/cartActions'
 
 import CheckoutSteps from '../components/CheckoutSteps'
 
+import { ADDRESS_CREATE_RESET } from '../constants/addressConstants'
 
 
 function PaymentScreen() {
@@ -27,6 +28,13 @@ function PaymentScreen() {
         navigate('/placeorder')
     }
 
+    useEffect(() => {
+        // dispatch ADDRESS_CREATE_RESET
+        if (!shippingAddresses) {
+            navigate('/shipping')
+        }
+        dispatch({ type: 'ADDRESS_CREATE_RESET' })
+    }, [dispatch, navigate, shippingAddresses])
 
     return (
 

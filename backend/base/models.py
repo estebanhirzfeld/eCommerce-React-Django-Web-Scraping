@@ -111,6 +111,7 @@ class OrderItem(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     qty = models.IntegerField(null=True, blank=True, default=0)
     size = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField(max_length=100, null=True, blank=True)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     image = models.CharField(max_length=500, null=True, blank=True)
 

@@ -20,7 +20,7 @@ function CartScreen() {
     const dispatch = useDispatch()
 
     const checkoutHandler = () => {
-        if ( error ) {
+        if (error) {
             navigate('/login?redirect=shipping')
         } else {
             navigate('/shipping')
@@ -39,12 +39,13 @@ function CartScreen() {
         if (cartItems) {
             // if at least one item is out of stock, show the message
             setIsOutOfStock(cartItems.some(item => item.qty > item.stock))
+            console.log(cartItems)
         }
-    }, [cartItems, loading, error, success, dispatch,navigate])
+    }, [cartItems, loading, error, success, dispatch, navigate])
 
 
-    const addToCartHandler = (id, qty, size) => {
-        dispatch(addToCart(id, qty, size))
+    const addToCartHandler = (id, qty, size, color) => {
+        dispatch(addToCart(id, qty, size, color))
     }
 
 
@@ -61,11 +62,17 @@ function CartScreen() {
 
                                 <Row>
                                     <Col className="col-4" md={2}>
+                                        <Link to={`/product/${item.product.id}`}>
                                         <Image style={{ aspectRatio: '1/1', objectFit: 'cover', }} src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
+                                        </Link>
                                     </Col>
                                     <Col className="col-8" md={3}>
-                                        <Link to={`/product/${item.product.id}`}>{item.product.name}</Link>
+                                        <Link to={`/product/${item.product.id}`}>
+                                            {/* if name > 15 lengh cut it and add ... */}
+                                            {item.product.name.length > 14 ? item.product.name.slice(0, 14) + '...' : item.product.name}
+                                        </Link>
                                         <p className='mt-2'>Size: {item.size}</p>
+                                        <p className='mt-2'>Color: {item.color}</p>
                                         {
                                             item.stock <= 0 ? <p className='text-danger'>Out of stock</p> : null
                                         }
@@ -77,14 +84,17 @@ function CartScreen() {
                                             as='select'
                                             value={item.qty}
                                             className='text-center'
-                                            onChange={(e) => addToCartHandler(item.product.id, Number(e.target.value), item.size)}>
+                                            // onChange={(e) => addToCartHandler(item.product.id, Number(e.target.value), item.size)}>
+                                            onChange={(e) => addToCartHandler(item.product.id, Number(e.target.value), item.size, item.color)}>
                                             {
-
-                                                [...Array(item.stock).keys()].map((x) => (
-                                                    <option key={x + 1} value={x + 1}>
-                                                        {x + 1}
-                                                    </option>
-                                                ))
+                                                item.stock <= 0 ?
+                                                    <option value={0}>0</option>
+                                                    :
+                                                    [...Array(item.stock).keys()].map((x) => (
+                                                        <option key={x + 1} value={x + 1}>
+                                                            {x + 1}
+                                                        </option>
+                                                    ))
                                             }
                                         </Form.Control>
                                     </Col>
@@ -93,7 +103,7 @@ function CartScreen() {
                                             className='col-12'
                                             type='button'
                                             variant='light'
-                                        onClick={() => removeFromCartHandler(item.id)}
+                                            onClick={() => removeFromCartHandler(item.id)}
                                         >
                                             <i className='fas fa-trash'></i>
                                         </Button>
@@ -129,9 +139,9 @@ function CartScreen() {
                             </Button>
                         </ListGroup.Item>
                     </ListGroup>
-                {
-                    isOutOfStock ? <p className='text-danger text-center mt-3'>Some items are out of stock</p> : null
-                }
+                    {
+                        isOutOfStock ? <p className='text-danger text-center mt-3'>Some items are out of stock</p> : null
+                    }
                 </Card>
             </Col>
         </Row>

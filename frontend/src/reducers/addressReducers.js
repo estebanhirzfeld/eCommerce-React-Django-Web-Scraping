@@ -6,6 +6,7 @@ import {
     ADDRESS_CREATE_REQUEST,
     ADDRESS_CREATE_SUCCESS,
     ADDRESS_CREATE_FAIL,
+    ADDRESS_CREATE_RESET,
 } from '../constants/addressConstants';
 
 export const addressReducer = (state = {shippingAddresses: []}, action) => {
@@ -47,6 +48,9 @@ export const addressCreateReducer = (state = {}, action) => {
                 loading: false,
                 error: action.payload
             }
+
+        case ADDRESS_CREATE_RESET:
+            return {}
         default:
             return state
     }

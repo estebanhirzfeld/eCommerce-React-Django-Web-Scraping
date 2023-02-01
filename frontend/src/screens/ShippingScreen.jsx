@@ -30,7 +30,7 @@ function ShippingScreen() {
     const dispatch = useDispatch()
 
     const addresses = useSelector(state => state.addresses)
-    const { shippingAddresses } = addresses
+    const { shippingAddresses, loading } = addresses
 
     const addressCreate = useSelector(state => state.addressCreate)
     const { success } = addressCreate
@@ -41,25 +41,26 @@ function ShippingScreen() {
     const [province, setProvince] = useState('')
 
     const submitHandler = async (e) => {
-
         e.preventDefault()
-
-        const { data } = await axios.get(`http://nominatim.openstreetmap.org/search?street=${address}&city=${city}&state=${province}&country=Argentina&postalcode=${postalCode}&format=json`)
-
-        if (!was_clicked) {
-            if (data[0]) {
-                setIsAddress(true)
-                setWasClicked(true)
-                setCoords([data[0].lat, data[0].lon])
-
-            } else {
+        try {
+            const { data } = await axios.get(`http://nominatim.openstreetmap.org/search?street=${address}&city=${city}&state=${province}&country=Argentina&postalcode=${postalCode}&format=json`)
+            if (!data[0]){
                 setIsAddress(false)
                 setWasClicked(true)
-                if (success) {
-                    navigate('/payment')
-                }
-            }
-        } else {
+                setCoords([0, 0])
+                throw new Error('No address found')
+            };
+            setIsAddress(true)
+            setWasClicked(true)
+            setCoords([data[0].lat, data[0].lon])
+        } catch(error) {
+            setIsAddress(false)
+            setWasClicked(true)
+            setCoords([0, 0])
+            console.error(error)
+        }
+    
+        if (was_clicked) {
             e.preventDefault()
             dispatch(createAddress({
                 address,
@@ -74,20 +75,31 @@ function ShippingScreen() {
             }
         }
     }
+    
+
 
     useEffect(() => {
         dispatch(getAddress())
+        // console.log(shippingAddresses)
     }, [dispatch])
+
+    useEffect(() => {
+        if (success) {
+            navigate('/payment')
+        }
+    }, [success, navigate])
 
     // set the address to the first address in the list
     useEffect(() => {
-        if (shippingAddresses.length > 0) {
+        if (shippingAddresses && shippingAddresses.length > 0) {
             setAddress(shippingAddresses[0].address)
             setPostalCode(shippingAddresses[0].postalCode)
             setCity(shippingAddresses[0].city)
             setProvince(shippingAddresses[0].province)
+            setCoords([shippingAddresses[0].lat, shippingAddresses[0].lon])
+            console.log('Coords:', coords[0], coords[1])
         }
-    }, [shippingAddresses])
+    }, [shippingAddresses, loading])
 
     let paymentData = localStorage.getItem('paymentMethod')
 
@@ -167,14 +179,10 @@ function ShippingScreen() {
                                 required
                                 type='text'
                                 placeholder='Enter address'
-                                // onChange setAddress 
                                 onChange={(e) => { setAddress(e.target.value) }}
-                                // onfocusout getCoordinates
-                                // onBlur={() => getCoordinates()}
                                 value={address}
                             ></Form.Control>
                         </Form.Group>
-
                         <div className='mt-5 d-flex justify-content-end'>
                             <Button type='submit' variant='primary'>
                                 Continue

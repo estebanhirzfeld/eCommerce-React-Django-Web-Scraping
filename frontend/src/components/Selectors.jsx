@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Selector from './Selector';
-import { Row, Col, Button } from 'react-bootstrap'
+import { Row, Col, Button, ListGroup } from 'react-bootstrap'
 
-function Selectors({ colors }) {
+function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_added }) {
 
     const [color, setColor] = useState('');
     const [size, setSize] = useState('');
@@ -18,52 +18,78 @@ function Selectors({ colors }) {
     }, [colors])
 
     return (
-        <>
-            <Selector
-                label="Color"
-                options={Object.keys(colors)}
-                handleChange={(e) => {
-                    setColor(e.target.value);
-                    if (Object.keys(colors[e.target.value]).length === 1) setSize(Object.keys(colors[e.target.value])[0]);
+        <ListGroup.Item className='text-center'>
+            <Row className='justify-content-center align-items-center' >
+                <Selector
+                    label="Color"
+                    options={Object.keys(colors)}
+                    handleChange={(e) => {
+                        setColor(e.target.value);
+                        if (Object.keys(colors[e.target.value]).length === 1) setSize(Object.keys(colors[e.target.value])[0]);
 
-                }}
-            />
+                    }}
+                />
 
-            {
-                color !== 'No color available' && colors[color] && (
-                    <Selector
-                        label="Size"
-                        options={Object.keys(colors[color])}
-                        handleChange={(e) => {
-                            setSize(e.target.value);
-                            if (colors[color][e.target.value] === 0) {
-                                setQty(1);
-                            }
-                        }}
-                    />
-                )
-            }
-
-
-            {
-                color !== 'No color available' && colors[color] && colors[color][size] !== undefined && (
-                    colors[color][size] === 0 ? (
-                        <Col>
-                            <Button className='mt-3 col-12 btn-block ' type='button' disabled={true}>
-                                Send stock reminder <i className="fa-solid fa-bell"></i>
-                            </Button>
-                        </Col>
-                    ) : (
+                {
+                    color !== 'No color available' && colors[color] && (
                         <Selector
-                            label="Qty"
-                            options={Array.from(Array(colors[color][size]).keys()).map(x => x + 1)}
-                            handleChange={(e) => { setQty(e.target.value) }}
+                            label="Size"
+                            options={Object.keys(colors[color])}
+                            handleChange={(e) => {
+                                setSize(e.target.value);
+                                if (colors[color][e.target.value] === 0) {
+                                    setQty(1);
+                                }
+                            }}
                         />
                     )
-                )
-            }
-        </>
+                }
 
+
+                {
+                    color !== 'No color available' && colors[color] && colors[color][size] !== undefined && (
+                        colors[color][size] === 0 ? (
+                            <Col>
+                                <Button className='mt-3 col-12 btn-block ' type='button' disabled={true}>
+                                    Send stock reminder <i className="fa-solid fa-bell"></i>
+                                </Button>
+                            </Col>
+                        ) : (
+                            <Selector
+                                label="Qty"
+                                options={Array.from(Array(colors[color][size]).keys()).map(x => x + 1)}
+                                handleChange={(e) => { setQty(e.target.value) }}
+                            />
+                        )
+                    )
+                }
+            </Row>
+
+            <Row className='justify-content-around align-items-center'>
+
+                <Button
+                    className='mt-3 col-3 col-md-12 col-lg-3 btn-block'
+                    type='button'
+                    onClick={() => addToWishlistHandler(id)}
+                >
+                    <i className="fa-solid fa-heart"
+                        style={{ color: was_added ? 'red' : 'black' }}
+                    ></i>
+                </Button>
+                <Button
+                    // onClick={() => addToCartHandler(id, qty, size, color)}
+                    onClick={() => addToCartHandler(id, qty, size, color)}
+                    className='mt-3 col-8 col-md-12 col-lg-8 btn-block'
+                    type='button'
+                    disabled={
+                        colors[color] && colors[color][size] === 0
+                    }
+                >
+                    Add to Cart
+                </Button>
+            </Row>
+
+        </ListGroup.Item >
     )
 }
 

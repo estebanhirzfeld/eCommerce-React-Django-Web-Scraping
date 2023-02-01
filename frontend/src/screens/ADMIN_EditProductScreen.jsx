@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants.js'
+
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Container, Row, Col, Form, Button, Image } from 'react-bootstrap'
@@ -89,7 +91,7 @@ const ADMIN_EditProductScreen = () => {
                 }
             }
 
-            const { data } = await axios.post('http://localhost:8000/api/products/upload/', formData, config)
+            const { data } = await axios.post(`${BASE_URL}/api/products/upload/`, formData, config)
 
             setImage(data)
             console.log(data)

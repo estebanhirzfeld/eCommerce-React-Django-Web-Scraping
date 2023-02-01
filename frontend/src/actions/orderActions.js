@@ -159,6 +159,9 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
             const url = "https://api.mercadopago.com/checkout/preferences";
 
             let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
+
+            console.log('orderNames from payOrder' ,orderNames)
+
             const body = {
                 "items": [
                     {
@@ -175,8 +178,8 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
                     "name": order.user.name,
                     "email": order.user.email,
                     "address": {
-                        "street_name": `${order.ShippingAddress.address}, ${order.ShippingAddress.city}`,
-                        "zip_code": order.ShippingAddress.postalCode
+                        "street_name": `${order.shippingAddress.address}, ${order.shippingAddress.city}`,
+                        "zip_code": order.shippingAddress.postalCode
                     }
                 },
                 "back_urls": {

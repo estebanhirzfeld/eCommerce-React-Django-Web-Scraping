@@ -30,7 +30,7 @@ function ProductScreen() {
     const [stock, setStock] = useState('')
     const [rating, setRating] = useState(0)
     const [comment, setComment] = useState('')
-    
+
 
     const [image, setImage] = useState('')
 
@@ -54,6 +54,7 @@ function ProductScreen() {
 
 
     useEffect(() => {
+        window.scrollTo(0, 0)
         dispatch(listProductDetails(id))
         dispatch(getWishlist())
     }, [dispatch, id, successProductReview, errorProductReview])
@@ -67,6 +68,8 @@ function ProductScreen() {
         if (success && product?.images) {
             setImage(product.images[0].image)
         }
+
+        // scroll to top
 
     }, [success, product])
 
@@ -109,10 +112,13 @@ function ProductScreen() {
     useEffect(() => {
 
         // if product is in wishlist, set the state to true
-        if (wishlistItems.find(item => item.product.id === parseInt(id))) {
-            setWasAdded(true)
-        } else {
-            setWasAdded(false)
+        if (wishlistItems && wishlistItems.length > 0 && product && product.id && !was_added) {
+
+            if (wishlistItems.find(item => item.product.id === parseInt(id))) {
+                setWasAdded(true)
+            } else {
+                setWasAdded(false)
+            }
         }
 
     }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
@@ -196,37 +202,19 @@ function ProductScreen() {
                                                             </Col>
                                                         </Row>
                                                     </ListGroup.Item>
+                                                    {
+                                                        success && product?.colors ? (
+                                                            <Selectors
+                                                                colors={product.colors}
+                                                                id={id}
+                                                                was_added={was_added}
+                                                                addToCartHandler={addToCartHandler}
+                                                                addToWishlistHandler={addToWishlistHandler}
 
-                                                    <ListGroup.Item className='text-center'>
-                                                        <Row className='justify-content-center align-items-center' >
-                                                            {
-                                                                success && product?.colors ? (
-                                                                    <Selectors
-                                                                        colors={product.colors}
-                                                                    ></Selectors>
-                                                                )
-                                                                    : null
-                                                            }
-                                                        </Row>
-
-                                                        <Row className='justify-content-around align-items-center'>
-
-                                                            <Button className='mt-3 col-3 col-md-12 col-lg-3 btn-block' type='button' onClick={() => addToWishlistHandler(product.id)}>
-                                                                <i className="fa-solid fa-heart" style={{ color: was_added ? 'red' : 'black' }}></i>
-                                                            </Button>
-                                                            <Button
-                                                            // onClick={() => addToCartHandler(id, qty, size, color)}
-                                                            onClick={() => addToCartHandler(id, qty, size, color)}
-                                                            className='mt-3 col-8 col-md-12 col-lg-8 btn-block'
-                                                            type='button'
-                                                            disabled={stock === 0}
-                                                            >
-                                                                Add to Cart
-                                                            </Button>
-                                                        </Row>
-
-                                                    </ListGroup.Item>
-
+                                                            ></Selectors>
+                                                        )
+                                                            : null
+                                                    }
                                                 </ListGroup>
                                             </Card>
                                         </Col>
