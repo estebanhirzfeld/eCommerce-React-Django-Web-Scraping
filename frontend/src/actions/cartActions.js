@@ -1,4 +1,4 @@
-import 
+import BASE_URL from '../../constants';
 import axios from 'axios';
 
 
@@ -43,7 +43,8 @@ export const getCart = () => async (dispatch, getState) => {
             },
         }
 
-        const { data } = await axios.get(`http://localhost:8000/api/cart/`, config)
+        
+        const { data } = await axios.get(`${BASE_URL}/api/cart/`, config)
 
         dispatch({
             type: GET_CART_SUCCESS,
@@ -78,7 +79,8 @@ export const addToCart = (productId, qty, size, color) => async (dispatch, getSt
             },
         }
 
-        const { data } = await axios.post(`http://localhost:8000/api/cart/add/${productId}/`, {
+        
+        const { data } = await axios.post(`${BASE_URL}/api/cart/add/${productId}/`, {
             size, 
             color,
             qty: parseInt(qty),
@@ -117,7 +119,8 @@ export const removeFromCart = (cartItemId) => async (dispatch, getState) => {
             },
         }
 
-        const { data } = await axios.delete(`http://localhost:8000/api/cart/remove/${cartItemId}/`, config);
+        
+        const { data } = await axios.delete(`${BASE_URL}/api/cart/remove/${cartItemId}/`, config);
 
         dispatch({
             type: REMOVE_FROM_CART_SUCCESS,
@@ -152,7 +155,8 @@ export const clearCart = () => async (dispatch, getState) => {
             },
         }
 
-        const { data } = await axios.delete(`http://localhost:8000/api/cart/clear/`, config);
+        
+        const { data } = await axios.delete(`${BASE_URL}/api/cart/clear/`, config);
 
         dispatch({
             type: CART_CLEAR_ITEMS_SUCCESS,

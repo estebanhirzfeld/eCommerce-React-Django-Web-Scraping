@@ -1,3 +1,5 @@
+import BASE_URL from "../../constants";
+
 import axios from "axios";
 import {
     ORDER_CREATE_REQUEST,
@@ -51,7 +53,8 @@ export const createOrder = (order) => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.post(`http://localhost:8000/api/orders/add/`, order, config);
+        
+        const { data } = await axios.post(`${BASE_URL}/api/orders/add/`, order, config);
 
         dispatch({
             type: ORDER_CREATE_SUCCESS,
@@ -84,7 +87,8 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.get(`http://localhost:8000/api/orders/${id}/`, config);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/orders/${id}/`, config);
 
         dispatch({
             type: ORDER_DETAILS_SUCCESS,
@@ -117,7 +121,8 @@ export const getUserOrders = (id) => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.get(`http://localhost:8000/api/orders/user/${id}/`, config);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/orders/user/${id}/`, config);
 
         dispatch({
             type: ORDERS_LIST_SUCCESS,
@@ -158,7 +163,11 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
 
             const url = "https://api.mercadopago.com/checkout/preferences";
 
-            let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
+            // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
+            // orderNames with Size and Color
+            // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | ' + item.size + ' | ' + item.color + ' \n').join(" ");
+            // orderNames with qty at the end
+            let orderNames = order.OrderItems.map((item) => item.name + ' | ' + item.size + ' | ' + item.color + ' x ' + item.qty + ' \n').join(" ");
 
             console.log('orderNames from payOrder' ,orderNames)
 
@@ -183,14 +192,15 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
                     }
                 },
                 "back_urls": {
-                    "success": "http://localhost:5173",
-                    "failure": "http://www.failure.com",
-                    "pending": "http://www.pending.com"
+                    "success": `http://localhost:5173/order/${order.id}`,
+                    "failure": `http://localhost:5173/order/${order.id}`,
+                    "pending": `http://localhost:5173/order/${order.id}`,
                 },
                 "auto_return": "approved",
-                // "notification_url": "http://localhost:8000/api/orders/pay/",
+                
+                "notification_url": `https://87fe-186-127-157-186.sa.ngrok.io/api/orders/pay/${order.id}/`,
                 "statement_descriptor": "Zoldyck Store",
-                "external_reference": order.id,
+                // "external_reference": order.id,
                 "expires": false,
             }
 
@@ -236,7 +246,8 @@ export const listOrders = () => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.get(`http://localhost:8000/api/orders/myorders/`, config);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/orders/myorders/`, config);
 
         dispatch({
             type: ORDERS_LIST_SUCCESS,
@@ -269,7 +280,8 @@ export const listAllOrders = () => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.get(`http://localhost:8000/api/orders/`, config);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/orders/`, config);
 
         dispatch({
             type: ORDERS_ALL_LIST_SUCCESS,
@@ -302,7 +314,8 @@ export const updateDeliverOrder = (id) => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.put(`http://localhost:8000/api/orders/update/delivered/${id}/`, {}, config);
+        
+        const { data } = await axios.put(`${BASE_URL}/api/orders/update/delivered/${id}/`, {}, config);
 
         dispatch({
             type: ORDER_UPDATE_DELIVERED_SUCCESS,
@@ -335,7 +348,8 @@ export const updatePaidOrder = (id) => async (dispatch, getState) => {
             },
         };
 
-        const { data } = await axios.put(`http://localhost:8000/api/orders/update/paid/${id}/`, {}, config);
+        
+        const { data } = await axios.put(`${BASE_URL}/api/orders/update/paid/${id}/`, {}, config);
 
         dispatch({
             type: ORDER_UPDATE_PAID_SUCCESS,

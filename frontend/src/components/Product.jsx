@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useState, useEffect } from 'react'
 import { Card } from 'react-bootstrap'
 import Rating from './Rating'
@@ -32,7 +34,7 @@ function Product({ product }) {
                     variant='top'
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
-                    src={`http://localhost:8000${image}`}
+                    src={`${BASE_URL}${image}`}
                 />
 
             </Link>

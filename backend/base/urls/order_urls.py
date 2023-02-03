@@ -3,7 +3,7 @@ from base.views import order_view as views
 
 urlpatterns = [ 
     path('', views.getOrders, name='orders'),
-    path ('pay/', views.mercadoPagoWebhook, name='webhook'),
+    path ('pay/<str:pk>/', views.mercadoPagoWebhook, name='webhook'),
     path('add/', views.addOrderItems, name='orders-add'),
     path ('myorders/', views.getMyOrders, name='myorders'),
 

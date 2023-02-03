@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {LinkContainer} from 'react-router-bootstrap'
@@ -42,7 +44,7 @@ function WishlistScreen() {
                                                 <LinkContainer to={`/product/${item.product.id}`}>
                                                     <Col md={12}>
                                                         <Image
-                                                        src={`http://localhost:8000${item.product.images[0]?.image}`}
+                                                        src={`${BASE_URL}${item.product.images[0]?.image}`}
                                                         alt={item.product.name}
                                                         className='cardImage' />
                                                     </Col>

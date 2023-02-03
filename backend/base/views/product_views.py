@@ -31,7 +31,6 @@ from base.serializers import ProductSerializer, ProductImageSerializer, SizeSeri
 
 from rest_framework import status
 
-
 @api_view(['GET'])
 def getProducts(request):
     query = request.query_params.get('keyword')

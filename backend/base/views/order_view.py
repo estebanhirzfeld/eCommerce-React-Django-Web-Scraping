@@ -1,3 +1,5 @@
+import requests
+
 import mercadopago
 from datetime import datetime
 from django.shortcuts import render
@@ -116,17 +118,26 @@ def getOrdersByUser(request, pk):
 
 
 @api_view(['POST'])
-def mercadoPagoWebhook(request):
+def mercadoPagoWebhook(request, pk):
     data = request.data
-    if data['type'] == 'payment':
+    order = Order.objects.get(id=pk)
+    if data.get('type') == 'payment':
         payment_id = data['data']['id']
-        payment = mercadopago.Payment.find_by_id(payment_id)
-        external_reference = payment['external_reference']
-        order = Order.objects.get(id=external_reference)
-        order.isPaid = True
-        order.paidAt = datetime.now()
-        order.save()
-    return Response('Payment was received')
+        
+        url = f'https://api.mercadopago.com/v1/payments/{payment_id}'
+        headers = {'Authorization': 'Bearer APP_USR-944357534465341-092314-60cc827acfdc0e3ff80e99b84db94e81-1203886094'}
+
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            payment_data = response.json()
+            if payment_data.get('status') == 'approved':
+                # Update the order status
+                order.isPaid = True
+                order.paidAt = datetime.now()
+                order.save()
+        return Response('Payment was received')
+    else:
+        return Response('Payment was not received')
 
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])

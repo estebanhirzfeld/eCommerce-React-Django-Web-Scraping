@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LinkContainer } from 'react-router-bootstrap'
@@ -24,7 +26,7 @@ function ADMIN_ListOrdersStatusScreen() {
 
     const getOrders = async () => {
         const { data } = await axios.get(
-            `http://localhost:8000/api/orders`,
+            `${BASE_URL}/api/orders`,
             config
         );
         switch (status) {

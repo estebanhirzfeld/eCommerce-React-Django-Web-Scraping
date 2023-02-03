@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants';
+
 import axios from 'axios';
 
 import {
@@ -39,7 +41,8 @@ export const listProducts = (keyword = '', pageNumber = 1) => async (dispatch) =
     try {
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
-        const { data } = await axios.get(`http://localhost:8000/api/products?keyword=${keyword}&page=${pageNumber}`);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/products?keyword=${keyword}&page=${pageNumber}`);
 
         dispatch({
             type: PRODUCT_LIST_SUCCESS,
@@ -62,7 +65,8 @@ export const listProductDetails = (id) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
-        const { data } = await axios.get(`http://localhost:8000/api/products/${id}`);
+        
+        const { data } = await axios.get(`${BASE_URL}/api/products/${id}`);
 
         dispatch({ type: PRODUCT_DETAILS_SUCCESS, payload: data });
 
@@ -92,7 +96,8 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
             }
         }
 
-        await axios.delete(`http://localhost:8000/api/products/delete/${id}`, config);
+        
+        await axios.delete(`${BASE_URL}/api/products/delete/${id}`, config);
 
         dispatch({ type: PRODUCT_DELETE_SUCCESS });
 
@@ -120,7 +125,8 @@ export const createProduct = () => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.post(`http://localhost:8000/api/products/create/`, {}, config);
+        
+        const { data } = await axios.post(`${BASE_URL}/api/products/create/`, {}, config);
 
         dispatch({ type: PRODUCT_CREATE_SUCCESS, payload: data });
 
@@ -149,7 +155,8 @@ export const updateProduct = (product) => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.put(`http://localhost:8000/api/products/update/${product.id}/`, product, config);
+        
+        const { data } = await axios.put(`${BASE_URL}/api/products/update/${product.id}/`, product, config);
 
         dispatch({ type: PRODUCT_UPDATE_SUCCESS, payload: data });
 
@@ -179,7 +186,8 @@ export const deleteProductImage = (id) => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.delete(`http://localhost:8000/api/products/image/delete/${id}/`, config);
+        
+        const { data } = await axios.delete(`${BASE_URL}/api/products/image/delete/${id}/`, config);
 
         dispatch({ type: PRODUCT_IMAGE_DELETE_SUCCESS, payload: data });
 
@@ -207,7 +215,8 @@ export const createProductReview = (productId, review) => async (dispatch, getSt
             }
         }
 
-        const { data } = await axios.post(`http://localhost:8000/api/products/review/${productId}/`, review, config);
+        
+        const { data } = await axios.post(`${BASE_URL}/api/products/review/${productId}/`, review, config);
 
         dispatch({
             type: PRODUCT_CREATE_REVIEW_SUCCESS,

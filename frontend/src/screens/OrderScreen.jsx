@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -119,7 +121,7 @@ function OrderScreen() {
                                             <ListGroup.Item key={index}>
                                                 <Row>
                                                     <Col md={1}>
-                                                        <Image src={`http://localhost:8000${item.image}`} alt={item.name} fluid rounded />
+                                                        <Image src={`${BASE_URL}${item.image}`} alt={item.name} fluid rounded />
                                                     </Col>
                                                     <Col>
                                                         <a href={`/product/${item.product}`}>{item.name}</a>

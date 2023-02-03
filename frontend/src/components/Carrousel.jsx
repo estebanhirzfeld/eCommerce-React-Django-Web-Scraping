@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants';
+
 import Carousel from 'react-bootstrap/Carousel';
 import {Image} from 'react-bootstrap';
 function CustomCarrousel({items}) {
@@ -12,7 +14,7 @@ function CustomCarrousel({items}) {
                         <Carousel.Item key={index} className="text-center">
                             <span>{item.name} ({item.size}) x {item.qty}</span>
                             <p>{item.description}</p>
-                            <Image src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
+                            <Image src={`${BASE_URL}${item?.image}`} alt={item.name} fluid rounded />
                         </Carousel.Item>
                     )
                 })

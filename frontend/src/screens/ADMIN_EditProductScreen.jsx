@@ -188,7 +188,7 @@ const ADMIN_EditProductScreen = () => {
                                     {
                                         product.images?.map((image, index) => (
                                             <Col md={4} className='productImageContainer'>
-                                                <img src={`http://localhost:8000${image.image}`} alt={name} className='productImage' />
+                                                <img src={`${BASE_URL}${image.image}`} alt={name} className='productImage' />
                                                 <div className='imageDeleteDiv'>
                                                     {/* trash button on center */}
                                                     <Button className='deleteButton' onClick={() => { deleteProductImageHandler(image.id) }

@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants.js';
+
 import axios from 'axios';
 
 import {
@@ -43,7 +45,8 @@ export const getWishlist = () => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.get(`http://localhost:8000/api/lists/wishlist/`, config)
+        
+        const { data } = await axios.get(`${BASE_URL}/api/lists/wishlist/`, config)
 
         dispatch({
             type: GET_WISHLIST_SUCCESS,
@@ -76,7 +79,9 @@ export const addToWishlist = (id) => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.post(`http://localhost:8000/api/lists/wishlist/add/${id}/`, {}, config)
+        
+        const { data } = await axios.post(`${BASE_URL}/api/lists/wishlist/add/${id}/`, {}, config)
+
 
         dispatch({
             type: ADD_TO_WISHLIST_SUCCESS,
@@ -109,7 +114,8 @@ export const removeFromWishlist = (id) => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.delete(`http://localhost:8000/api/lists/wishlist/remove/${id}/`, config)
+        
+        const { data } = await axios.delete(`${BASE_URL}/api/lists/wishlist/remove/${id}/`, config)
 
         dispatch({
             type: REMOVE_FROM_WISHLIST_SUCCESS,
@@ -143,7 +149,9 @@ export const getSaveForLater = () => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.get(`http://localhost:8000/api/lists/forlater/`, config)
+        
+        const { data } = await axios.get(`${BASE_URL}/api/lists/forlater/`, config)
+
 
         dispatch({
             type: GET_SAVE_FOR_LATER_SUCCESS,
@@ -176,7 +184,8 @@ export const addToSaveForLater = (id, qty, size) => async (dispatch, getState) =
             }
         }
 
-        const { data } = await axios.post(`http://localhost:8000/api/lists/forlater/add/${id}/`, {
+        
+        const { data } = await axios.post(`${BASE_URL}/api/lists/forlater/add/${id}/`, {
             size: size.toUpperCase(),
             qty: parseInt(qty)
         }, config)
@@ -212,7 +221,8 @@ export const removeFromSaveForLater = (id) => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.delete(`http://localhost:8000/api/lists/forlater/remove/${id}/`, config)
+        
+        const { data } = await axios.delete(`${BASE_URL}/api/lists/forlater/remove/${id}/`, config)
 
         dispatch({
             type: REMOVE_FROM_SAVE_FOR_LATER_SUCCESS,

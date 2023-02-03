@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useEffect, useState } from 'react'
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -129,9 +131,7 @@ function ADMIN_ListOrdersScreen() {
                                                 <span className='text-danger'>Cancelled</span>
                                                 <Row>
                                                     {
-                                                        order?.OrderItems?.map((item, index) => (
-                                                            <Image key={index} src={`http://localhost:8000${item?.image}`} alt={item.name} fluid rounded />
-                                                        ))
+                                                        order?.OrderItems?.map((item, index) => (<Image key={index} src={`${BASE_URL}${item?.image}`} alt={item.name} fluid rounded />))
                                                     }
                                                 </Row>
                                                 <Link to={`/order/${order.id}`}>View Order</Link>

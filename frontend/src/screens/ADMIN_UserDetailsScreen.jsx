@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LinkContainer } from 'react-router-bootstrap'
@@ -35,7 +37,7 @@ function ADMIN_UserDetailsScreen() {
 
     const getUserDetails = async () => {
         const { data } = await axios.get(
-            `http://localhost:8000/api/users/${id}/`,
+            `${BASE_URL}/api/users/${id}/`,
             config
         );
         setUser(data)

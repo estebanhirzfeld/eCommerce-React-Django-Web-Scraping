@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 // hooks
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -140,7 +142,7 @@ function ProductScreen() {
                                                     product.images.map((image, index) => (
                                                         <Col md={12} className={'mb-2'} key={index}>
                                                             <Image
-                                                                src={`http://localhost:8000${image.image}`}
+                                                                src={`${BASE_URL}${image.image}`}
                                                                 alt={product.name}
                                                                 fluid
                                                                 // onhover change the main image
@@ -155,7 +157,7 @@ function ProductScreen() {
                                     </Col>
                                     <Col md={4}>
                                         <Image
-                                            src={`http://127.0.0.1:8000${image}`}
+                                            src={`${BASE_URL}${image}`}
                                             alt={product.name}
                                             fluid />
 
