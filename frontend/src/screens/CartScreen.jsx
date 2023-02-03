@@ -7,6 +7,7 @@ import { Row, Col, ListGroup, Image, Form, Button, Card } from 'react-bootstrap'
 
 import { addToCart, removeFromCart, getCart } from '../actions/cartActions'
 import { useParams } from 'react-router-dom'
+import BASE_URL from '../../constants'
 
 function CartScreen() {
 
@@ -63,7 +64,7 @@ function CartScreen() {
                                 <Row>
                                     <Col className="col-4" md={2}>
                                         <Link to={`/product/${item.product.id}`}>
-                                        <Image style={{ aspectRatio: '1/1', objectFit: 'cover', }} src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
+                                        <Image style={{ aspectRatio: '1/1', objectFit: 'cover', }} src={`${BASE_URL}${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
                                         </Link>
                                     </Col>
                                     <Col className="col-8" md={3}>

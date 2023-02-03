@@ -25,10 +25,10 @@ function ADMIN_ListUsersScreen() {
     useEffect(() => {
         dispatch(listUsers())
     }, [dispatch, successDelete])
-    
+
     return (
         <Container className='mt-5'>
-                    <h1 className='my-5 text-center'>Users</h1>
+            <h1 className='my-5 text-center'>Users</h1>
             <Row className='justify-content-md-center'>
                 <Col xs={12} md={12}>
                     {loading ? <h2>Loading...</h2> : error ? <h2>{error}</h2> : (
@@ -52,9 +52,9 @@ function ADMIN_ListUsersScreen() {
                                         <td><a href={`mailto:${user.email}`}>{user.email}</a></td>
                                         <td className='text-center'>
                                             {user.is_Admin ? (
-                                                <i className='fas fa-check' style={{color: 'green'}}></i>
+                                                <i className='fas fa-check' style={{ color: 'green' }}></i>
                                             ) : (
-                                                <i className='fas fa-times' style={{color: 'red'}}></i>
+                                                <i className='fas fa-times' style={{ color: 'red' }}></i>
                                             )}
                                         </td>
                                         <td className='text-center'>

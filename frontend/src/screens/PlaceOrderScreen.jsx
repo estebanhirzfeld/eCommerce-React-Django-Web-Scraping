@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useState, useEffect } from 'react'
 import { Form, Button, Container, Row, Col, Image, Card, ListGroup } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
@@ -132,7 +134,7 @@ useEffect(() => {
                                             <ListGroup.Item key={index}>
                                                 <Row>
                                                     <Col md={1}>
-                                                        <Image src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
+                                                        <Image src={`${BASE_URL}${item.product.images[0]?.image}`} alt={item.product.name} fluid rounded />
                                                     </Col>
 
                                                     <Col>

@@ -1,3 +1,5 @@
+import BASE_URL from '../../constants'
+
 import React, { useEffect } from 'react'
 import { Card, Col, Row, ListGroup, Image, Form, Button } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
@@ -34,7 +36,7 @@ function CartList() {
                         <ListGroup key={index} variant='flush'>
                             <ListGroup.Item className=''>
                                 <Row className='text-center justify-content-center align-items-center'>
-                                    <Col lg={5}><Image style={{ objectFit: 'cover', height: '100px', width: '100px' }} src={`http://127.0.0.1:8000${item.product.images[0]?.image}`} alt={item.product?.name} fluid /></Col>
+                                    <Col lg={5}><Image style={{ objectFit: 'cover', height: '100px', width: '100px' }} src={`${BASE_URL}${item.product.images[0]?.image}`} alt={item.product?.name} fluid /></Col>
                                     <Col lg={7}>
                                         <Link to={`/product/${item.product?.id}`}>{item.product?.name} ({item.size})</Link>
                                         </Col>

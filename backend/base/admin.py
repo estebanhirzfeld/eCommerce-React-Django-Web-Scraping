@@ -17,6 +17,8 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image')
 
+    search_fields = ['product__name']
+
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('name', 'rating', 'product', 'user')
 
