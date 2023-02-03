@@ -54,7 +54,7 @@ function CartScreen() {
     return (
         <Row>
             <Col md={8}>
-                <h1>Shopping Cart | Saved for Later</h1>
+                <h1>Shopping Cart</h1>
                 {cartItems && cartItems.length > 0 ? (
                     <ListGroup variant='flush'>
                         {cartItems.map(item => (
