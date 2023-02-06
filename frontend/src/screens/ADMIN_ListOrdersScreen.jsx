@@ -33,11 +33,11 @@ function ADMIN_ListOrdersScreen() {
     const { userInfo } = login
 
     const ordersListAdmin = useSelector(state => state.ordersListAdmin)
-    const { loading, error, orders, success} = ordersListAdmin
+    const { loading, error, orders, success } = ordersListAdmin
 
 
     useEffect(() => {
-        if(success){
+        if (success) {
             setPendingOrders(orders?.filter(order => order.status === 'Pending'))
             setSuccessOrders(orders?.filter(order => order.status === 'Success'))
             setCancelledOrders(orders?.filter(order => order.status === 'Cancelled'))
@@ -75,73 +75,85 @@ function ADMIN_ListOrdersScreen() {
                             </Col>
                         </Row>
 
-                        <Row className='mt-5'>
-                            <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{ height: '400px', width: '100%' }}>
-                                <ChangeView center={coords} zoom={8} />
-                                <TileLayer
-                                    url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
-                                />
-                                {
-                                    // successOrders
-                                    successOrders?.map(order => (
-                                        <Marker
-                                            position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
-                                            icon={greenIcon}
-                                            key={order.id}
-                                        >
-                                            <Popup>
-                                                <span className='text-success'>Success</span>
-                                                <Row>
-                                                    <CustomCarrousel items={order.OrderItems} />
-                                                </Row>
-                                                <Link to={`/order/${order.id}`}>View Order</Link>
-                                                <p>{order.address}</p>
-                                            </Popup>
-                                        </Marker>
-                                    ))
-                                }
-                                {
-                                    // pendingOrders
-                                    pendingOrders?.map(order => (
-                                        <Marker
-                                            position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
-                                            icon={goldIcon}
-                                            key={order.id}
-                                        >
-                                            <Popup>
-                                                <span className='text-warning'>Pending</span>
-                                                <Row>
-                                                    <CustomCarrousel items={order.OrderItems} />
-                                                </Row>
-                                                <Link to={`/order/${order.id}`}>View Order</Link>
-                                                <p>{order.address}</p>
-                                            </Popup>
-                                        </Marker>
-                                    ))
-                                }
-                                {
-                                    // cancelledOrders
-                                    cancelledOrders?.map(order => (
-                                        <Marker
-                                            position={[order.shippingAddress?.lat, order.shippingAddress?.lon]}
-                                            icon={redIcon}
-                                            key={order.id}
-                                        >
-                                            <Popup>
-                                                <span className='text-danger'>Cancelled</span>
-                                                <Row>
-                                                    {
-                                                        order?.OrderItems?.map((item, index) => (<Image key={index} src={`${BASE_URL}${item?.image}`} alt={item.name} fluid rounded />))
-                                                    }
-                                                </Row>
-                                                <Link to={`/order/${order.id}`}>View Order</Link>
-                                                <p>{order.address}</p>
-                                            </Popup>
-                                        </Marker>
-                                    ))
-                                }
-                            </MapContainer>
-                        </Row>
+                        {
+                            orders && orders.length > 0 ? (
+                                <Row className='mt-5'>
+                                    <MapContainer center={[-34.608354, -58.438682]} zoom={8} scrollWheelZoom={true} style={{ height: '400px', width: '100%' }}>
+                                        <ChangeView center={coords} zoom={8} />
+                                        <TileLayer
+                                            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+                                        />
+                                        {
+                                            // successOrders
+                                            successOrders?.map(order => (
+                                                <Marker
+                                                    position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
+                                                    icon={greenIcon}
+                                                    key={order.id}
+                                                    draggable={true}
+                                                >
+                                                    <Popup>
+                                                        <span className='text-success'>Success</span>
+                                                        <Row>
+                                                            <CustomCarrousel items={order.OrderItems} />
+                                                        </Row>
+                                                        <Link to={`/order/${order.id}`}>View Order</Link>
+                                                        <p>{order.address}</p>
+                                                    </Popup>
+                                                </Marker>
+                                            ))
+                                        }
+                                        {
+                                            // pendingOrders
+                                            pendingOrders?.map(order => (
+                                                <Marker
+                                                    position={[order?.shippingAddress?.lat, order?.shippingAddress?.lon]}
+                                                    icon={goldIcon}
+                                                    key={order.id}
+                                                    draggable={true}
+                                                >
+                                                    <Popup>
+                                                        <span className='text-warning'>Pending</span>
+                                                        <Row>
+                                                            <CustomCarrousel items={order.OrderItems} />
+                                                        </Row>
+                                                        <Link to={`/order/${order.id}`}>View Order</Link>
+                                                        <p>{order.address}</p>
+                                                    </Popup>
+                                                </Marker>
+                                            ))
+                                        }
+                                        {
+                                            // cancelledOrders
+                                            cancelledOrders?.map(order => (
+                                                <Marker
+                                                    position={[order.shippingAddress?.lat, order.shippingAddress?.lon]}
+                                                    icon={redIcon}
+                                                    key={order.id}
+                                                    draggable={true}
+                                                >
+                                                    <Popup>
+                                                        <span className='text-danger'>Cancelled</span>
+                                                        <Row>
+                                                            {
+                                                                order?.OrderItems?.map((item, index) => (<Image key={index} src={`${BASE_URL}${item?.image}`} alt={item.name} fluid rounded />))
+                                                            }
+                                                        </Row>
+                                                        <Link to={`/order/${order.id}`}>View Order</Link>
+                                                        <p>{order.address}</p>
+                                                    </Popup>
+                                                </Marker>
+                                            ))
+                                        }
+                                    </MapContainer>
+                                </Row>
+                            )
+                                :
+                                (
+                                    <h1 className='text-center'>No Orders</h1>
+                                )
+                        }
+
 
                         <Row>
                             <Col>

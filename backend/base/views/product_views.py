@@ -232,6 +232,7 @@ def scrapeProducts(request):
     PRODUCTS_XPATHS = [
         "//div[contains(@data-component,'product-list-item')]",
         "//div[contains(@class,'item-description')]",
+        "//div[@class='product-row row']/div",
     ]
 
     LINK_XPATHS = [
@@ -258,6 +259,7 @@ def scrapeProducts(request):
     WORDS_XPATHS = [
         "//div[contains(@class,'js-product-left-col')]/div[contains(@class,'product-description')]/p",
         "//div[contains(@class,'product-description')]/p",
+        "//div[@class='user-content']//p",
     ]
 
     SIZES_XPATHS = [
@@ -305,6 +307,10 @@ def scrapeProducts(request):
     driver = webdriver.Chrome(options=options)
 
     stores = [
+        # 'https://tienda.tuespacioorganizado.com.ar/cocina/'
+        # 'https://losandes2.mitiendanube.com/vinos/',
+        'https://casamartinez.mitiendanube.com/electronica/television/',
+        # 'https://centralcafe.mitiendanube.com/'
         # Belforte
         # "https://www.belforte.com.ar/sandalias/",
         # "https://www.belforte.com.ar/borcegos/",
@@ -460,58 +466,58 @@ def scrapeProducts(request):
         # # ACCESORIOS
         # "https://www.mustaqe.com.ar/accesorios/pilusos/",
         # "https://www.mustaqe.com.ar/accesorios/gorros/",
-        "https://www.mustaqe.com.ar/accesorios/medias/",
-        "https://www.mustaqe.com.ar/accesorios/cadenas/",
-        "https://www.mustaqe.com.ar/accesorios/pasamontanas1/",
+        # "https://www.mustaqe.com.ar/accesorios/medias/",
+        # "https://www.mustaqe.com.ar/accesorios/cadenas/",
+        # "https://www.mustaqe.com.ar/accesorios/pasamontanas1/",
 
-        # MUSTAQE KIDS
-        "https://www.mustaqe.com.ar/ninos/conjuntos1/",
-        "https://www.mustaqe.com.ar/ninos/remeras/",
-        "https://www.mustaqe.com.ar/ninos/shorts1/",
+        # # MUSTAQE KIDS
+        # "https://www.mustaqe.com.ar/ninos/conjuntos1/",
+        # "https://www.mustaqe.com.ar/ninos/remeras/",
+        # "https://www.mustaqe.com.ar/ninos/shorts1/",
 
-        # Tacitadete
-        "https://tacitadete.mitiendanube.com/buzos/",
-        "https://tacitadete.mitiendanube.com/camperas/",
-        "https://tacitadete.mitiendanube.com/pants/",
-        "https://tacitadete.mitiendanube.com/tops/",
-        "https://tacitadete.mitiendanube.com/remerones/",
-        "https://tacitadete.mitiendanube.com/shorts/",
+        # # Tacitadete
+        # "https://tacitadete.mitiendanube.com/buzos/",
+        # "https://tacitadete.mitiendanube.com/camperas/",
+        # "https://tacitadete.mitiendanube.com/pants/",
+        # "https://tacitadete.mitiendanube.com/tops/",
+        # "https://tacitadete.mitiendanube.com/remerones/",
+        # "https://tacitadete.mitiendanube.com/shorts/",
 
-        # murderdoll
-        "https://www.murderdoll.com.ar/chokers/",
-        "https://www.murderdoll.com.ar/chokers-cintas/",
-        "https://www.murderdoll.com.ar/collares/",
-        "https://www.murderdoll.com.ar/aros/",
-        "https://www.murderdoll.com.ar/anillos/",
-        "https://www.murderdoll.com.ar/pulseras-de-tachas/",
-        "https://www.murderdoll.com.ar/otros-accesorios/",
-        "https://www.murderdoll.com.ar/pulseras/",
-        "https://www.murderdoll.com.ar/giftcards/",
+        # # murderdoll
+        # "https://www.murderdoll.com.ar/chokers/",
+        # "https://www.murderdoll.com.ar/chokers-cintas/",
+        # "https://www.murderdoll.com.ar/collares/",
+        # "https://www.murderdoll.com.ar/aros/",
+        # "https://www.murderdoll.com.ar/anillos/",
+        # "https://www.murderdoll.com.ar/pulseras-de-tachas/",
+        # "https://www.murderdoll.com.ar/otros-accesorios/",
+        # "https://www.murderdoll.com.ar/pulseras/",
+        # "https://www.murderdoll.com.ar/giftcards/",
 
-        # collares
+        # # collares
 
-        "https://www.murderdoll.com.ar/collares/collares-de-acero-quirurgico/",
-        "https://www.murderdoll.com.ar/collares/collares-cadenas-grandes/",
+        # "https://www.murderdoll.com.ar/collares/collares-de-acero-quirurgico/",
+        # "https://www.murderdoll.com.ar/collares/collares-cadenas-grandes/",
 
-        # JimmyRebel
-        "https://www.jimmyrebel.com.ar/remeras/",
-        "https://www.jimmyrebel.com.ar/shorts-y-bermudas/",
-        "https://www.jimmyrebel.com.ar/accesorios/",
-        "https://www.jimmyrebel.com.ar/buzos/",
-        "https://www.jimmyrebel.com.ar/gorras/",
-        "https://www.jimmyrebel.com.ar/beanies/",
-        "https://www.jimmyrebel.com.ar/pantalones/",
-        "https://www.jimmyrebel.com.ar/gift-card/",
-        "https://www.jimmyrebel.com.ar/home/",
-        "https://www.jimmyrebel.com.ar/sale/",
-        "https://www.jimmyrebel.com.ar/royalty/",
+        # # JimmyRebel
+        # "https://www.jimmyrebel.com.ar/remeras/",
+        # "https://www.jimmyrebel.com.ar/shorts-y-bermudas/",
+        # "https://www.jimmyrebel.com.ar/accesorios/",
+        # "https://www.jimmyrebel.com.ar/buzos/",
+        # "https://www.jimmyrebel.com.ar/gorras/",
+        # "https://www.jimmyrebel.com.ar/beanies/",
+        # "https://www.jimmyrebel.com.ar/pantalones/",
+        # "https://www.jimmyrebel.com.ar/gift-card/",
+        # "https://www.jimmyrebel.com.ar/home/",
+        # "https://www.jimmyrebel.com.ar/sale/",
+        # "https://www.jimmyrebel.com.ar/royalty/",
 
-        # HyteApparel
-        "https://www.hyteapparel.com.ar/hoodies/",
-        "https://www.hyteapparel.com.ar/remeras/",
-        "https://www.hyteapparel.com.ar/bermudas/",
-        "https://www.hyteapparel.com.ar/camisetas-oversize/",
-        "https://www.hyteapparel.com.ar/pantalones/",
+        # # HyteApparel
+        # "https://www.hyteapparel.com.ar/hoodies/",
+        # "https://www.hyteapparel.com.ar/remeras/",
+        # "https://www.hyteapparel.com.ar/bermudas/",
+        # "https://www.hyteapparel.com.ar/camisetas-oversize/",
+        # "https://www.hyteapparel.com.ar/pantalones/",
     ]
 
     # stores = [
@@ -553,6 +559,8 @@ def scrapeProducts(request):
 
         error_log_list = []
         products_list = []
+        colors_list = []
+        sizes_list = []
 
 
         def waitForElement(xpath, driver, max_time, multi):
@@ -619,7 +627,7 @@ def scrapeProducts(request):
             scraping_time = time.time()
 
             # for product in products:
-            for i in range(0, 1):
+            for i in range(3, 5):
                 product = products[i]
                 try:
                     link_time = time.time()
@@ -1092,7 +1100,8 @@ def scrapeProducts(request):
                             # the image is invalid
                             pass
 
-
+                if colors_list == [] or colors_list == None: 
+                    colors_list = [{'color': 'Unico', 'sizes': [{'size': 'Unico', 'stock': 10}]}]
 
                 for color in colors_list:
                     # if color doesn't exist, create it
@@ -1135,13 +1144,13 @@ def scrapeProducts(request):
                 print('product saved')
 
 
-                total_name_time = total_name_time + name_time
-                total_price_time = total_price_time + price_time
-                total_images_time = total_images_time + images_time
-                total_words_time = total_words_time + words_time
-                total_category_time = total_category_time + category_time
-                total_buy_button_time = total_buy_button_time + buy_button_time
-                total_sizes_time = total_sizes_time + sizes_time
+                # total_name_time = total_name_time + name_time
+                # total_price_time = total_price_time + price_time
+                # total_images_time = total_images_time + images_time
+                # total_words_time = total_words_time + words_time
+                # total_category_time = total_category_time + category_time
+                # total_buy_button_time = total_buy_button_time + buy_button_time
+                # total_sizes_time = total_sizes_time + sizes_time
 
 
             print(len(error_log_list), 'errors_log found')
@@ -1197,4 +1206,6 @@ def scrapeProducts(request):
         #         out_file.close()
 
     # print('final_list.json saved in JSON file ;)')
+
+    return Response('Scraping finished')
 

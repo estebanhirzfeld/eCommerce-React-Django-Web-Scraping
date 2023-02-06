@@ -1,3 +1,4 @@
+import random
 import requests
 
 import mercadopago
@@ -156,3 +157,54 @@ def updateOrderToDelivered(request, pk):
     order.deliveredAt = datetime.now()
     order.save()
     return Response('Order was delivered')
+
+
+@api_view(['GET'])
+def test(request):
+
+    # def generate_random_coords():
+    #     lat_min, lat_max = -55.0, -20.0
+    #     lon_min, lon_max = -75.0, -50.0
+    #     lat = random.uniform(lat_min, lat_max)
+    #     lon = random.uniform(lon_min, lon_max)
+    #     return {'lat': lat, 'lon': lon}
+
+    # # Generate 20 random coordinates
+    # coords = [generate_random_coords() for i in range(60)]
+
+    # # create a new order for every location with a random product and user id 1 (admin) and using the coords with test address
+    # for coord in coords:
+    #     shipping_address = ShippingAddress.objects.create(
+    #         address='test',
+    #         city='test',
+    #         postalCode='test',
+    #         province='test',
+    #         lat=coord['lat'],
+    #         lon=coord['lon']
+    #     )
+    #     order = Order.objects.create(
+    #         user = User.objects.get(id=1),
+    #         shippingAddress=shipping_address,
+    #         paymentMethod='Mercado Pago',
+    #         shippingPrice=0,
+    #         totalPrice=0,
+    #         isPaid=True,
+    #         paidAt=datetime.now(),
+    #         isDelivered=False,
+    #         deliveredAt=None
+    #     )
+    #     # create a random product for every order
+    #     product = Product.objects.get(id=random.randint(383, 400))
+    #     orderItem = OrderItem.objects.create(
+    #         product=product,
+    #         order=order,
+    #         name=product.name,
+    #         qty=1,
+    #         price=product.price,
+    #         # image= ProductImage.objects.get(product=product).image.url
+    #         # get the first image of the product
+    #         image=product.productimage_set.all()[0].image.url
+    #     )
+    #     orderItem.save()
+    #     order.save()
+    return Response('Orders created')

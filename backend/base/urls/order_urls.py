@@ -2,6 +2,7 @@ from django.urls import path
 from base.views import order_view as views
 
 urlpatterns = [ 
+    path('test/', views.test, name='test'),
     path('', views.getOrders, name='orders'),
     path ('pay/<str:pk>/', views.mercadoPagoWebhook, name='webhook'),
     path('add/', views.addOrderItems, name='orders-add'),
@@ -14,5 +15,5 @@ urlpatterns = [
     path ('<str:pk>/', views.getOrderById, name='user-order'),
     path('user/<str:pk>/', views.getOrdersByUser, name='orders'),
 
-    # path ('<str:pk>/pay/', views.updateOrderToPaid, name='pay'),
+
 ]

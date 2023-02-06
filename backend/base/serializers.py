@@ -210,7 +210,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['brand', 'category', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images']
+        fields = ['brand', 'category', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images', 'original_url']
 
     def get_images(self, obj):
         images = obj.productimage_set.all()
