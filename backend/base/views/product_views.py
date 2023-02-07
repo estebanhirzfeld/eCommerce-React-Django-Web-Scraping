@@ -251,9 +251,9 @@ def scrapeProducts(request):
     ]
 
     IMAGES_XPATHS = [
+        "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]/div/a/img",
         "//div[@class='cloud-zoom-wrap']/a",
         "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]/div/a",
-        "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]/div/a/img",
     ]
 
     WORDS_XPATHS = [
@@ -304,12 +304,14 @@ def scrapeProducts(request):
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
+    # driver = webdriver.Chrome(options=options)
+
+    driver = webdriver.Chrome(executable_path='./chromedriver.exe', options=options)
 
     stores = [
         # 'https://tienda.tuespacioorganizado.com.ar/cocina/'
         # 'https://losandes2.mitiendanube.com/vinos/',
-        'https://casamartinez.mitiendanube.com/electronica/television/',
+        # 'https://casamartinez.mitiendanube.com/electronica/television/',
         # 'https://centralcafe.mitiendanube.com/'
         # Belforte
         # "https://www.belforte.com.ar/sandalias/",
@@ -427,18 +429,18 @@ def scrapeProducts(request):
         # "https://www.rockthatbody.com.ar/bermuda/",
 
         # # # Satana
-        # "https://www.satanaclothes.com/vestidos/",
-        # "https://www.satanaclothes.com/faldas/",
-        # "https://www.satanaclothes.com/remeras-y-tops/",
-        # "https://www.satanaclothes.com/bodys/",
-        # "https://www.satanaclothes.com/calzas/",
-        # "https://www.satanaclothes.com/camisas/",
-        # "https://www.satanaclothes.com/pantalones/",
-        # "https://www.satanaclothes.com/shorts-y-bermudas/",
-        # "https://www.satanaclothes.com/buzos-y-sweaters/",
-        # "https://www.satanaclothes.com/camperas/",
-        # "https://www.satanaclothes.com/monoprendas/",
-        # "https://www.satanaclothes.com/accesorios1/",
+        "https://www.satanaclothes.com/vestidos/",
+        "https://www.satanaclothes.com/faldas/",
+        "https://www.satanaclothes.com/remeras-y-tops/",
+        "https://www.satanaclothes.com/bodys/",
+        "https://www.satanaclothes.com/calzas/",
+        "https://www.satanaclothes.com/camisas/",
+        "https://www.satanaclothes.com/pantalones/",
+        "https://www.satanaclothes.com/shorts-y-bermudas/",
+        "https://www.satanaclothes.com/buzos-y-sweaters/",
+        "https://www.satanaclothes.com/camperas/",
+        "https://www.satanaclothes.com/monoprendas/",
+        "https://www.satanaclothes.com/accesorios1/",
 
         # # # delusion
 
@@ -788,6 +790,7 @@ def scrapeProducts(request):
                                 else:
                                     raise Exception('Image tag name is not a or img')
                             print('Images found in', images_time, 'seconds')
+                            lucky_images_xpath = IMAGES_XPATHS.index(images_xpath)
                         except:
                             pass
                 if images == None:

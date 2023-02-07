@@ -42,6 +42,7 @@ const ADMIN_EditProductScreen = () => {
 
     const [stock, setStock] = useState(0)
     const [size, setSize] = useState('')
+    const [color, setColor] = useState('')
 
     const [sizes, setSizes] = useState([])
     const [sizeToDel, setSizeToDel] = useState([])
@@ -224,11 +225,20 @@ const ADMIN_EditProductScreen = () => {
 
                             <Form.Group controlId='size' className='my-3'>
 
-                                <Form.Label>Size and Stock</Form.Label>
+                                <Form.Label>Color, Size and Stock</Form.Label>
 
 
                                 <Row className='justify-content-md-center align-items-center'>
-                                    <Col md={5}>
+                                    <Col md={3}>
+                                        <Form.Control
+                                            className='text-center'
+                                            type='text'
+                                            placeholder='Color'
+                                            value={color}
+                                            onChange={(e) => setColor(e.target.value)}
+                                        ></Form.Control>
+                                    </Col>
+                                    <Col md={3}>
                                         <Form.Control
                                             className='text-center'
                                             type='text'
@@ -237,7 +247,7 @@ const ADMIN_EditProductScreen = () => {
                                             onChange={(e) => setSize((e.target.value).toUpperCase())}
                                         ></Form.Control>
                                     </Col>
-                                    <Col md={5}>
+                                    <Col md={3}>
                                         <Form.Control
                                             className='text-center'
                                             type='number'
@@ -247,7 +257,7 @@ const ADMIN_EditProductScreen = () => {
                                         ></Form.Control>
                                     </Col>
                                     {/* Add Button to add more sizes */}
-                                    <Col md={2}>
+                                    <Col md={3}>
                                         <Button variant='primary' className='my-3 w-100'
                                             onClick={
                                                 // if size already exists, update stock
