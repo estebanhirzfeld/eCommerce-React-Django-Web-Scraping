@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import locale
 # from base.scrape import getProductsLinks
 from decimal import Decimal
@@ -31,20 +33,29 @@ from base.serializers import ProductSerializer, ProductImageSerializer, SizeSeri
 
 from rest_framework import status
 
+
 @api_view(['GET'])
 def getProducts(request):
+
+    all_products = Product.objects.all()
+
     query = request.query_params.get('keyword')
+    category = request.query_params.get('category')
 
     if query == None:
         query = ''
 
-    products = Product.objects.filter(name__icontains=query, is_active=True)
-    
-    #  randomize products
-    products = random.sample(list(products), len(products))
+    if category == None:
+        category = ''
+
+    products = Product.objects.filter(name__icontains=query, is_active=True, category__icontains=category)
+
+    #  randomize products if there is no query and category
+    if query == '' and category == '':
+        products = random.sample(list(products), len(products))
 
     page = request.query_params.get('page')
-    paginator = Paginator(products, 200)
+    paginator = Paginator(products, 30)
 
     try:
         products = paginator.page(page)
@@ -66,12 +77,18 @@ def getProducts(request):
     # return Response(products)
 
 
+
 @api_view(['GET'])
 def getProduct(request, pk):
     product = Product.objects.get(id=pk)
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def getProductsByCategory(request, category):
+    products = Product.objects.filter(category=category, is_active=True)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
 
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
@@ -84,12 +101,11 @@ def updateProduct(request, pk):
     product.brand = data['brand']
     product.category = data['category']
 
-
     product.description = data['description']
 
     # for every size in the product create or update size model
-    
-    # compare size in the product with size in the database if was removed delete it from the database  
+
+    # compare size in the product with size in the database if was removed delete it from the database
     # if was added create it in the database
     # if was updated update it in the database
 
@@ -150,7 +166,7 @@ def uploadImages(request):
     product_id = data['product_id']
     product = Product.objects.get(id=product_id)
     images = request.FILES.getlist('images')
-    
+
     for image in images:
         product_image = ProductImage.objects.create(
             product=product,
@@ -161,12 +177,14 @@ def uploadImages(request):
     # return productImage serializer
     return Response('Images were uploaded')
 
+
 @api_view(['DELETE'])
 @permission_classes([IsAdminUser])
 def deleteImage(request, pk):
     product_image = ProductImage.objects.get(id=pk)
     product_image.delete()
     return Response('Image was deleted')
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -218,17 +236,52 @@ def createReview(request, pk):
         else:
             content = {'detail': 'You have not ordered this product'}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        
-
-
-
-
-
 
 
 @api_view(['GET'])
 def scrapeProducts(request):
-        
+
+    def map_category(category):
+        if category in ['VESTIDOS']:
+            return 'Vestidos'
+        elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
+            return 'Shorts y bermudas'
+        elif category in ['FALDAS', 'Pollera']:
+            return 'Faldas'
+        elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
+            return 'Remeras y tops'
+        elif category in ['BODYS', 'Body']:
+            return 'Bodys'
+        elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']:
+            return 'Hoodies/Buzos/Sweaters'
+        elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
+            return 'Pantalones'
+        elif category in ['CONJUNTOS']:
+            return 'Conjuntos'
+        elif category in ['Trajes de Baño']:
+            return 'Trajes de baño'
+        elif category in ['Chalecos']:
+            return 'Chalecos'
+        elif category in ['Corset']:
+            return 'Corset'
+        elif category in ['CALZADO']:
+            return 'Calzado'
+        elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
+            return 'Accesorios'
+        elif category in ['Colección']:
+            return 'Colección'
+        elif category in ['Sale !']:
+            return 'Sale!'
+        elif category in ['THE END OF $TW']:
+            return 'The end of $TW'
+        elif category in ['Mallas y Bermudas']:
+            return 'Mallas y bermudas'
+        elif category in ['Gorras', 'Beanies']:
+            return 'Gorras y Beanies'
+        else:
+            return category
+
+
     PRODUCTS_XPATHS = [
         "//div[contains(@data-component,'product-list-item')]",
         "//div[contains(@class,'item-description')]",
@@ -254,6 +307,7 @@ def scrapeProducts(request):
         "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]/div/a/img",
         "//div[@class='cloud-zoom-wrap']/a",
         "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]/div/a",
+        "//div[contains(@class,'js-swiper-product')]/div[contains(@class,'swiper-wrapper')]//img",
     ]
 
     WORDS_XPATHS = [
@@ -269,7 +323,6 @@ def scrapeProducts(request):
         "//form[@id='product_form']//label[text()[contains(.,'mero')]]/following-sibling::select/option"
     ]
 
-
     COLORS_XPATHS = [
         # "//div[contains(@data-variant,'Color')]/div/a/span",
         # "//form[@id='product_form']//label[text()='Color']/following-sibling::select/option",
@@ -277,7 +330,6 @@ def scrapeProducts(request):
         "//span[text()[contains(.,'Color')]]/parent::label/following-sibling::div/select/option",
         "//form[@id='product_form']//label[text()[contains(.,'Color')]]/following-sibling::select/option",
     ]
-
 
     BUY_BUTTON_XPATHS = [
         "//div[contains(@class,'product-buy-container')]/input",
@@ -306,14 +358,15 @@ def scrapeProducts(request):
     options.add_argument('--no-sandbox')
     # driver = webdriver.Chrome(options=options)
 
-    driver = webdriver.Chrome(executable_path='./chromedriver.exe', options=options)
+    driver = webdriver.Chrome(
+        executable_path='./chromedriver.exe', options=options)
 
     stores = [
         # 'https://tienda.tuespacioorganizado.com.ar/cocina/'
         # 'https://losandes2.mitiendanube.com/vinos/',
         # 'https://casamartinez.mitiendanube.com/electronica/television/',
         # 'https://centralcafe.mitiendanube.com/'
-        # Belforte
+        # # Belforte
         # "https://www.belforte.com.ar/sandalias/",
         # "https://www.belforte.com.ar/borcegos/",
         # "https://www.belforte.com.ar/botinetas/",
@@ -340,7 +393,7 @@ def scrapeProducts(request):
         # "https://langlois.com.ar/trajes/",
         # "https://langlois.com.ar/sale/",
 
-        # # Forever Bastard
+        # Forever Bastard
         # "https://www.foreverbastard.com/the-end-of-tw/remeras/",
         # "https://www.foreverbastard.com/the-end-of-tw/camisas/",
         # "https://www.foreverbastard.com/the-end-of-tw/beach-shorts/",
@@ -348,8 +401,8 @@ def scrapeProducts(request):
         # "https://www.foreverbastard.com/the-end-of-tw/accesorios1/",
 
 
-        # # Shamrock
-        # # "https://www.shamrock.com.ar/productos/",
+        # # # Shamrock
+        # "https://www.shamrock.com.ar/productos/",
 
         # "https://www.shamrock.com.ar/remeras-oversize/",
         # "https://www.shamrock.com.ar/remeras/",
@@ -377,10 +430,10 @@ def scrapeProducts(request):
         # "https://www.shamrock.com.ar/conjuntos/",
         # "https://www.shamrock.com.ar/accesorios/",
 
-        # # Insublime
+        # Insublime
         # "https://www.insublime.ar/hoodie/",
         # "https://www.insublime.ar/remes/",
-        # "https://www.insublime.ar/giftcard/",
+        # # "https://www.insublime.ar/giftcard/",
         # "https://www.insublime.ar/sale/",
 
         # # Helsinki Mochilas
@@ -428,103 +481,103 @@ def scrapeProducts(request):
         # "https://www.rockthatbody.com.ar/corset/",
         # "https://www.rockthatbody.com.ar/bermuda/",
 
-        # # # Satana
-        "https://www.satanaclothes.com/vestidos/",
-        "https://www.satanaclothes.com/faldas/",
-        "https://www.satanaclothes.com/remeras-y-tops/",
-        "https://www.satanaclothes.com/bodys/",
-        "https://www.satanaclothes.com/calzas/",
-        "https://www.satanaclothes.com/camisas/",
-        "https://www.satanaclothes.com/pantalones/",
-        "https://www.satanaclothes.com/shorts-y-bermudas/",
-        "https://www.satanaclothes.com/buzos-y-sweaters/",
-        "https://www.satanaclothes.com/camperas/",
-        "https://www.satanaclothes.com/monoprendas/",
-        "https://www.satanaclothes.com/accesorios1/",
+        # # Satana
+    #     "https://www.satanaclothes.com/vestidos/",
+    #     "https://www.satanaclothes.com/faldas/",
+    #     "https://www.satanaclothes.com/remeras-y-tops/",
+    #     "https://www.satanaclothes.com/bodys/",
+    #     "https://www.satanaclothes.com/calzas/",
+    #     "https://www.satanaclothes.com/camisas/",
+    #     "https://www.satanaclothes.com/pantalones/",
+    #     "https://www.satanaclothes.com/shorts-y-bermudas/",
+    #     "https://www.satanaclothes.com/buzos-y-sweaters/",
+    #     "https://www.satanaclothes.com/camperas/",
+    #     "https://www.satanaclothes.com/monoprendas/",
+    #     "https://www.satanaclothes.com/accesorios1/",
 
-        # # # delusion
+    #     # # # delusion
 
-        # # # avystrac
-        # "https://avystrac.com.ar/buzos/",
-        # "https://avystrac.com.ar/remeras/",
-        # "https://avystrac.com.ar/shorts/",
-        # "https://avystrac.com.ar/accesorios/",
-        # "https://avystrac.com.ar/preguntas-frecuentes/",
+    #     # # avystrac
+    #     "https://avystrac.com.ar/buzos/",
+    #     "https://avystrac.com.ar/remeras/",
+    #     "https://avystrac.com.ar/shorts/",
+    #     "https://avystrac.com.ar/accesorios/",
+    #     # "https://avystrac.com.ar/preguntas-frecuentes/",
 
-        # # Mystic
-        # "https://mysticba.com/buzos/",
-        # "https://mysticba.com/remeras/",
-        # "https://mysticba.com/accesorios/",
+    #     # # Mystic
+    #     "https://mysticba.com/buzos/",
+    #     "https://mysticba.com/remeras/",
+    #     "https://mysticba.com/accesorios/",
 
-        # # # saintrebels
+    #     # # # saintrebels
 
-        # # Mustaqe
-        # "https://www.mustaqe.com.ar/conjuntos/",
-        # "https://www.mustaqe.com.ar/hoodie-buzos/",
-        # "https://www.mustaqe.com.ar/pantalones/",
-        # "https://www.mustaqe.com.ar/remeron/",
-        # "https://www.mustaqe.com.ar/shorts/",
+    #     # # # Mustaqe
+    #     "https://www.mustaqe.com.ar/shorts/",
+    #     "https://www.mustaqe.com.ar/hoodie-buzos/",
+    #     "https://www.mustaqe.com.ar/pantalones/",
+    #     "https://www.mustaqe.com.ar/remeron/",
+    #     "https://www.mustaqe.com.ar/conjuntos/",
 
-        # # ACCESORIOS
-        # "https://www.mustaqe.com.ar/accesorios/pilusos/",
-        # "https://www.mustaqe.com.ar/accesorios/gorros/",
-        # "https://www.mustaqe.com.ar/accesorios/medias/",
-        # "https://www.mustaqe.com.ar/accesorios/cadenas/",
-        # "https://www.mustaqe.com.ar/accesorios/pasamontanas1/",
+    #     # # # ACCESORIOS
+    #     "https://www.mustaqe.com.ar/accesorios/pilusos/",
+    #     "https://www.mustaqe.com.ar/accesorios/gorros/",
+    #     "https://www.mustaqe.com.ar/accesorios/medias/",
+    #     "https://www.mustaqe.com.ar/accesorios/cadenas/",
+    #     "https://www.mustaqe.com.ar/accesorios/pasamontanas1/",
 
-        # # MUSTAQE KIDS
-        # "https://www.mustaqe.com.ar/ninos/conjuntos1/",
-        # "https://www.mustaqe.com.ar/ninos/remeras/",
-        # "https://www.mustaqe.com.ar/ninos/shorts1/",
+    #     # # MUSTAQE KIDS
+    #     "https://www.mustaqe.com.ar/ninos/conjuntos1/",
+    #     "https://www.mustaqe.com.ar/ninos/remeras/",
+    #     "https://www.mustaqe.com.ar/ninos/shorts1/",
 
-        # # Tacitadete
-        # "https://tacitadete.mitiendanube.com/buzos/",
-        # "https://tacitadete.mitiendanube.com/camperas/",
-        # "https://tacitadete.mitiendanube.com/pants/",
-        # "https://tacitadete.mitiendanube.com/tops/",
-        # "https://tacitadete.mitiendanube.com/remerones/",
-        # "https://tacitadete.mitiendanube.com/shorts/",
+    #     # # Tacitadete
+    #     "https://tacitadete.mitiendanube.com/buzos/",
+    #     "https://tacitadete.mitiendanube.com/camperas/",
+    #     "https://tacitadete.mitiendanube.com/pants/",
+    #     "https://tacitadete.mitiendanube.com/tops/",
+    #     "https://tacitadete.mitiendanube.com/remerones/",
+    #     "https://tacitadete.mitiendanube.com/shorts/",
 
-        # # murderdoll
-        # "https://www.murderdoll.com.ar/chokers/",
-        # "https://www.murderdoll.com.ar/chokers-cintas/",
-        # "https://www.murderdoll.com.ar/collares/",
-        # "https://www.murderdoll.com.ar/aros/",
-        # "https://www.murderdoll.com.ar/anillos/",
-        # "https://www.murderdoll.com.ar/pulseras-de-tachas/",
-        # "https://www.murderdoll.com.ar/otros-accesorios/",
-        # "https://www.murderdoll.com.ar/pulseras/",
-        # "https://www.murderdoll.com.ar/giftcards/",
+    #     # # # murderdoll
+    #     "https://www.murderdoll.com.ar/chokers/",
+    #     "https://www.murderdoll.com.ar/chokers-cintas/",
+    #     "https://www.murderdoll.com.ar/collares/",
+    #     "https://www.murderdoll.com.ar/aros/",
+    #     "https://www.murderdoll.com.ar/anillos/",
+    #     "https://www.murderdoll.com.ar/pulseras-de-tachas/",
+    #     "https://www.murderdoll.com.ar/otros-accesorios/",
+    #     "https://www.murderdoll.com.ar/pulseras/",
+    #     # "https://www.murderdoll.com.ar/giftcards/",
 
-        # # collares
+    #     # # collares
 
-        # "https://www.murderdoll.com.ar/collares/collares-de-acero-quirurgico/",
-        # "https://www.murderdoll.com.ar/collares/collares-cadenas-grandes/",
+    #     "https://www.murderdoll.com.ar/collares/collares-de-acero-quirurgico/",
+    #     "https://www.murderdoll.com.ar/collares/collares-cadenas-grandes/",
 
-        # # JimmyRebel
-        # "https://www.jimmyrebel.com.ar/remeras/",
-        # "https://www.jimmyrebel.com.ar/shorts-y-bermudas/",
-        # "https://www.jimmyrebel.com.ar/accesorios/",
+    # #     # # JimmyRebel
+        "https://www.jimmyrebel.com.ar/remeras/",
+    #     "https://www.jimmyrebel.com.ar/shorts-y-bermudas/",
+    #     "https://www.jimmyrebel.com.ar/accesorios/",
         # "https://www.jimmyrebel.com.ar/buzos/",
         # "https://www.jimmyrebel.com.ar/gorras/",
         # "https://www.jimmyrebel.com.ar/beanies/",
         # "https://www.jimmyrebel.com.ar/pantalones/",
         # "https://www.jimmyrebel.com.ar/gift-card/",
         # "https://www.jimmyrebel.com.ar/home/",
-        # "https://www.jimmyrebel.com.ar/sale/",
-        # "https://www.jimmyrebel.com.ar/royalty/",
+    #     "https://www.jimmyrebel.com.ar/sale/",
+    #     "https://www.jimmyrebel.com.ar/royalty/",
 
-        # # HyteApparel
-        # "https://www.hyteapparel.com.ar/hoodies/",
-        # "https://www.hyteapparel.com.ar/remeras/",
-        # "https://www.hyteapparel.com.ar/bermudas/",
-        # "https://www.hyteapparel.com.ar/camisetas-oversize/",
-        # "https://www.hyteapparel.com.ar/pantalones/",
+    #     # HyteApparel
+    #     "https://www.hyteapparel.com.ar/hoodies/",
+    #     "https://www.hyteapparel.com.ar/remeras/",
+    #     "https://www.hyteapparel.com.ar/bermudas/",
+    #     "https://www.hyteapparel.com.ar/camisetas-oversize/",
+    #     "https://www.hyteapparel.com.ar/pantalones/",
     ]
 
     # stores = [
     #     "https://www.belforte.com.ar/search/?q=GILDA", #                    10.8 sec per product
-    #     "https://langlois.com.ar/productos/", #                             7.3 sec per product     
+    #     "https://langlois.com.ar/productos/", #                             7.3 sec per product
     #     "https://www.foreverbastard.com/", #                                11.2 sec per product
     #     "https://www.shamrock.com.ar/pantalones/", #                        6.2 sec per product
     #     "https://baib.com.ar/productos/", #                                 4.2 sec per product
@@ -541,12 +594,12 @@ def scrapeProducts(request):
     #     "https://mysticba.com/",
     #     "https://www.saintrebels.com/productos/",
 
-    #     "https://www.mustaqe.com.ar/hoodie-buzos/",                             
-    #     'https://www.mustaqe.com.ar/accesorios/',                              
+    #     "https://www.mustaqe.com.ar/hoodie-buzos/",
+    #     'https://www.mustaqe.com.ar/accesorios/',
     #     "https://tacitadete.mitiendanube.com/remerones/",
-    #     "https://www.murderdoll.com.ar/collares/",                            
+    #     "https://www.murderdoll.com.ar/collares/",
     #     "https://www.jimmyrebel.com.ar/",
-    #     "https://www.hyteapparel.com.ar/hoodies/",                           
+    #     "https://www.hyteapparel.com.ar/hoodies/",
 
     #     # "https://www.tiendacry.com.ar/ropa/", #                             4.4 sec per product    # error at selecte size
     #     # # "https://onekickz.com/ar/stock1/sneakers-mpage2/", #                6.0 sec per product  # 404 error
@@ -564,7 +617,6 @@ def scrapeProducts(request):
         colors_list = []
         sizes_list = []
 
-
         def waitForElement(xpath, driver, max_time, multi):
             if multi == True:
                 result = WebDriverWait(driver, max_time).until(
@@ -574,7 +626,6 @@ def scrapeProducts(request):
                 result = WebDriverWait(driver, max_time).until(
                     EC.presence_of_element_located((By.XPATH, xpath)))
                 return result
-
 
         lucky_product_xpath = 0
         lucky_link_xpath = 0
@@ -589,7 +640,6 @@ def scrapeProducts(request):
 
         products = []
         links = []
-
 
         total_name_time = 0
         total_price_time = 0
@@ -606,7 +656,8 @@ def scrapeProducts(request):
             products = waitForElement(
                 PRODUCTS_XPATHS[lucky_product_xpath], driver, 0.2, True)
             products_time = time.time() - products_time
-            print(len(products), 'products found in', products_time, 'seconds with lucky xpath')
+            print(len(products), 'products found in',
+                  products_time, 'seconds with lucky xpath')
 
         except:
             for product_xpath in PRODUCTS_XPATHS:
@@ -614,7 +665,8 @@ def scrapeProducts(request):
                     products_time = time.time()
                     products = waitForElement(product_xpath, driver, 0.2, True)
                     products_time = time.time() - products_time
-                    print(len(products), 'products found in', products_time, 'seconds')
+                    print(len(products), 'products found in',
+                          products_time, 'seconds')
                     lucky_product_xpath = PRODUCTS_XPATHS.index(product_xpath)
                     break
                 except:
@@ -628,26 +680,30 @@ def scrapeProducts(request):
 
             scraping_time = time.time()
 
-            # for product in products:
-            for i in range(3, 5):
-                product = products[i]
+            for product in products:
+            # for i in range(0, 1):
+            #     product = products[i]
                 try:
                     link_time = time.time()
-                    link = waitForElement(LINK_XPATHS[lucky_link_xpath], product, 0.03, False).get_attribute('href')
+                    link = waitForElement(
+                        LINK_XPATHS[lucky_link_xpath], product, 0.03, False).get_attribute('href')
                     link_time = time.time() - link_time
                     if 'tabla-de-talles' not in link:
-                        print('Link found in', link_time, 'seconds with lucky xpath')
+                        print('Link found in', link_time,
+                              'seconds with lucky xpath')
                         links.append(link)
                 except:
                     for link_xpath in LINK_XPATHS:
                         try:
                             link_time = time.time()
-                            link = waitForElement(link_xpath, product, 0.05, False).get_attribute('href')
+                            link = waitForElement(
+                                link_xpath, product, 0.05, False).get_attribute('href')
                             link_time = time.time() - link_time
                             if 'tabla-de-talles' not in link:
                                 print('Link found in', link_time, 'seconds')
                                 links.append(link)
-                                lucky_link_xpath = LINK_XPATHS.index(link_xpath)
+                                lucky_link_xpath = LINK_XPATHS.index(
+                                    link_xpath)
                                 break
                         except:
                             pass
@@ -656,7 +712,6 @@ def scrapeProducts(request):
                     print('No link found')
                     driver.quit()
                     exit()
-
 
             for link in links:
                 driver.get(link)
@@ -677,14 +732,16 @@ def scrapeProducts(request):
                     name = waitForElement(
                         NAME_XPATHS[lucky_name_xpath], driver, 0.25, False).text
                     name_time = time.time() - name_time
-                    print('Name found in', name_time, 'seconds with lucky xpath')
+                    print('Name found in', name_time,
+                          'seconds with lucky xpath')
                     print('\n Name:', name)
 
                 except:
                     for name_xpath in NAME_XPATHS:
                         try:
                             name_time = time.time()
-                            name = waitForElement(name_xpath, driver, 0.25, False).text
+                            name = waitForElement(
+                                name_xpath, driver, 0.25, False).text
                             name_time = time.time() - name_time
                             print('Name found in', name_time, 'seconds')
                             print('\n Name:', name)
@@ -706,7 +763,8 @@ def scrapeProducts(request):
                     price = waitForElement(
                         PRICE_XPATHS[lucky_price_xpath], driver, 0.05, False).text
                     price_time = time.time() - price_time
-                    print('Price found in', price_time, 'seconds with lucky xpath')
+                    print('Price found in', price_time,
+                          'seconds with lucky xpath')
                 except:
                     for price_xpath in PRICE_XPATHS:
                         try:
@@ -744,10 +802,6 @@ def scrapeProducts(request):
                         IMAGES_XPATHS[lucky_images_xpath], driver, 0.23, True)
                     images_time = time.time() - images_time
 
-                    # if image is a, get the href attribute
-                    #  if image is img, get the src attribute
-                    # if image value is not a link dont add it to the list
-
                     for image in images:
                         if image.tag_name == 'a':
                             if 'http' and not 'placeholder' in image.get_attribute('href'):
@@ -755,13 +809,18 @@ def scrapeProducts(request):
                             else:
                                 raise Exception('Image href is not a link')
                         elif image.tag_name == 'img':
-                            if 'http' and not 'placeholder' in image.get_attribute('src'):
-                                images_list.append(image.get_attribute('src'))
+                            srcset = image.get_attribute('srcset')
+                            srcset_items = srcset.split(',')
+                            last_item = srcset_items[-1].strip().split(' ')[0]
+
+                            if 'placeholder' not in last_item:
+                                images_list.append(last_item)
                             else:
-                                raise Exception('Image src is not a link')
+                                raise Exception(
+                                    'Image src or srcset is not a link or contains a placeholder')
                         else:
                             raise Exception('Image tag name is not a or img')
-                        
+
                     print('Images found in', images_time, 'seconds with lucky xpath')
 
                 except:
@@ -772,25 +831,32 @@ def scrapeProducts(request):
                                 images_xpath, driver, 0.23, True)
                             images_time = time.time() - images_time
 
-                            # if image is a, get the href attribute
-                            #  if image is img, get the src attribute
-                            # if image value is not a link dont add it to the list
-
                             for image in images:
                                 if image.tag_name == 'a':
                                     if 'http' and not 'placeholder' in image.get_attribute('href'):
-                                        images_list.append(image.get_attribute('href'))
+                                        images_list.append(
+                                            image.get_attribute('href'))
                                     else:
-                                        raise Exception('Image tag name is not a or img')
+                                        raise Exception(
+                                            'Image href is not a link')
                                 elif image.tag_name == 'img':
-                                    if 'http' and not 'placeholder' in image.get_attribute('src'):
-                                        images_list.append(image.get_attribute('src'))
+                                    srcset = image.get_attribute('srcset')
+                                    srcset_items = srcset.split(',')
+                                    last_item = srcset_items[-1].strip().split(' ')[
+                                        0]
+                                    
+                                    if 'placeholder' not in last_item:
+                                        images_list.append(last_item)
                                     else:
-                                        raise Exception('Image tag name is not a or img')
+                                        raise Exception(
+                                            'Image src or srcset is not a link or contains a placeholder')
                                 else:
-                                    raise Exception('Image tag name is not a or img')
+                                    raise Exception(
+                                        'Image tag name is not a or img')
+
                             print('Images found in', images_time, 'seconds')
-                            lucky_images_xpath = IMAGES_XPATHS.index(images_xpath)
+                            lucky_images_xpath = IMAGES_XPATHS.index(
+                                images_xpath)
                         except:
                             pass
                 if images == None:
@@ -808,7 +874,8 @@ def scrapeProducts(request):
                     words = waitForElement(
                         WORDS_XPATHS[lucky_words_xpath], driver, 0.2, True)
                     words_time = time.time() - words_time
-                    print(len(words), 'words found in', words_time, 'seconds with lucky xpath')
+                    print(len(words), 'words found in',
+                          words_time, 'seconds with lucky xpath')
                 except:
                     for words_xpath in WORDS_XPATHS:
                         try:
@@ -816,7 +883,8 @@ def scrapeProducts(request):
                             words = waitForElement(
                                 words_xpath, driver, 0.2, True)
                             words_time = time.time() - words_time
-                            print(len(words), 'words found in', words_time, 'seconds')
+                            print(len(words), 'words found in',
+                                  words_time, 'seconds')
                             lucky_words_xpath = WORDS_XPATHS.index(words_xpath)
                             break
                         except:
@@ -840,18 +908,49 @@ def scrapeProducts(request):
                 try:
                     category_time = time.time()
                     category = waitForElement(
-                        CATEGORY_XPATHS[lucky_category_xpath], driver, 0.3, False).text
+                        CATEGORY_XPATHS[lucky_category_xpath], driver, 0.3, True)
                     category_time = time.time() - category_time
+
+                    # if category is more than one, iterate ignoring 'inicio' and 'home'
+                    print(len(category))
+                    if len(category) > 1:
+                        print('more than one category')
+                        for item in category:
+                            print(item.text)
+                            if item.text.lower() != 'inicio' and item.text.lower() != 'home':
+                                category = item.text
+                                category = map_category(category)
+                                print('category found ' + category)
+                                break
+                    else:
+                        category = category[0].text
+                        category = map_category(category)
+
+
                     print('Category found in', category_time, 'seconds with lucky xpath')
                 except:
                     for category_xpath in CATEGORY_XPATHS:
                         try:
                             category_time = time.time()
                             category = waitForElement(
-                                category_xpath, driver, 0.3, False).text
+                                category_xpath, driver, 0.3, True)
+                            
+                            # if category is more than one, iterate ignoring 'inicio' and 'home'
+                            print(len(category))
+                            if len(category) > 1:
+                                print('more than one category')
+                                for item in category:
+                                    print(item.text)
+                                    if item.text.lower() != 'inicio' and item.text.lower() != 'home':
+                                        category = item.text
+                                        category = map_category(category)
+                                        print('category found ' + category)
+                                        break
+
                             category_time = time.time() - category_time
                             print('Category found in', category_time, 'seconds')
-                            lucky_category_xpath = CATEGORY_XPATHS.index(category_xpath)
+                            lucky_category_xpath = CATEGORY_XPATHS.index(
+                                category_xpath)
                             break
                         except:
                             pass
@@ -877,7 +976,8 @@ def scrapeProducts(request):
                             buy_button = waitForElement(
                                 buy_button_xpath, driver, 0.01, False)
                             buy_button_time = time.time() - buy_button_time
-                            print('Buy button found in', buy_button_time, 'seconds')
+                            print('Buy button found in',
+                                  buy_button_time, 'seconds')
                             lucky_buy_button_xpath = BUY_BUTTON_XPATHS.index(
                                 buy_button_xpath)
                             break
@@ -890,15 +990,17 @@ def scrapeProducts(request):
                         'time': time.time(),
                         'xpath': buy_button_xpath
                     })
-                    
+
                 else:
                     # Get Colors
                     colors_list = []
                     try:
                         colors_time = time.time()
-                        colors = waitForElement(COLORS_XPATHS[lucky_colors_xpath], driver, 0.1, True)
+                        colors = waitForElement(
+                            COLORS_XPATHS[lucky_colors_xpath], driver, 0.1, True)
                         colors_time = time.time() - colors_time
-                        print(len(colors), 'colors found in', colors_time, 'seconds with lucky xpath')
+                        print(len(colors), 'colors found in',
+                              colors_time, 'seconds with lucky xpath')
                     except:
                         for colors_xpath in COLORS_XPATHS:
                             try:
@@ -906,8 +1008,10 @@ def scrapeProducts(request):
                                 colors = waitForElement(
                                     colors_xpath, driver, 0.1, True)
                                 colors_time = time.time() - colors_time
-                                print(len(colors), 'colors found in', colors_time, 'seconds')
-                                lucky_colors_xpath = COLORS_XPATHS.index(colors_xpath)
+                                print(len(colors), 'colors found in',
+                                      colors_time, 'seconds')
+                                lucky_colors_xpath = COLORS_XPATHS.index(
+                                    colors_xpath)
                                 break
                             except:
                                 pass
@@ -923,9 +1027,11 @@ def scrapeProducts(request):
                         sizes_list = []
                         try:
                             sizes_time = time.time()
-                            sizes = waitForElement(SIZES_XPATHS[lucky_sizes_xpath], driver, 0.02, True)
+                            sizes = waitForElement(
+                                SIZES_XPATHS[lucky_sizes_xpath], driver, 0.02, True)
                             sizes_time = time.time() - sizes_time
-                            print(len(sizes), 'sizes found in', sizes_time, 'seconds with lucky xpath')
+                            print(len(sizes), 'sizes found in',
+                                  sizes_time, 'seconds with lucky xpath')
                         except:
                             for sizes_xpath in SIZES_XPATHS:
                                 try:
@@ -933,8 +1039,10 @@ def scrapeProducts(request):
                                     sizes = waitForElement(
                                         sizes_xpath, driver, 0.02, True)
                                     sizes_time = time.time() - sizes_time
-                                    print(len(sizes), 'sizes found in', sizes_time, 'seconds')
-                                    lucky_sizes_xpath = SIZES_XPATHS.index(sizes_xpath)
+                                    print(len(sizes), 'sizes found in',
+                                          sizes_time, 'seconds')
+                                    lucky_sizes_xpath = SIZES_XPATHS.index(
+                                        sizes_xpath)
                                     break
                                 except:
                                     pass
@@ -944,10 +1052,10 @@ def scrapeProducts(request):
                             size_obj = {}
                             size_obj['size'] = 'Unico'
                             if buy_button.get_attribute('disabled'):
-                                    size_obj['stock'] = 0
+                                size_obj['stock'] = 0
                             else:
                                 size_obj['stock'] = 10
-                            
+
                             sizes_list.append(size_obj)
                             color_obj['sizes'] = [size_obj]
 
@@ -973,12 +1081,15 @@ def scrapeProducts(request):
                         for color in colors:
                             color_obj = {}
                             try:
-                                color_obj['color'] = color.get_attribute('value').capitalize()
-                                is_span = WebDriverWait(driver, 0.1).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@data-variant,'Color')]/div/a/span[@data-name='" + color.get_attribute("value") + "']")))
+                                color_obj['color'] = color.get_attribute(
+                                    'value').capitalize()
+                                is_span = WebDriverWait(driver, 0.1).until(EC.presence_of_element_located(
+                                    (By.XPATH, "//div[contains(@data-variant,'Color')]/div/a/span[@data-name='" + color.get_attribute("value") + "']")))
                                 is_span.click()
                                 sleep(1)
                             except:
-                                color_obj['color'] = color.get_attribute('value').capitalize()
+                                color_obj['color'] = color.get_attribute(
+                                    'value').capitalize()
                                 color.click()
                                 sleep(1)
 
@@ -989,7 +1100,8 @@ def scrapeProducts(request):
                                 sizes = waitForElement(
                                     SIZES_XPATHS[lucky_sizes_xpath], driver, 0.02, True)
                                 sizes_time = time.time() - sizes_time
-                                print(len(sizes), 'sizes found in', sizes_time, 'seconds with lucky xpath')
+                                print(len(sizes), 'sizes found in',
+                                      sizes_time, 'seconds with lucky xpath')
                             except:
                                 for sizes_xpath in SIZES_XPATHS:
                                     try:
@@ -997,8 +1109,10 @@ def scrapeProducts(request):
                                         sizes = waitForElement(
                                             sizes_xpath, driver, 0.02, True)
                                         sizes_time = time.time() - sizes_time
-                                        print(len(sizes), 'sizes found in', sizes_time, 'seconds')
-                                        lucky_sizes_xpath = SIZES_XPATHS.index(sizes_xpath)
+                                        print(len(sizes), 'sizes found in',
+                                              sizes_time, 'seconds')
+                                        lucky_sizes_xpath = SIZES_XPATHS.index(
+                                            sizes_xpath)
                                         break
                                     except:
                                         pass
@@ -1025,7 +1139,6 @@ def scrapeProducts(request):
                                     color_obj['sizes'] = sizes_list
                             colors_list.append(color_obj)
 
-
                 # product_JSON = {
                 #     'name': name,
                 #     'price': price,
@@ -1039,8 +1152,7 @@ def scrapeProducts(request):
 
                 user = User.objects.get(id=1)
 
-
-                    # if some field except description is none set is_active to False
+                # if some field except description is none set is_active to False
                 status = True
                 if not name or not price or not images or not category or not buy_button:
                     # print('name:', name, '\n')
@@ -1072,7 +1184,15 @@ def scrapeProducts(request):
 
                     product.save()
 
+                # update product category
+                if product.category != category:
+                    product.category = category
+                    product.save()
+
+
                 for image in images_list:
+                    if image.startswith('//'):
+                                image = 'https:' + image
                     # if image ends with #, remove it from the list
                     if image.endswith('#'):
                         images_list.remove(image)
@@ -1084,27 +1204,30 @@ def scrapeProducts(request):
                             product=product, original_url=image)
                         continue
                     except:
-
                         try:
                             image_content = requests.get(image).content
                             image_name = image.split('/')[-1]
                             image_file = ContentFile(image_content, image_name)
                             img = Image.open(image_file)
                             img.verify()
+
                             # the image is valid
-                            
+
                             product_image = ProductImage(
                                 product=product,
                                 image=image_file,
                                 original_url=image
                             )
                             product_image.save()
+                            print('image saved')
                         except Exception as e:
                             # the image is invalid
+                            print('image is invalid')
                             pass
 
-                if colors_list == [] or colors_list == None: 
-                    colors_list = [{'color': 'Unico', 'sizes': [{'size': 'Unico', 'stock': 10}]}]
+                if colors_list == [] or colors_list == None:
+                    colors_list = [{'color': 'Unico', 'sizes': [
+                        {'size': 'Unico', 'stock': 10}]}]
 
                 for color in colors_list:
                     # if color doesn't exist, create it
@@ -1138,14 +1261,12 @@ def scrapeProducts(request):
                                 product=product,
                                 stock=size['stock']
                             )
-                            
+
                             product_attribute.save()
                             product_attribute.color.add(color_obj)
                             product_attribute.size.add(size_obj)
 
-
                 print('product saved')
-
 
                 # total_name_time = total_name_time + name_time
                 # total_price_time = total_price_time + price_time
@@ -1154,7 +1275,6 @@ def scrapeProducts(request):
                 # total_category_time = total_category_time + category_time
                 # total_buy_button_time = total_buy_button_time + buy_button_time
                 # total_sizes_time = total_sizes_time + sizes_time
-
 
             print(len(error_log_list), 'errors_log found')
             # print(len(products), 'products found')
@@ -1171,14 +1291,13 @@ def scrapeProducts(request):
             # print('average time per element:', (total_name_time + total_price_time + total_images_time + total_words_time + total_category_time + total_buy_button_time + total_sizes_time) / len(products))
 
             scraping_time = time.time() - scraping_time
-            print('Scraping time:', scraping_time, 'seconds, average time per product:', scraping_time / len(products), 'seconds, (', len(products), 'products )')
+            print('Scraping time:', scraping_time, 'seconds, average time per product:',
+                  scraping_time / len(products), 'seconds, (', len(products), 'products )')
 
         # response_string = 'Scraping time: {} seconds, average time per product: {} seconds, ({} products)'.format(scraping_time, scraping_time / len(products), len(products))
         # return Response(response_string)
 
-        
-
-        # if was_saved == False:    
+        # if was_saved == False:
         #     # Save Error Log
         #     out_file = open('error_log.json', 'w')
         #     json.dump(error_log_list, out_file, indent=4)
@@ -1211,4 +1330,3 @@ def scrapeProducts(request):
     # print('final_list.json saved in JSON file ;)')
 
     return Response('Scraping finished')
-

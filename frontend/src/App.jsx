@@ -46,6 +46,11 @@ function App() {
               <HomeScreen />
             </Container>
           } />
+          <Route path='/category/:category' element={
+            <Container>
+              <HomeScreen />
+            </Container>
+          } />
           <Route path='/product/:id' element={
             <Container>
               <ProductScreen />

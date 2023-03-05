@@ -83,6 +83,10 @@ def addOrderItems(request):
 @permission_classes([IsAdminUser])
 def getOrders(request):
     orders = Order.objects.all()
+
+    # all the order that has expiryDate less than today and isPaid is False set status to 'Expired'
+    
+
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
 

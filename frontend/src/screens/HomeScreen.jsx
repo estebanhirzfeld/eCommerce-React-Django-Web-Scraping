@@ -12,8 +12,43 @@ import { useSearchParams } from 'react-router-dom'
 
 import ItemLoader from '../components/ItemLoader'
 
-import { Row, Col, Button } from 'react-bootstrap'
+import { Row, Col, Container, Form } from 'react-bootstrap'
 import Product from '../components/Product'
+
+const categories = [
+    'Inicio',
+    'Vestidos',
+    'Shorts y bermudas',
+    'Faldas',
+    'Remeras y tops',
+    'Bodys',
+    'Hoodies/buzos/sweaters',
+    'Pantalones',
+    'Remerones',
+    'Conjuntos',
+    'Mameluco',
+    'Calzado',
+    'Accesorios',
+    'Remeras',
+    'Trajes de baño',
+    'Chalecos',
+    'Corset',
+    'Camperas',
+    'Colección',
+    'Sale !',
+    'Sandalias',
+    'Borcegos',
+    'Botinetas',
+    'Crema para cueros',
+    'The end of $tw',
+    'Shorts',
+    'Buzos',
+    'Mustaqe kids',
+    'Mallas y bermudas',
+    'Buzos y abrigos',
+    'Gorras y beanies',
+    'Otros',
+]
 
 function HomeScreen() {
     const dispatch = useDispatch()
@@ -24,53 +59,147 @@ function HomeScreen() {
     const [searchParams] = useSearchParams();
 
     const keyword = searchParams.get('keyword') ? searchParams.get('keyword') : ''
+    const category = searchParams.get('category') ? searchParams.get('category') : ''
     const [pageNumber, setPageNumber] = useState(searchParams.get('page') ? searchParams.get('page') : 1)
 
     useEffect(() => {
-        dispatch(listProducts(keyword, pageNumber))
-        dispatch(was_clicked_reset())
+        // scroll to top
+        window.scrollTo(0, 0)
+
+        // if link has category, then dispatch listProducts with category
+        if (searchParams.get('category')) {
+            dispatch(listProducts(keyword, pageNumber, category))
+            dispatch(was_clicked_reset())
+        }
+        else {
+            dispatch(listProducts(keyword, pageNumber))
+            dispatch(was_clicked_reset())
+        }
+
     }, [dispatch, keyword, pageNumber])
 
 
     return (
-        <div>
-            <h1 className='text-center' >Latest Products</h1>
-            {loading ? <ItemLoader />
+        <>
+            {
+                // if link has category, then show category name
+                searchParams.get('category')
+                    ? <h1 className='text-center' >{searchParams.get('category')}</h1>
+                    : <h1 className='text-center' >All Products</h1>
 
-                : error ? <h3>{error}</h3>
-                    : products && products?.length > 0 ? (
-                        <Row>
-                            {products.map((product) => (
-                                <Col key={product.id} sm={6} md={6} lg={4} xl={3} className='mb-5'>
-                                    <Product product={product} />
-                                </Col>
-                            ))}
-
-                            {
-                                pages > 1 && (
-                                    <Pagination className='justify-content-center mt-5'>
-                                        <>
-                                            <Pagination.Prev onClick={() => setPageNumber(pageNumber - 1)} disabled={pageNumber === 1} />
-                                            {[...Array(pages).keys()].map((x) => (
-                                                <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => setPageNumber(x + 1)}>
-                                                    {x + 1}
-                                                </Pagination.Item>
-                                            ))}
-                                            <Pagination.Next onClick={() => setPageNumber(pageNumber + 1)} disabled={pageNumber === pages}/>
-                                        </>
-                                    </Pagination>
-                                )
-
-                            }
-                        </Row>
-
-
-
-                    ) : (
-                        <p className='text-center mt-5'>No Products Found 😞</p>
-                    )
             }
-        </div>
+            {/* filters Category and Price selects */}
+            {/* <div className='d-flex justify-content-center'>
+                <div className='d-flex flex-column'>
+                    <label htmlFor='category'>Category</label>
+                    <select name='category' id='category' className='form-select' onChange={(e) => {
+                        searchParams.set('category', e.target.value)
+                        searchParams.set('page', 1)
+                        window.location.search = searchParams.toString()
+                    }}>
+                        {categories.map((category) => (
+                            <option key={category} value={category}>{category}</option>
+                        ))
+                        }
+                    </select>
+
+                </div> */}
+            {/* select using React-Bootstrap Form.Control */}
+            <Container className='d-flex justify-content-center'>
+                <Col md={4} justify-content-center align="center">
+                    <Form.Group>
+                        {/* Label Category */}
+
+                        <Form.Label>Category</Form.Label>
+                        <Form.Control
+                            as="select"
+                            // default value params or all
+                            value={searchParams.get('category') ? searchParams.get('category') : 'All'}
+                            onChange={
+                                (e) => {
+                                    searchParams.set('category', e.target.value)
+                                    searchParams.set('page', 1)
+                                    window.location.search = searchParams.toString()
+                                }
+                            }
+                            className='text-center'
+                        >
+                            {
+                                categories ?
+                                    categories.map((category) => (
+                                        <option key={category} value={category}>{category}</option>
+                                    ))
+                                    :
+                                    <option>None</option>
+                            }
+                        </Form.Control>
+                    </Form.Group>
+                </Col>
+            </Container>
+
+
+
+            <div>
+
+                {loading ? <ItemLoader />
+
+                    : error ? <h3>{error}</h3>
+                        : products && products?.length > 0 ? (
+                            <Row>
+                                {products.map((product) => (
+                                    <Col key={product.id} sm={6} md={6} lg={4} xl={3} className='mb-5'>
+                                        <Product product={product} />
+                                    </Col>
+                                ))}
+
+                                {
+                                    pages > 1 && (
+                                        <Pagination className='justify-content-center mt-5'>
+                                            <>
+                                                {/* <Pagination.Prev onClick={() => setPageNumber(pageNumber - 1)} disabled={pageNumber === 1} /> */}
+                                                {/* pagination.prev change searchparms and router link */}
+                                                <Pagination.Prev onClick={() => {
+                                                    searchParams.set('page', pageNumber - 1)
+                                                    window.location.search = searchParams.toString()
+                                                }} disabled={pageNumber === 1} />
+
+                                                {/* {[...Array(pages).keys()].map((x) => (
+                                                    <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => setPageNumber(x + 1)}>
+                                                        {x + 1}
+                                                    </Pagination.Item>
+                                                ))} */}
+                                                {/* pagination numbers change searchparms and router link */}
+                                                {[...Array(pages).keys()].map((x) => (
+                                                    <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => {
+                                                        searchParams.set('page', x + 1)
+                                                        window.location.search = searchParams.toString()
+                                                    }}>
+                                                        {x + 1}
+                                                    </Pagination.Item>
+                                                ))}
+                                                {/* <Pagination.Next onClick={() => setPageNumber(pageNumber + 1)} disabled={pageNumber === pages} /> */}
+                                                {/* pagination.next change searchparms and router link */}
+                                                <Pagination.Next onClick={() => {
+                                                    searchParams.set('page', pageNumber + 1)
+                                                    window.location.search = searchParams.toString()
+                                                }} disabled={pageNumber === pages} />
+
+                                            </>
+                                        </Pagination>
+                                    )
+
+                                }
+                            </Row>
+
+
+
+                        ) : (
+                            <p className='text-center mt-5'>No Products Found 😞</p>
+                        )
+                }
+
+            </div>
+        </>
 
 
     )

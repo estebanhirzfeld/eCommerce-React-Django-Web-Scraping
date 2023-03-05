@@ -127,7 +127,12 @@ function ProductScreen() {
 
     return (
         <div>
-            <Button onClick={() => navigate(-1)} className='btn btn-light my-3' >Go Back </Button>
+            <div className='my-3' >
+            {/* <Button onClick={() => navigate(-1)} className='btn btn-light my-3' >Go Back </Button> */}
+            {/* BreadCrumbs */}
+            <Link to='/' >Products</Link> / <Link to={`/?category=${product?.category}`}>{product?.category}</Link> / {product?.name}
+
+            </div>
             {
                 loading ? <ItemDetailLoader />
                     : error ? <h3>{error}</h3>

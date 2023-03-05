@@ -36,13 +36,12 @@ import {
 import { WAS_CLICKED_RESET } from "../constants/cartConstants";
 
 
-export const listProducts = (keyword = '', pageNumber = 1) => async (dispatch) => {
+export const listProducts = (keyword = '', pageNumber = 1, category = '') => async (dispatch) => {
 
     try {
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
-        
-        const { data } = await axios.get(`${BASE_URL}/api/products?keyword=${keyword}&page=${pageNumber}`);
+        const { data } = await axios.get(`${BASE_URL}/api/products?keyword=${keyword}&page=${pageNumber}&category=${category}`);
 
         dispatch({
             type: PRODUCT_LIST_SUCCESS,
