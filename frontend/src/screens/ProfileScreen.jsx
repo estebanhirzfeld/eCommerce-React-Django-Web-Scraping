@@ -16,6 +16,8 @@ function ProfileScreen() {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
+    const [changePassword, setChangePassword] = useState(false)
+
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
@@ -87,7 +89,11 @@ function ProfileScreen() {
                         ></Form.Control>
                     </Form.Group>
 
-                    <Form.Group controlId='password'>
+                    <p className='my-2' onClick={() => setChangePassword(!changePassword)} style={{ cursor: 'pointer' }}>Change Password?</p>
+{
+                        changePassword && (
+                            <>
+                            <Form.Group controlId='password'>
                         <Form.Label className='my-2'>Password</Form.Label>
                         <Form.Control
                             type='password'
@@ -109,6 +115,10 @@ function ProfileScreen() {
                     <Button className='my-2' type='submit' variant='primary'>
                         Update
                     </Button>
+                    </>
+                        )
+                        
+            }
                 </Form>
             </Col>
             <Col md={9}>

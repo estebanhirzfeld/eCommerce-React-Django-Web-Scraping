@@ -68,12 +68,13 @@ function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_add
             <Row className='justify-content-around align-items-center'>
 
                 <Button
-                    className='mt-3 col-3 col-md-12 col-lg-3 btn-block'
+                    className='mt-3 col-3 col-md-12 col-lg-3 btn-block border'
+                    variant='light'
                     type='button'
                     onClick={() => addToWishlistHandler(id)}
                 >
                     <i className="fa-solid fa-heart"
-                        style={{ color: was_added ? 'red' : 'black' }}
+                        style={{ color: was_added ? 'red' : 'grey' }}
                     ></i>
                 </Button>
                 <Button

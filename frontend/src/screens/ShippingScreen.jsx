@@ -3,8 +3,9 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { getAddress, createAddress } from '../actions/addressActions'
+import { blueIcon } from '../components/LeafletIcons'
 
+import { getAddress, createAddress } from '../actions/addressActions'
 
 import CheckoutSteps from '../components/CheckoutSteps'
 
@@ -202,7 +203,10 @@ function ShippingScreen() {
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
                                 {/* draggable marker */}
-                                <Marker position={coords} draggable={true}
+                                <Marker
+                                position={coords}
+                                draggable={true}
+                                icon={blueIcon}
                                     eventHandlers={{
                                         dragend: (e) => {
                                             setCoords([e.target.getLatLng().lat.toFixed(6), e.target.getLatLng().lng.toFixed(6)])

@@ -4,10 +4,10 @@ import { Form, Col } from 'react-bootstrap'
 function Selector({ label, handleChange, options }) {
     return (
         <>
-            <Col md={6}>
+            <Col md={6} className='col-3'>
                 {label}:
             </Col>
-            <Col xs='auto' className='my-1' md={6}>
+            <Col xs='auto' className='my-1 col-8' md={6}>
                 <Form.Control
                     as="select"
                     onClick={handleChange}

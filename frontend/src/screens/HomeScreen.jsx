@@ -50,6 +50,8 @@ const categories = [
     'Otros',
 ]
 
+
+
 function HomeScreen() {
     const dispatch = useDispatch()
 
@@ -77,6 +79,48 @@ function HomeScreen() {
         }
 
     }, [dispatch, keyword, pageNumber])
+
+    function getPaginationButtons(pages, page) {
+        const MAX_BUTTONS = 10; // maximum number of pagination buttons to display
+    
+        const startPage = Math.max(1, page - 5);
+        const endPage = Math.min(startPage + MAX_BUTTONS - 1, pages);
+    
+        const buttons = [...Array(endPage - startPage + 1).keys()].map((i) => (
+            <Pagination.Item 
+                key={startPage + i} 
+                active={startPage + i === page} 
+                onClick={() => {
+                    searchParams.set('page', startPage + i)
+                    window.location.search = searchParams.toString()
+                }}
+            >
+                {startPage + i}
+            </Pagination.Item>
+        ));
+    
+        return (
+            <>
+                {page > 1 && (
+                    <Pagination.Prev 
+                        onClick={() => {
+                            searchParams.set('page', page - 1)
+                            window.location.search = searchParams.toString()
+                        }} 
+                    />
+                )}
+                {buttons}
+                {page < pages && (
+                    <Pagination.Next 
+                        onClick={() => {
+                            searchParams.set('page', page + 1)
+                            window.location.search = searchParams.toString()
+                        }} 
+                    />
+                )}
+            </>
+        );
+    }
 
 
     return (
@@ -155,36 +199,7 @@ function HomeScreen() {
                                 {
                                     pages > 1 && (
                                         <Pagination className='justify-content-center mt-5'>
-                                            <>
-                                                {/* <Pagination.Prev onClick={() => setPageNumber(pageNumber - 1)} disabled={pageNumber === 1} /> */}
-                                                {/* pagination.prev change searchparms and router link */}
-                                                <Pagination.Prev onClick={() => {
-                                                    searchParams.set('page', pageNumber - 1)
-                                                    window.location.search = searchParams.toString()
-                                                }} disabled={pageNumber === 1} />
-
-                                                {/* {[...Array(pages).keys()].map((x) => (
-                                                    <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => setPageNumber(x + 1)}>
-                                                        {x + 1}
-                                                    </Pagination.Item>
-                                                ))} */}
-                                                {/* pagination numbers change searchparms and router link */}
-                                                {[...Array(pages).keys()].map((x) => (
-                                                    <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => {
-                                                        searchParams.set('page', x + 1)
-                                                        window.location.search = searchParams.toString()
-                                                    }}>
-                                                        {x + 1}
-                                                    </Pagination.Item>
-                                                ))}
-                                                {/* <Pagination.Next onClick={() => setPageNumber(pageNumber + 1)} disabled={pageNumber === pages} /> */}
-                                                {/* pagination.next change searchparms and router link */}
-                                                <Pagination.Next onClick={() => {
-                                                    searchParams.set('page', pageNumber + 1)
-                                                    window.location.search = searchParams.toString()
-                                                }} disabled={pageNumber === pages} />
-
-                                            </>
+                                            {getPaginationButtons(pages, page)}
                                         </Pagination>
                                     )
 

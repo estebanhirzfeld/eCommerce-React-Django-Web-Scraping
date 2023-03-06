@@ -12,6 +12,7 @@ import { getUserOrders } from '../actions/orderActions'
 import { getUserDetails } from '../actions/userActions'
 
 import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet"
+import {blueIcon} from '../components/LeafletIcons'
 import 'leaflet/dist/leaflet.css'
 
 function ADMIN_UserDetailsScreen() {
@@ -104,6 +105,7 @@ function ADMIN_UserDetailsScreen() {
                                         
                                         <Marker
                                             position={[orders[0].shippingAddress.lat, orders[0].shippingAddress.lon]}
+                                            icon={blueIcon}
                                         >
                                             <Popup>
                                                 <span>{orders[0].shippingAddress.address}</span>

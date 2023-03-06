@@ -173,6 +173,7 @@ const ADMIN_EditProductScreen = () => {
                                     type='text'
                                     placeholder='Enter image url'
                                     value={image}
+                                    disabled
                                     onChange={(e) => setImage(e.target.value)}
                                 ></Form.Control>
 

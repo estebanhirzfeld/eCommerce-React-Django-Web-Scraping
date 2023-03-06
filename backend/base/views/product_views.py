@@ -36,26 +36,35 @@ from rest_framework import status
 
 @api_view(['GET'])
 def getProducts(request):
+    query = request.query_params.get('keyword', '')
+    category = request.query_params.get('category', '')
+    subcategory = request.query_params.get('subcategory', '')
 
-    all_products = Product.objects.all()
+    print('------------------------------------- \n')
+    print('query: ', query)
+    print('category: ', category)
+    print('subcategory: ', subcategory)
+    # print all the parameters
+    print('request.query_params: ', request.query_params)
+    print('------------------------------------- \n')
 
-    query = request.query_params.get('keyword')
-    category = request.query_params.get('category')
+    if query != '':
+        products = Product.objects.filter(name__icontains=query, is_active=True)
+    elif category != '':
+        products = Product.objects.filter(category__icontains=category, is_active=True)
+    elif subcategory != '':
+        products = Product.objects.filter(subCategory__icontains=subcategory, is_active=True)
+    else:
+        products = Product.objects.all().filter(is_active=True)
 
-    if query == None:
-        query = ''
 
-    if category == None:
-        category = ''
-
-    products = Product.objects.filter(name__icontains=query, is_active=True, category__icontains=category)
 
     #  randomize products if there is no query and category
     if query == '' and category == '':
         products = random.sample(list(products), len(products))
 
-    page = request.query_params.get('page')
-    paginator = Paginator(products, 30)
+    page = request.query_params.get('page', None)
+    paginator = Paginator(products, 32)
 
     try:
         products = paginator.page(page)
