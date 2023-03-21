@@ -1,3 +1,6 @@
+from django.utils import timezone
+from datetime import timedelta
+
 from urllib.parse import urlparse
 
 import locale
@@ -27,7 +30,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.models import User
 
-from base.models import Product, ProductImage, Review, Order, OrderItem, Size, Color, ProductAttribute
+
+from base.models import Product, ProductImage, Review, Order, OrderItem, Size, Color, ProductAttribute, ProductView
 from base.products import products
 from base.serializers import ProductSerializer, ProductImageSerializer, SizeSerializer
 
@@ -39,21 +43,21 @@ def getProducts(request):
 
     
 
-    # get all products
-    allPrd = Product.objects.all()
+    # # get all products
+    # allPrd = Product.objects.all()
 
-    # print json of every product.category and product.subCategory of that category
-    data = {}
-    for product in allPrd:
-        # dont add to data if category is already in data
-        if product.category not in data:
-            data[product.category] = []
-            data[product.category].append(product.subCategory)
-        else:
-            if product.subCategory not in data[product.category]:
-                data[product.category].append(product.subCategory)
+    # # print json of every product.category and product.subCategory of that category
+    # data = {}
+    # for product in allPrd:
+    #     # dont add to data if category is already in data
+    #     if product.category not in data:
+    #         data[product.category] = []
+    #         data[product.category].append(product.subCategory)
+    #     else:
+    #         if product.subCategory not in data[product.category]:
+    #             data[product.category].append(product.subCategory)
 
-    print(data)
+    # print(data)
 
 
 
@@ -111,6 +115,13 @@ def getProducts(request):
 @api_view(['GET'])
 def getProduct(request, pk):
     product = Product.objects.get(id=pk)
+    # Registrar la nueva visita
+    ProductView.objects.create(product=product)
+
+    # Incrementar el contador de vistas del producto
+    product.views += 1
+    product.last_viewed_at = timezone.now()
+    product.save()
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data)
 
@@ -128,7 +139,6 @@ def updateProduct(request, pk):
 
     product.name = data['name']
     product.price = data['price']
-    product.brand = data['brand']
     product.category = data['category']
 
     product.description = data['description']
@@ -178,7 +188,6 @@ def createProduct(request):
     product = Product.objects.create(
         user=user,
         name='Sample name',
-        brand='Sample brand',
         category='Sample category',
         price=0,
         description=''

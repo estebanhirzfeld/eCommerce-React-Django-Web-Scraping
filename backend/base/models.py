@@ -1,3 +1,4 @@
+from django.utils import timezone
 from datetime import timedelta
 from django.utils.timezone import now
 from email.mime import image
@@ -14,7 +15,11 @@ class Product(models.Model):
     # if user is deleted, set to null
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200, null=True, blank=True)
-    brand = models.CharField(max_length=200, null=True, blank=True)
+    # brand = models.CharField(max_length=200, null=True, blank=True)
+
+    views = models.IntegerField(null=True, blank=True, default=0)
+    last_viewed_at = models.DateTimeField(auto_now=True)
+
     category = models.CharField(max_length=100, null=True, blank=True)
     subCategory = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -37,6 +42,30 @@ class Product(models.Model):
     #     color_list = [color.color for color in colors]
     #     return color_list
 
+    def total_views(self):
+        return self.views
+
+    def last_five_minutes_views(self):
+        five_minutes_ago = timezone.now() - timedelta(minutes=5)
+        return ProductView.objects.filter(
+            product=self,
+            viewed_at__gte=five_minutes_ago
+        ).count()
+
+    def last_week(self):
+        week_ago = timezone.now() - timedelta(days=7)
+        return ProductView.objects.filter(
+            product=self,
+            viewed_at__gte=week_ago
+        ).count()
+
+    def last_day(self):
+        day_ago = timezone.now() - timedelta(days=1)
+        return ProductView.objects.filter(
+            product=self,
+            viewed_at__gte=day_ago
+        ).count()
+
     def __str__(self):
         return self.name
 
@@ -48,6 +77,10 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return self.product.name
+
+class ProductView(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
 
 
 class Review(models.Model):
