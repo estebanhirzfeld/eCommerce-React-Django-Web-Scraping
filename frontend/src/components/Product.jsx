@@ -14,10 +14,16 @@ function Product({ product }) {
     const [image, setImage] = useState('')
 
     useEffect(() => {
+        // if product has no images set image placeholder
+        if (product.images.length === 0) {
+            setImage('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png')
+        }
+
         setImage(product.images[0]?.image)
     }, [product])
 
     useEffect(() => {
+
         if (isHovered && product.images[1]) {
             setImage(product.images[1]?.image)
         } else {
@@ -27,7 +33,22 @@ function Product({ product }) {
     }, [isHovered])
 
     return (
-        <Card className='h-100 my-3 rounded'>
+        <Card className='h-100 my-3 border-0'
+        style={{ transform: isHovered ? 'translateY(-10px)' : 'translateY(0px)', transition: 'transform 0.3s ease-in-out' }}
+        >
+            {/* heart icon buttonin top right corner when hovered upon image position relative */}
+            <div className='position-relative'>
+                <div className='position-absolute top-10 end-0'>
+                    {
+                        isHovered ? (
+                            <i className='fas fa-heart fa-2x text-danger'></i>
+                        ) : null
+                    }
+                </div>
+            </div>
+            
+
+        
             <Link to={`/product/${product.id}`}>
                 <Card.Img
                     className='cardImage'
@@ -39,21 +60,33 @@ function Product({ product }) {
 
             </Link>
             <Card.Body >
-                <Link to={`/product/${product.id}`}>
+                <Link to={`/product/${product.id}`} className='text-decoration-none text-dark text-start'>
                     <Card.Title as='div'>
-                        <strong>{product.name}</strong>
+                    
+                        {/* <strong>{product.name}</strong> */}
+                        {/* <strong>{product.name.toUpperCase()}</strong> */}
+                        {/* to lower and then capital case every word */}
+                        <strong>{product.name.toLowerCase().replace(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())}</strong>
+                        
                     </Card.Title>
                 </Link>
                 <Card.Text as='div'>
                     <div className='my-3'>
-                        <Rating
-                            value={product.rating ? product.rating : '0'}
-                            text={product.numReviews ? `${product.numReviews} reviews` : '0'}
-                            color={'#f8e825'}
-                        />
+                        {/* if product has no rating, don't show the rating component */}
+                        {
+                            product.rating ? (
+                                <Rating
+                                    value={product.rating ? product.rating : '0'}
+                                    text={product.numReviews ? `${product.numReviews} reviews` : '0'}
+                                    color={'#f8e825'}
+                                />
+                            )
+                                : null
+
+                        }
                     </div>
                 </Card.Text>
-                <Card.Text as='h3'>
+                <Card.Text as='h3' className='mb-3'>
                     ${product.price}
                 </Card.Text>
             </Card.Body>

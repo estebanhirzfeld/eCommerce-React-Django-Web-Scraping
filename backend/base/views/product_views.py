@@ -36,24 +36,45 @@ from rest_framework import status
 
 @api_view(['GET'])
 def getProducts(request):
+
+    
+
+    # get all products
+    allPrd = Product.objects.all()
+
+    # print json of every product.category and product.subCategory of that category
+    data = {}
+    for product in allPrd:
+        # dont add to data if category is already in data
+        if product.category not in data:
+            data[product.category] = []
+            data[product.category].append(product.subCategory)
+        else:
+            if product.subCategory not in data[product.category]:
+                data[product.category].append(product.subCategory)
+
+    print(data)
+
+
+
+
+    # if product.category.lower() contains 'shorts y bermudas' and product.name.lower() contains ciclista change subcategory to 'Ciclista'
+    # for product in allPrd:
+    #     if 'shorts y bermudas' in product.category.lower() and 'ciclista' in product.name.lower():
+    #         product.subCategory = 'Ciclista'
+    #         product.save()
+
     query = request.query_params.get('keyword', '')
     category = request.query_params.get('category', '')
     subcategory = request.query_params.get('subcategory', '')
 
-    print('------------------------------------- \n')
-    print('query: ', query)
-    print('category: ', category)
-    print('subcategory: ', subcategory)
-    # print all the parameters
-    print('request.query_params: ', request.query_params)
-    print('------------------------------------- \n')
 
     if query != '':
         products = Product.objects.filter(name__icontains=query, is_active=True)
-    elif category != '':
-        products = Product.objects.filter(category__icontains=category, is_active=True)
     elif subcategory != '':
         products = Product.objects.filter(subCategory__icontains=subcategory, is_active=True)
+    elif category != '':
+        products = Product.objects.filter(category__icontains=category, is_active=True)
     else:
         products = Product.objects.all().filter(is_active=True)
 
@@ -371,12 +392,16 @@ def scrapeProducts(request):
         executable_path='./chromedriver.exe', options=options)
 
     stores = [
+
+        #  if '/password/' in url means that the store is in maintenance mode
+
+        # 'https://www.psicodelia.com.ar/productos/'
         # 'https://tienda.tuespacioorganizado.com.ar/cocina/'
         # 'https://losandes2.mitiendanube.com/vinos/',
         # 'https://casamartinez.mitiendanube.com/electronica/television/',
         # 'https://centralcafe.mitiendanube.com/'
         # # Belforte
-        # "https://www.belforte.com.ar/sandalias/",
+        "https://www.belforte.com.ar/sandalias/",
         # "https://www.belforte.com.ar/borcegos/",
         # "https://www.belforte.com.ar/botinetas/",
         # "https://www.belforte.com.ar/crema-para-cueros/",
@@ -564,7 +589,7 @@ def scrapeProducts(request):
     #     "https://www.murderdoll.com.ar/collares/collares-cadenas-grandes/",
 
     # #     # # JimmyRebel
-        "https://www.jimmyrebel.com.ar/remeras/",
+        # "https://www.jimmyrebel.com.ar/remeras/",
     #     "https://www.jimmyrebel.com.ar/shorts-y-bermudas/",
     #     "https://www.jimmyrebel.com.ar/accesorios/",
         # "https://www.jimmyrebel.com.ar/buzos/",
@@ -722,6 +747,8 @@ def scrapeProducts(request):
                     driver.quit()
                     exit()
 
+            # links = ['https://www.satanaclothes.com/productos/camisa-smith/']
+            links = ['https://www.murderdoll.com.ar/productos/aros-skull-swords/']
             for link in links:
                 driver.get(link)
                 driver.maximize_window()
@@ -1071,6 +1098,14 @@ def scrapeProducts(request):
                             colors_list.append(color_obj)
 
                         else:
+                            # if newsletter is present, close it
+                            try:
+                                newsletter = waitForElement("//div[@class='_dp_close']", driver, 0.01, False)
+                                newsletter.click()
+                                print('newsletter closed')
+                            except:
+                                pass
+
                             for size in sizes:
                                 color_obj = {}
                                 color_obj['color'] = 'Unico'
@@ -1136,6 +1171,14 @@ def scrapeProducts(request):
                                 color_obj['sizes'] = sizes_list
                                 colors_list.append(color_obj)
                             else:
+                                # if newsletter is present, close it
+                                try:
+                                    newsletter = waitForElement("//div[@class='_dp_close']", driver, 0.01, False)
+                                    newsletter.click()
+                                    print('newsletter closed')
+                                except:
+                                    pass
+
                                 for size in sizes:
                                     size_obj = {}
                                     size_obj['size'] = size.text
@@ -1161,6 +1204,13 @@ def scrapeProducts(request):
 
                 user = User.objects.get(id=1)
 
+                subCategory = ''
+                if name:
+                    # if name.lower() contains 'remeron' set subcategory to 'Remerones'
+                    if 'remeron' in name.lower():
+                        subCategory = 'Remerones'
+
+
                 # if some field except description is none set is_active to False
                 status = True
                 if not name or not price or not images or not category or not buy_button:
@@ -1174,6 +1224,8 @@ def scrapeProducts(request):
 
                     status = False
 
+                
+
                 # if product doesn't exist, create it
                 try:
                     product = Product.objects.get(original_url=link)
@@ -1186,6 +1238,7 @@ def scrapeProducts(request):
                         price=price,
                         description=description,
                         category=category,
+                        subCategory=subCategory,
                         original_url=link,
                         is_scraped=True,
                         is_active=status,
@@ -1193,10 +1246,25 @@ def scrapeProducts(request):
 
                     product.save()
 
-                # update product category
-                if product.category != category:
-                    product.category = category
+                
+                # update product price
+                if product.price != price:
+                    product.price = price
                     product.save()
+
+                # if product had subcategory then don't update category
+                if product.subCategory:
+                    pass
+                else:
+                    # # update product category
+                    if product.category != category:
+                        product.category = category
+                        product.save()
+
+                    # update product subcategory
+                    if product.subCategory != subCategory:
+                        product.subCategory = subCategory
+                        product.save()
 
 
                 for image in images_list:

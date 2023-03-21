@@ -16,7 +16,6 @@ import { Row, Col, Container, Form } from 'react-bootstrap'
 import Product from '../components/Product'
 
 const categories = [
-    'Inicio',
     'Vestidos',
     'Shorts y bermudas',
     'Faldas',
@@ -24,29 +23,15 @@ const categories = [
     'Bodys',
     'Hoodies/buzos/sweaters',
     'Pantalones',
-    'Remerones',
     'Conjuntos',
     'Mameluco',
     'Calzado',
+    'Camisas',
     'Accesorios',
-    'Remeras',
-    'Trajes de baño',
     'Chalecos',
     'Corset',
     'Camperas',
-    'Colección',
-    'Sale !',
-    'Sandalias',
-    'Borcegos',
-    'Botinetas',
-    'Crema para cueros',
-    'The end of $tw',
-    'Shorts',
-    'Buzos',
-    'Mustaqe kids',
-    'Mallas y bermudas',
-    'Buzos y abrigos',
-    'Gorras y beanies',
+    'Kids',
     'Otros',
 ]
 
@@ -62,14 +47,19 @@ function HomeScreen() {
 
     const keyword = searchParams.get('keyword') ? searchParams.get('keyword') : ''
     const category = searchParams.get('category') ? searchParams.get('category') : ''
+    const subcategory = searchParams.get('subcategory') ? searchParams.get('subcategory') : ''
     const [pageNumber, setPageNumber] = useState(searchParams.get('page') ? searchParams.get('page') : 1)
 
     useEffect(() => {
         // scroll to top
         window.scrollTo(0, 0)
-
         // if link has category, then dispatch listProducts with category
-        if (searchParams.get('category')) {
+        if (searchParams.get('subcategory')) {
+            dispatch(listProducts(keyword, pageNumber, category, subcategory))
+            dispatch(was_clicked_reset())
+        }
+            
+        else if (searchParams.get('category')) {
             dispatch(listProducts(keyword, pageNumber, category))
             dispatch(was_clicked_reset())
         }
@@ -78,7 +68,7 @@ function HomeScreen() {
             dispatch(was_clicked_reset())
         }
 
-    }, [dispatch, keyword, pageNumber])
+    }, [dispatch, keyword, pageNumber, category, subcategory])
 
     function getPaginationButtons(pages, page) {
         const MAX_BUTTONS = 10; // maximum number of pagination buttons to display
@@ -126,10 +116,13 @@ function HomeScreen() {
     return (
         <>
             {
-                // if link has category, then show category name
-                searchParams.get('category')
-                    ? <h1 className='text-center' >{searchParams.get('category')}</h1>
-                    : <h1 className='text-center' >All Products</h1>
+                // if link has subcategory, then show categorysubcategory
+                // else if link has category, then show category
+                // else show all
+                searchParams.get('subcategory') ? <h1 className='text-center my-4'>{subcategory}</h1>
+                    : searchParams.get('category') ? <h1 className='text-center my-4'>{category}</h1>
+                        : <h1 className='text-center my-4'>All</h1>
+
 
             }
             {/* filters Category and Price selects */}
@@ -161,6 +154,10 @@ function HomeScreen() {
                             value={searchParams.get('category') ? searchParams.get('category') : 'All'}
                             onChange={
                                 (e) => {
+                                    // clear search all params
+                                    searchParams.delete('keyword')
+                                    searchParams.delete('subcategory')
+                                    // set new params
                                     searchParams.set('category', e.target.value)
                                     searchParams.set('page', 1)
                                     window.location.search = searchParams.toString()
@@ -191,7 +188,10 @@ function HomeScreen() {
                         : products && products?.length > 0 ? (
                             <Row>
                                 {products.map((product) => (
-                                    <Col key={product.id} sm={6} md={6} lg={4} xl={3} className='mb-5'>
+                                    <Col key={product.id} sm={6} md={6} lg={4} xl={3} className='mb-5 col-6'
+                                    // max-height=''50vh'
+                                    style={{ maxHeight: '50%' }}
+                                    >
                                         <Product product={product} />
                                     </Col>
                                 ))}

@@ -120,8 +120,8 @@ function ADMIN_ListProductsScreen() {
                             <th>NAME</th>
                             <th>PRICE</th>
                             <th>CATEGORY</th>
-                            <th>BRAND</th>
-                            <th className="text-center">SIZES</th>
+                            <th>SUB-CATEGORY</th>
+                            <th className="text-center">COLORS</th>
                             <th className='text-center'>ACTIONS</th>
                         </tr>
                     </thead>
@@ -135,12 +135,19 @@ function ADMIN_ListProductsScreen() {
                                 </td>
                                 <td>{product.price}</td>
                                 <td>{product.category}</td>
-                                <td>{product.brand}</td>
+                                <td>{product.subCategory}</td>
                                 <td className="text-center">
+                                    {/* product.colors = Beige: {S: 10, M: 10, L: 10},
+                                                        Negro: {S: 10, M: 10, L: 10}
+                                    */}
                                     {
-                                        product.sizes?.map(p => (
-                                            <span key={p.id} className="badge badge-success text-dark">{p.size}</span>
+                                        // Object.keys(color) = ['Beige: {S: 10, M: 10, L: 10}']
+                                        Object.keys(product.colors).map(color => (
+                                            <div key={color}>
+                                                <span>{color}</span>
+                                            </div>
                                         ))
+
                                     }
                                 </td>
                                 <td className='text-center'>

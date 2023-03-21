@@ -8,7 +8,7 @@ function Footer() {
             <Container>
                 <Row>
                     <Col className='text-center py-3'>
-                        <p>Copyrigth &copy; Zoldyck</p>
+                        <p>Copyrigth &copy; Footer coming soon</p>
                     </Col>
                 </Row>
             </Container>

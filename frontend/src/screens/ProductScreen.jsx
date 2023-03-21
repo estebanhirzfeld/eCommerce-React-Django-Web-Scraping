@@ -75,6 +75,8 @@ function ProductScreen() {
     }, [dispatch, id, successProductReview, errorProductReview])
 
 
+
+
     const productDetails = useSelector(state => state.productDetails)
     const { loading, error, product, success } = productDetails
 
