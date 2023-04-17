@@ -58,7 +58,7 @@ export const createOrder = (order) => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.post(`${BASE_URL}/api/orders/add/`, order, config);
 
         dispatch({
@@ -92,7 +92,7 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.get(`${BASE_URL}/api/orders/${id}/`, config);
 
         dispatch({
@@ -126,7 +126,7 @@ export const getUserOrders = (id) => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.get(`${BASE_URL}/api/orders/user/${id}/`, config);
 
         dispatch({
@@ -145,7 +145,7 @@ export const getUserOrders = (id) => async (dispatch, getState) => {
 }
 
 
-export const payOrder = (orderId, paymentResult) => async (dispatch, getState) => {
+export const payOrder = (orderId, method, image = null) => async (dispatch, getState) => {
     try {
         dispatch({
             type: ORDER_PAY_REQUEST,
@@ -154,7 +154,87 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
 
         /// MercadoPago //////////////////////////////
 
+        if (method === 'MercadoPago') {
+
+            const { orderDetails: { order }, } = getState();
+
+            const expirationDate = new Date(order.expiryDate).getTime()
+
+            if (expirationDate < Date.now()) {
+                dispatch({
+                    type: ORDER_PAY_FAIL,
+                    payload: "La orden ha expirado",
+                });
+
+            } else {
+
+                const url = "https://api.mercadopago.com/checkout/preferences";
+
+                // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
+                // orderNames with Size and Color
+                // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | ' + item.size + ' | ' + item.color + ' \n').join(" ");
+                // orderNames with qty at the end
+                let orderNames = order.OrderItems.map((item) => item.name + ' | ' + item.size + ' | ' + item.color + ' x ' + item.qty + ' \n').join(" ");
+                const body = {
+                    "items": [
+                        {
+                            "id": order.id,
+                            "title": orderNames,
+                            "picture_url": "https://http2.mlstatic.com/D_NQ_NP_2X_692019-MLA43820000001_102020-O.webp",
+                            "quantity": 1,
+                            "description": 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                            "currency_id": "ARS",
+                            "unit_price": Number(order.totalPrice),
+                        }
+                    ],
+                    "payer": {
+                        "name": order.user.name,
+                        "email": order.user.email,
+                        "address": {
+                            "street_name": `${order.shippingAddress.address}, ${order.shippingAddress.city}`,
+                            "zip_code": order.shippingAddress.postalCode
+                        }
+                    },
+                    "back_urls": {
+                        "success": `http://localhost:5173/order/${order.id}`,
+                        "failure": `http://localhost:5173/order/${order.id}`,
+                        "pending": `http://localhost:5173/order/${order.id}`,
+                    },
+                    "auto_return": "approved",
+
+                    "notification_url": `https://87fe-186-127-157-186.sa.ngrok.io/api/orders/pay/${order.id}/`,
+                    "statement_descriptor": "Zoldyck Store",
+                    // "external_reference": order.id,
+                    "expires": false,
+                }
+
+                const { data } = await axios.post(url, body, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer APP_USR-944357534465341-092314-60cc827acfdc0e3ff80e99b84db94e81-1203886094"
+                    }
+                });
+
+                // //////////////////////////////////////////////
+
+                dispatch({
+                    type: ORDER_PAY_SUCCESS,
+                    payload: data,
+                });
+
+            }
+        }
+
+
+    /// Tranferencia Bancaria //////////////////////////////
+
+    else if(method === 'Tranferencia Bancaria') {
+        // upload payment proof to server
+        console.log('Tranferencia Bancaria');
         const { orderDetails: { order }, } = getState();
+        const {
+            login: { userInfo },
+        } = getState();
 
         const expirationDate = new Date(order.expiryDate).getTime()
 
@@ -163,67 +243,36 @@ export const payOrder = (orderId, paymentResult) => async (dispatch, getState) =
                 type: ORDER_PAY_FAIL,
                 payload: "La orden ha expirado",
             });
+        }
 
-        } else {
+        else {
 
-            const url = "https://api.mercadopago.com/checkout/preferences";
-
-            // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | \n').join(" ");
-            // orderNames with Size and Color
-            // let orderNames = order.OrderItems.map((item) => item.name + ' x ' + item.qty + ' | ' + item.size + ' | ' + item.color + ' \n').join(" ");
-            // orderNames with qty at the end
-            let orderNames = order.OrderItems.map((item) => item.name + ' | ' + item.size + ' | ' + item.color + ' x ' + item.qty + ' \n').join(" ");
-
-            console.log('orderNames from payOrder' ,orderNames)
-
-            const body = {
-                "items": [
-                    {
-                        "id": order.id,
-                        "title": orderNames,
-                        "picture_url": "https://http2.mlstatic.com/D_NQ_NP_2X_692019-MLA43820000001_102020-O.webp",
-                        "quantity": 1,
-                        "description": 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                        "currency_id": "ARS",
-                        "unit_price": Number(order.totalPrice),
-                    }
-                ],
-                "payer": {
-                    "name": order.user.name,
-                    "email": order.user.email,
-                    "address": {
-                        "street_name": `${order.shippingAddress.address}, ${order.shippingAddress.city}`,
-                        "zip_code": order.shippingAddress.postalCode
-                    }
-                },
-                "back_urls": {
-                    "success": `http://localhost:5173/order/${order.id}`,
-                    "failure": `http://localhost:5173/order/${order.id}`,
-                    "pending": `http://localhost:5173/order/${order.id}`,
-                },
-                "auto_return": "approved",
-                
-                "notification_url": `https://87fe-186-127-157-186.sa.ngrok.io/api/orders/pay/${order.id}/`,
-                "statement_descriptor": "Zoldyck Store",
-                // "external_reference": order.id,
-                "expires": false,
-            }
-
-            const { data } = await axios.post(url, body, {
+            // post image to server
+            const formData = new FormData();
+            formData.append('image', image);
+            const { data } = await axios.post(`${BASE_URL}/api/orders/pay/proof/${orderId}/`, formData, {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer APP_USR-944357534465341-092314-60cc827acfdc0e3ff80e99b84db94e81-1203886094"
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${userInfo.token}`,
                 }
             });
-
-            // //////////////////////////////////////////////
 
             dispatch({
                 type: ORDER_PAY_SUCCESS,
                 payload: data,
             });
-
+            console.log(data);
+            console.log('Success');
         }
+
+    }
+    else{
+        dispatch({
+            type: ORDER_PAY_FAIL,
+            payload: "No se ha seleccionado un metodo de pago",
+        });
+    }
+
     } catch (error) {
         dispatch({
             type: ORDER_PAY_FAIL,
@@ -251,7 +300,7 @@ export const listOrders = () => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.get(`${BASE_URL}/api/orders/myorders/`, config);
 
         dispatch({
@@ -285,7 +334,7 @@ export const listAllOrders = () => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.get(`${BASE_URL}/api/orders/`, config);
 
         dispatch({
@@ -319,7 +368,7 @@ export const updateDeliverOrder = (id) => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.put(`${BASE_URL}/api/orders/update/delivered/${id}/`, {}, config);
 
         dispatch({
@@ -353,7 +402,7 @@ export const updatePaidOrder = (id) => async (dispatch, getState) => {
             },
         };
 
-        
+
         const { data } = await axios.put(`${BASE_URL}/api/orders/update/paid/${id}/`, {}, config);
 
         dispatch({

@@ -36,17 +36,7 @@ function Product({ product }) {
         <Card className='h-100 my-3 border-0'
         style={{ transform: isHovered ? 'translateY(-10px)' : 'translateY(0px)', transition: 'transform 0.3s ease-in-out' }}
         >
-            {/* heart icon buttonin top right corner when hovered upon image position relative */}
-            <div className='position-relative'>
-                <div className='position-absolute top-10 end-0'>
-                    {
-                        isHovered ? (
-                            <i className='fas fa-heart fa-2x text-danger'></i>
-                        ) : null
-                    }
-                </div>
-            </div>
-            
+
 
         
             <Link to={`/product/${product.id}`}>
@@ -66,7 +56,7 @@ function Product({ product }) {
                         {/* <strong>{product.name}</strong> */}
                         {/* <strong>{product.name.toUpperCase()}</strong> */}
                         {/* to lower and then capital case every word */}
-                        <strong>{product.name.toLowerCase().replace(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())}</strong>
+                        <strong>{product.name.toLowerCase().replace(/(^\w{1})|(\s{1}\w{1})/g, match => match.toUpperCase())}</strong> 
                         
                     </Card.Title>
                 </Link>

@@ -12,17 +12,9 @@ function SearchBar() {
     const submitHandler = (e) => {
         e.preventDefault();
         if (keyword.trim()) {
-
-            navigate({
-                search: `${createSearchParams({
-                    keyword: keyword,
-                    page: 1
-                })}`
-            }
-            );
-
+            navigate(`/?${createSearchParams({ keyword: keyword, page: 1 })}`);
         } else {
-            navigate('/')
+            navigate('/');
         }
     }
 

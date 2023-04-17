@@ -1,206 +1,139 @@
-import React, { useState } from "react"
-import { useEffect } from "react"
-import { Form, Button, Container, Col, Image } from "react-bootstrap"
+import React, { useState, useRef, useEffect } from 'react';
+import { Container, Card, Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux'
+import { payOrder } from '../actions/orderActions'
 
-import SearchBar from "../components/SearchBar"
+// import css
+import './Test.css';
 
-const Test = () => {
+function Test({id}) {
+    const dispatch = useDispatch()
+    const [image, setImage] = useState(null);
+    const [error, setError] = useState(null);
+    const fileInputRef = useRef(null);
 
-    const [hover, setHover] = useState(false)
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [address, setAddress] = useState('')
+    const orderPay = useSelector(state => state.orderPay)
+    const { paymentLink, success, error: errorPay } = orderPay
 
-    const products = [
-        {
-            name: 'Product 1',
-            price: 100,
-            description: 'Product 1 description',
-            image: 'https://picsum.photos/200/300'
-        },
-        {
-            name: 'Product 2',
-            price: 200,
-            description: 'Product 2 description',
-            image: 'https://picsum.photos/200/300'
-        }
-    ]
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        const data = {
-            name,
-            email,
-            address,
-
-            products
-        }
-
-        console.log('Order', data)
-    }
-
-    const submitHandler = (e) => {
+    const handleDrop = (e) => {
         e.preventDefault();
-        console.log(search);
+        e.stopPropagation();
+        e.currentTarget.classList.remove('dragging-over');
+        const file = e.dataTransfer.files[0];
+        if (file.type.startsWith('image/')) {
+            setError(null);
+            setImage(file);
+        } else {
+            setError('Invalid file type. Please select an image.');
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // apply the visual effect
+        e.currentTarget.classList.add('dragging-over');
+    };
+
+    const handleRemoveImage = (e) => {
+        e.stopPropagation();
+        setImage(null);
+    };
+
+    const handleClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file.type.startsWith('image/')) {
+            setError(null);
+            setImage(file);
+        } else {
+            setError('Invalid file type. Please select an image.');
+        }
+    };
+
+    const payHandler = () => {
+        console.log(`dispatching with ${id} and ${image}`)
+        dispatch(payOrder(id, 'Tranferencia Bancaria', image))
     }
+
+    useEffect(() => {
+        if (success) {
+            alert('Upload successful')
+        }
+        else if (errorPay) {
+            alert(errorPay)
+        }
+    }, [success, errorPay])
 
 
     return (
-        <>
-            <h1>Search Bar</h1>
+        <Container>
+            <div className="file-upload-wrapper" >
+                {/* style={{ width: '30%' }}> */}
 
-            {/* image with div overlap */}
-            <div style={{ position: 'relative', width: '300px', height: '300px' }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-                <img src={'http://localhost:8000/images/BONES_1_cWukhjH.jpg'} style={{ width: '100%', height: '100%' }} />
-                <div style={{ position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: hover ? 'block' : 'none' }}>
-                    {/* trash button on center */}
-                    <Button style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} onClick={() => alert('delete')} variant='danger'>
-                        <i className="fas fa-trash-alt" style={{ color: 'white', fontSize: '2rem' }}></i>
-                    </Button>
-                </div>
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            {/* <Form onSubmit={submitHandler} inline>
-                <Form.Control
-                    type='text'
-                    name='q'
-                    onChange={(e) => setKeyword(e.target.value)}
-                    className='mr-sm-2 ml-sm-5'
-                ></Form.Control>
-
-                <Button
-                    type='submit'
-                    variant='outline-success'
-                    className='p-2'
+                <Card
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    className={`card-body card-dragdrop view file-upload ${image ? 'has-image' : ''}`}
+                    // on hover change the border color
+                    style={{ border: '1px dashed #ccc', padding: '20px', borderRadius: '5px' }}
+                    onClick={handleClick}
                 >
-                    Submit
-                </Button>
-            </Form> */}
-
-            <SearchBar />
-
-            <Container>
-                <p>Product List</p>
-                {products.map((product, index) => (
-                    <Col key={index} sm={12} md={6} lg={4} xl={3}>
-                        <strong>
-                            {product.name}
-                        </strong>
-                    </Col>
-                ))}
-            </Container>
-
-            <Form onSubmit={handleSubmit}>
-
-                {/* name */}
-                <Form.Group className="my-4" controlId="name">
-                    <Form.Label>Nombre</Form.Label>
-                    <Form.Control
-                        required
-                        type="text"
-                        placeholder="Ingrese el nombre"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    ></Form.Control>
-                </Form.Group>
-
-                {/* email */}
-                <Form.Group className="my-4" controlId="formBasicEmail">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                        required
-                        type="email"
-                        placeholder="Ingrese el email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </Form.Group>
-
-                {/* address */}
-                <Form.Group className="my-4" controlId="address">
-                    <Form.Label>Dirección</Form.Label>
-                    <Form.Control
-                        required
-                        type="text"
-                        placeholder="Ingrese la dirección"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                    ></Form.Control>
-                </Form.Group>
-
-                {/* submit */}
-                <Button type="submit" variant="primary">
-                    Submit
-                </Button>
-
-
-            </Form>
-
-            {/* Satana */}
-            Bodys
-            Calzas
-            Monoprendas
-
-            {/* Kitanas */}
-            Lovers Era Ss'23
-            Mayoristas
-            Temporada Pasada
-            Accesorios
-
-            {/* Hippy Killer */}
-            Chombas
-            Camisas
-            {/* Shorts */} {/* Bermudas */}
-            Shorts Y Bermudas
-            {/* Buzos */} {/* Sweaters */}
-            Buzos Y Sweaters
-            {/* Remeras */} {/* Top */} {/* Crop Top */}
-            Remeras Y Tops
-            Hawaiana
-            Pantalones
-            Polleras
-            Bikers
-            {/* Shorts */} {/* Faldas */}
-            Faldas Y Shorts
-            Camperas
-            Vestidos
-            Conjuntos Deportivos
-
-
-
-            {/* Scraping */}
-
-            Important:+ products from last update to last update
-            1st products with more views
-            2nd products more selled
-            3rd products with more cart items
-            4th products with more wishlist items
-            5th products with more reviews
-
-            {/* Envios gratis en todos los productos */}
-
-
-
-
-
-
-
-        </>
-    )
+                    {!image && (
+                        <div className="card-text file-upload-message d-flex flex-column align-items-center justify-content-center" style={{ cursor: 'pointer' }}>
+                            <i class="fa-solid fa-cloud-arrow-up fa-2xl mt-4"></i>
+                            <p className='mt-3'>Drag and drop a file here or click</p>
+                            {error && <p className="file-upload-error">{error}</p>}
+                        </div>
+                    )}
+                    {image && (
+                        <div className="file-upload-preview">
+                            <span className="file-upload-render">
+                                <img src={URL.createObjectURL(image)} alt="Preview" className='w-100 imageDrop' style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }} />
+                                <div className='imageDeleteDiv'>
+                                    <p>Change Image</p>
+                                </div>
+                            </span>
+                            <div className="file-upload-infos">
+                                <div className="file-upload-infos-inner">
+                                    <p className="file-upload-filename">
+                                        <span className="file-upload-filename-inner">
+                                            {/* {image.name} */}
+                                            {image.name.length > 20 ? image.name.substring(0, 15) + '...' : image.name}
+                                        </span>
+                                    </p>
+                                    <p className="file-upload-infos-message">
+                                        Drag and drop or click to replace
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div className="mask rgba-stylish-slight" style={{ display: 'none' }}></div>
+                    <div className="file-upload-errors-container" style={{ display: 'none' }}>
+                        <ul></ul>
+                    </div>
+                    <input type="file" id="input-file-max-fs" className="file_upload" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} ref={fileInputRef} />
+                    {image && (
+                        <Button type="button" variant="danger" size="sm" className="waves-effect waves-light" onClick={handleRemoveImage} style={{ marginTop: '10px' }}>
+                            Remove <i class="fa-solid fa-trash ml-1"></i>
+                        </Button>
+                    )}
+                </Card>
+            </div>
+            <Button
+                type='button'
+                className='btn btn-block mt-3'
+                onClick={payHandler}
+            >
+                Upload Proof of Payment
+            </Button>
+        </Container>
+    );
 }
 
-export default Test
+export default Test;
+

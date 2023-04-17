@@ -210,7 +210,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['category', 'subCategory', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images', 'original_url']
+        fields = ['category', 'subCategory', 'createdAt', 'description', 'id', 'name', 'numReviews', 'price', 'rating', 'colors', 'reviews', 'images', 'original_url', 'is_active']
 
     def get_images(self, obj):
         images = obj.productimage_set.all()
@@ -266,6 +266,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'deliveredAt',
             'createdAt',
             'id',
+            'paymentProof',
         )
 
     def get_OrderItems(self, obj):

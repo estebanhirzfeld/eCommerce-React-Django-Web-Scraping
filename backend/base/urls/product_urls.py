@@ -12,5 +12,7 @@ urlpatterns = [
     path('create/', views.createProduct, name='product-create'),
     path('<int:pk>/', views.getProduct, name='product'),
 
-    path('scrape/', views.scrapeProducts, name='products-scrape'),
+    path('scrape/<int:pk>/', views.scrapeProduct, name='product-scrape'),
+    path('scrape/discover/', views.discoverProducts, name='products-discover'),
+    # path('scrape/', views.scrapeProducts, name='products-scrape'),
 ]

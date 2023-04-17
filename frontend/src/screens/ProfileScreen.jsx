@@ -141,7 +141,7 @@ function ProfileScreen() {
                                     <tbody>
                                         {
                                             loadingOrders ? <h2>Loading...</h2> :
-                                                orders.reverse().map(order => (
+                                                orders.map(order => (
                                                     <tr key={order.id}>
                                                         <td>{order.id}</td>
                                                         <td>{order.createdAt.substring(0, 10)}</td>

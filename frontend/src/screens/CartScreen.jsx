@@ -38,8 +38,8 @@ function CartScreen() {
 
     useEffect(() => {
         if (cartItems) {
-            // if at least one item is out of stock, show the message
-            setIsOutOfStock(cartItems.some(item => item.qty > item.stock))
+            // if at least one item is out of stock, show the message or is_active = false
+            setIsOutOfStock(cartItems.some(item => item.qty > item.stock || item.product.is_active === false))
             console.log(cartItems)
         }
     }, [cartItems, loading, error, success, dispatch, navigate])
@@ -75,7 +75,7 @@ function CartScreen() {
                                         <p className='mt-2'>Size: {item.size}</p>
                                         <p className='mt-2'>Color: {item.color}</p>
                                         {
-                                            item.stock <= 0 ? <p className='text-danger'>Out of stock</p> : null
+                                            item.stock <= 0 || item.product.is_active === false ? <p className='text-danger'>Out of stock</p> : null
                                         }
                                     </Col>
 
@@ -133,7 +133,7 @@ function CartScreen() {
                             <Button
                                 type='button'
                                 className='btn-block'
-                                disabled={isOutOfStock || error || !cartItems || cartItems.length === 0}
+                                disabled={isOutOfStock || error || !cartItems || cartItems.length === 0 }
                                 onClick={checkoutHandler}
                             >
                                 Proceed To Checkout

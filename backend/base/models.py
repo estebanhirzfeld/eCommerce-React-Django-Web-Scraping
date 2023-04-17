@@ -1,3 +1,5 @@
+import random
+from urllib.parse import urlparse
 from django.utils import timezone
 from datetime import timedelta
 from django.utils.timezone import now
@@ -66,6 +68,10 @@ class Product(models.Model):
             viewed_at__gte=day_ago
         ).count()
 
+    class Meta:
+        ordering = [F'?',]
+
+
     def __str__(self):
         return self.name
 
@@ -106,6 +112,7 @@ class Order(models.Model):
         max_digits=7, decimal_places=2, null=True, blank=True)
     totalPrice = models.DecimalField(
         max_digits=7, decimal_places=2, null=True, blank=True)
+    paymentProof = models.ImageField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
 
     STATUS_CHOICES = (
@@ -134,6 +141,9 @@ class Order(models.Model):
         max_length=200, null=True, blank=True)
     ORDER_ORIGIN_NUMBER = models.CharField(
         max_length=20, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-createdAt']
 
     def __str__(self):
         return str(self.createdAt)
@@ -296,6 +306,10 @@ class Wishlist(models.Model):
 class WishlistItem(models.Model):
     wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    addedAt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-addedAt']
 
     def __str__(self):
         return str(self.product)

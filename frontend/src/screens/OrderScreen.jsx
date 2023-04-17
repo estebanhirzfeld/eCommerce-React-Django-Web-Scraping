@@ -9,6 +9,7 @@ import { Container, Row, Col, ListGroup, Image, Card, Button } from 'react-boots
 import { useNavigate } from 'react-router-dom'
 
 import { updateDeliverOrder, updatePaidOrder } from '../actions/orderActions'
+import Test from './Test'
 
 function OrderScreen() {
 
@@ -37,14 +38,19 @@ function OrderScreen() {
 
     useEffect(() => {
 
-        if (success) {
+        if (success && order.paymentMethod === 'Mercado Pago') {
             window.location.href = paymentLink
         }
+        else if (success && order.paymentMethod === 'Tranferencia Bancaria') {
+            // reload the page
+            dispatch(getOrderDetails(id))
+        }
+
 
     }, [success, paymentLink, dispatch, successPaid, successDeliver])
 
     const payHandler = () => {
-        dispatch(payOrder(id))
+        dispatch(payOrder(id, order.paymentMethod))
     }
 
     const updatePaidHandler = () => {
@@ -75,11 +81,42 @@ function OrderScreen() {
                                     {order.paymentMethod}
                                 </p>
 
-                                {order.isPaid ?
-                                    <div className='alert alert-success'>Paid on {order.paidAt}</div>
+                                {/* if order.paymentMethod is Tranferencia Bancaria show the button to upload the proof of payment */}
+
+
+                                {order.isPaid ? (
+                                    <>
+                                        <div className='alert alert-success'>Paid on {order.paidAt}</div>
+                                    </>
+                                )
                                     : new Date(order.expiryDate).getTime() < Date.now() ?
                                         <div className='alert alert-danger'>Order Expired on {order.expiryDate.slice(0, 10)}</div>
-                                        : <div className='alert alert-danger'>Not Paid</div>
+                                        : <div className={order.paymentMethod === 'Tranferencia Bancaria' ? 'alert alert-info' : 'alert alert-danger'}>
+
+                                            {/* if paymentProof ! null show the image */}
+                                            {order.paymentProof ?
+                                                <>
+                                                    <p>Proof of payment</p>
+                                                    <Image src={`${BASE_URL}${order.paymentProof}`} alt={order.paymentProof} fluid rounded />
+                                                </>
+                                                :
+                                                order.paymentMethod === 'Tranferencia Bancaria' && !order.isPaid && order.user.id === userInfo.id ? (
+                                                    <>
+                                                        <p>Attach the proof of payment</p>
+                                                        <Test
+                                                            id={order.id}
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>Not Paid</>
+                                                )}
+
+
+
+
+
+
+                                        </div>
                                 }
 
                             </ListGroup.Item>
@@ -167,9 +204,7 @@ function OrderScreen() {
 
                         </Card>
 
-                        {/* only show the button to the user who made the order */}
-
-                        {!order?.isPaid && order?.user?.id === userInfo?.id && (
+                        {!order?.isPaid && order?.user?.id === userInfo?.id && order?.paymentMethod === 'MercadoPago' && (
                             <ListGroup.Item>
                                 {errorPay || new Date(order.expiryDate).getTime() < Date.now() ?
                                     <></>

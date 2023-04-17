@@ -72,9 +72,8 @@ function ProductScreen() {
         window.scrollTo(0, 0)
         dispatch(listProductDetails(id))
         dispatch(getWishlist())
+        console.log(product)
     }, [dispatch, id, successProductReview, errorProductReview])
-
-
 
 
     const productDetails = useSelector(state => state.productDetails)
@@ -167,185 +166,204 @@ function ProductScreen() {
                                     <Col md={6}>
                                         <Carousel activeIndex={activeIndex} onSelect={handleCarouselSelect}>
                                             {product.images &&
-                                            product.images.map((image, index) => (
-                                                <Carousel.Item key={index}>
-                                                    <img className="d-block w-100" src={`${BASE_URL}${image.image}`} alt={product.name} />
-                                                </Carousel.Item>
-                                            ))}
+                                                product.images.map((image, index) => (
+                                                    <Carousel.Item key={index}>
+                                                        <img className="d-block w-100" src={`${BASE_URL}${image.image}`} alt={product.name} />
+                                                    </Carousel.Item>
+                                                ))}
                                         </Carousel>
-                                </Col>
-
-                                {was_clicked
-                                    ?
-                                    <Col md={5}>
-                                        <CartList status={was_clicked} />
                                     </Col>
-                                    :
-                                    <Col md={5}>
-                                        <div className='my-3 text-muted text-decoration-none'>
-                                            {/* <Button onClick={() => navigate(-1)} className='btn btn-light my-3' >Go Back </Button> */}
-                                            {/* BreadCrumbs */}
-                                            {/* // to='/' className='text-decoration-none text-muted'>Home</Link> / <Link className='text-decoration-none text-muted' to={`/?category=${product?.category}`}>{product?.category}</Link> / {product?.subCategory ? <Link className='text-decoration-none text-muted' to={`/?category=${product?.category}&subcategory=${product?.subCategory}`}>{product?.subCategory}</Link> : ''} / {product?.name} */}
-                                            {/* // Home / product?.category / product?.subcategory / product?.name */}
 
-                                            <Link to='/' className='text-decoration-none text-muted'>
-                                                Home
-                                            </Link>
-                                            /
-                                            <Link to={`/?category=${product?.category}`} className='text-decoration-none text-muted'>
-                                                {product?.category}
-                                            </Link>
-                                            /
-                                            {product?.subCategory
-                                                ?
-                                                <Link to={`/?category=${product?.category}&subcategory=${product?.subCategory}`} className='text-decoration-none text-muted'>
-                                                    {product?.subCategory}
+                                    {was_clicked
+                                        ?
+                                        <Col md={5}>
+                                            <CartList status={was_clicked} />
+                                        </Col>
+                                        :
+                                        <Col md={5}>
+                                            <div className='my-3 text-muted text-decoration-none'>
+                                                {/* <Button onClick={() => navigate(-1)} className='btn btn-light my-3' >Go Back </Button> */}
+                                                {/* BreadCrumbs */}
+                                                {/* // to='/' className='text-decoration-none text-muted'>Home</Link> / <Link className='text-decoration-none text-muted' to={`/?category=${product?.category}`}>{product?.category}</Link> / {product?.subCategory ? <Link className='text-decoration-none text-muted' to={`/?category=${product?.category}&subcategory=${product?.subCategory}`}>{product?.subCategory}</Link> : ''} / {product?.name} */}
+                                                {/* // Home / product?.category / product?.subcategory / product?.name */}
+
+                                                <Link to='/' className='text-decoration-none text-muted'>
+                                                    Home
                                                 </Link>
-                                                :
-                                                ''
-                                            }
-                                            /
-                                            {product?.name}
-
-
-
-                                        </div>
-                                        <ListGroup variant='flush'>
-                                            <ListGroup.Item>
-                                                <h3>{product.name}</h3>
-                                            </ListGroup.Item>
-                                            <ListGroup.Item>
-                                                {product.rating
-                                                    ? <Rating
-                                                        value={product.rating ? product.rating : '0'}
-                                                        text={product.numReviews ? `${product.numReviews} reviews` : '0'}
-                                                        color={'#f8e825'} />
-                                                    : 'There is no rating for this product yet'}
-                                            </ListGroup.Item>
-                                            <ListGroup.Item className='my-3'>
-                                                ${product.price}
-                                            </ListGroup.Item>
-                                        </ListGroup>
-                                        <Card className='border-0'>
-                                            <ListGroup variant='flush'>
-                                                {
-                                                    success && product?.colors ? (
-                                                        <Selectors
-                                                            colors={product.colors}
-                                                            id={id}
-                                                            was_added={was_added}
-                                                            addToCartHandler={addToCartHandler}
-                                                            addToWishlistHandler={addToWishlistHandler}
-
-                                                        ></Selectors>
-                                                    )
-                                                        : null
+                                                /
+                                                <Link to={`/?category=${product?.category}`} className='text-decoration-none text-muted'>
+                                                    {product?.category}
+                                                </Link>
+                                                {product?.subCategory
+                                                    ?
+                                                    <Link to={`/?category=${product?.category}&subcategory=${product?.subCategory}`} className='text-decoration-none text-muted'>
+                                                        /{product?.subCategory}
+                                                    </Link>
+                                                    :
+                                                    ''
                                                 }
+                                                /
+                                                {product?.name}
+
+                                            </div>
+                                            <ListGroup variant='flush'>
+                                                <ListGroup.Item>
+                                                    <h3>{product.name}
+                                                    {/* if user is admin add update button*/}
+                                                        {userInfo && userInfo.is_Admin &&
+                                                            <a href={`http://localhost:8000/api/products/scrape/${product.id}`} target="_blank" className='btn btn-light my-3' rel="noopener noreferrer">
+                                                                <i className='fas fa-sync text-success'></i>
+                                                            </a>
+                                                        }
+                                                        {/* if user is admin add link to django admin */}
+                                                        {userInfo && userInfo.is_Admin &&
+                                                            <a href={`http://localhost:8000/admin/base/product/${product.id}/change/`} target="_blank" className='btn btn-light my-3' rel="noopener noreferrer">
+                                                                <i className='fas fa-edit text-danger'></i>
+                                                            </a>
+                                                        }
+                                                        {/* if user is admin add link edit product */}
+                                                        {userInfo && userInfo.is_Admin &&
+                                                            <Link to={`/admin/product/${product.id}/edit`} className='btn btn-light my-3'>
+                                                                <i className='fas fa-edit text-warning'></i>
+                                                            </Link>
+                                                        }
+                                                                
+                                                    </h3>
+
+                                                </ListGroup.Item>
+                                                <ListGroup.Item>
+                                                    {product.rating
+                                                        ? <Rating
+                                                            value={product.rating ? product.rating : '0'}
+                                                            text={product.numReviews ? `${product.numReviews} reviews` : '0'}
+                                                            color={'#f8e825'} />
+                                                        : 'There is no rating for this product yet'}
+                                                </ListGroup.Item>
+                                                <ListGroup.Item className='my-3'>
+                                                    ${product.price}
+                                                </ListGroup.Item>
                                             </ListGroup>
-                                        </Card>
-                                    </Col>
-                                }
+                                            <Card className='border-0'>
+                                                <ListGroup variant='flush'>
+                                                    {
+                                                        success && product?.colors ? (
+                                                            <Selectors
+                                                                colors={product.colors}
+                                                                id={id}
+                                                                was_added={was_added}
+                                                                is_active={product.is_active}
+                                                                addToCartHandler={addToCartHandler}
+                                                                addToWishlistHandler={addToWishlistHandler}
+
+                                                            ></Selectors>
+                                                        )
+                                                            : null
+                                                    }
+                                                </ListGroup>
+                                            </Card>
+                                        </Col>
+                                    }
 
 
-                            </Row>
+                                </Row>
                                 {/* Leave a Review */}
-            {/* button to change between reviews amd description of the product */}
-            <ButtonGroup className='mb-3 justify-content-between align-items-center'>
-                <Button
-                    variant='outline-secondary'
-                    onClick={() => setIsDescription(true)}
-                >
-                    Description
-                </Button>
-                <Button
-                    variant='outline-secondary'
-                    onClick={() => setIsDescription(false)}
-                >
-                    Reviews
-                </Button>
-            </ButtonGroup>
-            {/* if isDescription is true, show the description of the product */}
-            {isDescription
-                ? <div>
-                    <h2>Description</h2>
-                    <p>{product.description}</p>
-                </div>
-                : <Row className='mt-5'>
-                    <Col md={8}>
-                        <ListGroup variant='flush'>
-                            <ListGroup.Item>
-                                <h2>Reviews</h2>
-                                {product?.reviews?.length === 0 &&
-                                    <div className='alert alert-info'>There are no reviews for this product yet</div>}
-                                <ListGroup variant='flush'>
-                                    {product.reviews.map(review => (
-                                        <ListGroup.Item key={review.id}>
-                                            <strong>{review.name}</strong>
-                                            <Rating value={review.rating} color={'#f8e825'} />
-                                            <p>{review.createdAt.substring(0, 10)}</p>
-                                            <p>{review.comment}</p>
-                                        </ListGroup.Item>
-                                    ))}
-                                    <ListGroup.Item>
-                                        <h2>Write a Customer Review</h2>
-                                        {errorProductReview &&
-                                            <div className='alert alert-danger' role='alert'>
-                                                {errorProductReview}
-                                            </div>
-                                        }
-                                        {userInfo ? (
-                                            <Form onSubmit={submitHandler}>
-                                                <Form.Group controlId='rating'>
-                                                    <Form.Label>Rating</Form.Label>
-                                                    <Form.Control
-                                                        as='select'
-                                                        required
-                                                        value={rating}
-                                                        onChange={(e) => setRating(e.target.value)}
-                                                    >
-                                                        <option value=''>Select...</option>
-                                                        <option value='1'>1 - Poor</option>
-                                                        <option value='2'>2 - Fair</option>
-                                                        <option value='3'>3 - Good</option>
-                                                        <option value='4'>4 - Very Good</option>
-                                                        <option value='5'>5 - Excellent</option>
-                                                    </Form.Control>
-                                                </Form.Group>
-                                                <Form.Group controlId='comment'>
-                                                    <Form.Label>Comment</Form.Label>
-                                                    <Form.Control
-                                                        as='textarea'
-                                                        row='3'
-                                                        value={comment}
-                                                        maxLength='200'
-                                                        onChange={(e) => setComment(e.target.value)}
-                                                    ></Form.Control>
-                                                </Form.Group>
-                                                <Button
-                                                    disabled={loadingProductReview}
-                                                    type='submit'
-                                                    variant='primary'
-                                                >
-                                                    Submit
-                                                </Button>
-                                            </Form>
-                                        ) : (
-                                            <div className='container-fluid alert alert-info'>
-                                                Please <Link to='/login'>sign in</Link> to write a review{' '}
-                                            </div>
-                                        )}
-                                    </ListGroup.Item>
-                                </ListGroup>
-                            </ListGroup.Item>
-                        </ListGroup>
-                    </Col>
-                </Row>
-            }
-        </Container>
+                                {/* button to change between reviews amd description of the product */}
+                                <ButtonGroup className='mb-3 justify-content-between align-items-center'>
+                                    <Button
+                                        variant='outline-secondary'
+                                        onClick={() => setIsDescription(true)}
+                                    >
+                                        Description
+                                    </Button>
+                                    <Button
+                                        variant='outline-secondary'
+                                        onClick={() => setIsDescription(false)}
+                                    >
+                                        Reviews
+                                    </Button>
+                                </ButtonGroup>
+                                {/* if isDescription is true, show the description of the product */}
+                                {isDescription
+                                    ? <div>
+                                        <h2>Description</h2>
+                                        <p>{product.description}</p>
+                                    </div>
+                                    : <Row className='mt-5'>
+                                        <Col md={8}>
+                                            <ListGroup variant='flush'>
+                                                <ListGroup.Item>
+                                                    <h2>Reviews</h2>
+                                                    {product?.reviews?.length === 0 &&
+                                                        <div className='alert alert-info'>There are no reviews for this product yet</div>}
+                                                    <ListGroup variant='flush'>
+                                                        {product.reviews.map(review => (
+                                                            <ListGroup.Item key={review.id}>
+                                                                <strong>{review.name}</strong>
+                                                                <Rating value={review.rating} color={'#f8e825'} />
+                                                                <p>{review.createdAt.substring(0, 10)}</p>
+                                                                <p>{review.comment}</p>
+                                                            </ListGroup.Item>
+                                                        ))}
+                                                        <ListGroup.Item>
+                                                            <h2>Write a Customer Review</h2>
+                                                            {errorProductReview &&
+                                                                <div className='alert alert-danger' role='alert'>
+                                                                    {errorProductReview}
+                                                                </div>
+                                                            }
+                                                            {userInfo ? (
+                                                                <Form onSubmit={submitHandler}>
+                                                                    <Form.Group controlId='rating'>
+                                                                        <Form.Label>Rating</Form.Label>
+                                                                        <Form.Control
+                                                                            as='select'
+                                                                            required
+                                                                            value={rating}
+                                                                            onChange={(e) => setRating(e.target.value)}
+                                                                        >
+                                                                            <option value=''>Select...</option>
+                                                                            <option value='1'>1 - Poor</option>
+                                                                            <option value='2'>2 - Fair</option>
+                                                                            <option value='3'>3 - Good</option>
+                                                                            <option value='4'>4 - Very Good</option>
+                                                                            <option value='5'>5 - Excellent</option>
+                                                                        </Form.Control>
+                                                                    </Form.Group>
+                                                                    <Form.Group controlId='comment'>
+                                                                        <Form.Label>Comment</Form.Label>
+                                                                        <Form.Control
+                                                                            as='textarea'
+                                                                            row='3'
+                                                                            value={comment}
+                                                                            maxLength='200'
+                                                                            onChange={(e) => setComment(e.target.value)}
+                                                                        ></Form.Control>
+                                                                    </Form.Group>
+                                                                    <Button
+                                                                        disabled={loadingProductReview}
+                                                                        type='submit'
+                                                                        variant='primary'
+                                                                    >
+                                                                        Submit
+                                                                    </Button>
+                                                                </Form>
+                                                            ) : (
+                                                                <div className='container-fluid alert alert-info'>
+                                                                    Please <Link to='/login'>sign in</Link> to write a review{' '}
+                                                                </div>
+                                                            )}
+                                                        </ListGroup.Item>
+                                                    </ListGroup>
+                                                </ListGroup.Item>
+                                            </ListGroup>
+                                        </Col>
+                                    </Row>
+                                }
+                            </Container>
                             :
-    <h2>No Product Found</h2>
-}
-<div id="toast"><div id="img"><i className="fas fa-shopping-cart"></i></div><div id="desc">Product Added to Cart! </div></div>
+                            <h2>No Product Found</h2>
+            }
+            <div id="toast"><div id="img"><i className="fas fa-shopping-cart"></i></div><div id="desc">Product Added to Cart! </div></div>
         </div >
     )
 }

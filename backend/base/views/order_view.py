@@ -121,8 +121,24 @@ def getOrdersByUser(request, pk):
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+# attach payment proof'
+def attachProof(request,pk):
+    user = request.user
+    image = request.data['image']
+    order = Order.objects.get(id=pk)
+    if user.is_staff or order.user == user:
+        order.paymentProof = image
+        order.save()
+        serializer = OrderSerializer(order, many=False)
+        return Response(serializer.data)
+    else:
+        return Response({'message': 'Not authorized to view this order'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def mercadoPagoWebhook(request, pk):
     data = request.data
     order = Order.objects.get(id=pk)

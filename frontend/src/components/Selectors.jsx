@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Selector from './Selector';
 import { Row, Col, Button, ListGroup } from 'react-bootstrap'
 
-function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_added }) {
+function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_added, is_active }) {
 
     const [color, setColor] = useState('');
     const [size, setSize] = useState('');
@@ -48,9 +48,9 @@ function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_add
 
                 {
                     color !== 'No color available' && colors[color] && colors[color][size] !== undefined && (
-                        colors[color][size] === 0 ? (
+                        colors[color][size] === 0 || is_active === false ? (
                             <Col>
-                                <Button className='mt-3 col-12 btn-block ' type='button' disabled={true}>
+                                <Button className='mt-3 col-12 btn-block ' type='button' >
                                     Send stock reminder <i className="fa-solid fa-bell"></i>
                                 </Button>
                             </Col>
@@ -83,10 +83,12 @@ function Selectors({ colors, id, addToCartHandler, addToWishlistHandler, was_add
                     className='mt-3 col-8 col-md-12 col-lg-8 btn-block'
                     type='button'
                     disabled={
-                        colors[color] && colors[color][size] === 0
+                        colors[color] && colors[color][size] === 0 || is_active === false
                     }
                 >
-                    Add to Cart
+                    {
+                        is_active === false ? 'Out of stock' : 'Add to Cart'
+                    }
                 </Button>
             </Row>
 
