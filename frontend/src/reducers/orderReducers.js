@@ -9,9 +9,17 @@ import {
     ORDER_DETAILS_SUCCESS,
     ORDER_DETAILS_FAIL,
 
+    ORDER_DETAILS_UNLOGGED_REQUEST,
+    ORDER_DETAILS_UNLOGGED_SUCCESS,
+    ORDER_DETAILS_UNLOGGED_FAIL,
+
     ORDER_PAY_REQUEST,
     ORDER_PAY_SUCCESS,
     ORDER_PAY_FAIL,
+
+    ORDER_UPLOAD_PROOF_UNLOGGED_REQUEST,
+    ORDER_UPLOAD_PROOF_UNLOGGED_SUCCESS,
+    ORDER_UPLOAD_PROOF_UNLOGGED_FAIL,
 
     ORDERS_LIST_REQUEST,
     ORDERS_LIST_SUCCESS,
@@ -22,7 +30,7 @@ import {
     ORDERS_ALL_LIST_SUCCESS,
     ORDERS_ALL_LIST_FAIL,
 
-    
+
     // ORDER_USER_LIST_REQUEST,
     // ORDER_USER_LIST_FAIL,
     // ORDER_USER_LIST_SUCCESS,
@@ -34,6 +42,22 @@ import {
     ORDER_UPDATE_DELIVERED_REQUEST,
     ORDER_UPDATE_DELIVERED_SUCCESS,
     ORDER_UPDATE_DELIVERED_FAIL,
+
+    ORDER_ADD_TRACKING_NUMBER_REQUEST,
+    ORDER_ADD_TRACKING_NUMBER_SUCCESS,
+    ORDER_ADD_TRACKING_NUMBER_FAIL,
+
+    ORDER_ADD_TRACKING_URL_REQUEST,
+    ORDER_ADD_TRACKING_URL_SUCCESS,
+    ORDER_ADD_TRACKING_URL_FAIL,
+
+    ORDER_DELETE_TRACKING_NUMBER_REQUEST,
+    ORDER_DELETE_TRACKING_NUMBER_SUCCESS,
+    ORDER_DELETE_TRACKING_NUMBER_FAIL,
+
+    ORDER_DELETE_TRACKING_URL_REQUEST,
+    ORDER_DELETE_TRACKING_URL_SUCCESS,
+    ORDER_DELETE_TRACKING_URL_FAIL,
 
 
 } from "../constants/orderConstants";
@@ -65,7 +89,7 @@ export const orderCreateReducer = (state = {}, action) => {
                 ...state,
                 orderLink: action.payload,
             };
-            
+
         default:
             return state;
     }
@@ -93,6 +117,28 @@ export const orderDetailsReducer = (state = { loading: true, orderItems: [], shi
     }
 }
 
+export const orderDetailsUnloggedReducer = (state = { loading: true, orderItems: [], shippingAddress: {} }, action) => {
+    switch (action.type) {
+        case ORDER_DETAILS_UNLOGGED_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            };
+        case ORDER_DETAILS_UNLOGGED_SUCCESS:
+            return {
+                loading: false,
+                order: action.payload,
+            };
+        case ORDER_DETAILS_UNLOGGED_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
 export const orderPayReducer = (state = {}, action) => {
     switch (action.type) {
         case ORDER_PAY_REQUEST:
@@ -107,6 +153,28 @@ export const orderPayReducer = (state = {}, action) => {
                 paymentLink: action.payload.init_point,
             };
         case ORDER_PAY_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderUploadProofUnloggedReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_UPLOAD_PROOF_UNLOGGED_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_UPLOAD_PROOF_UNLOGGED_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                success: true,
+            };
+        case ORDER_UPLOAD_PROOF_UNLOGGED_FAIL:
             return {
                 loading: false,
                 error: action.payload,
@@ -218,6 +286,90 @@ export const orderUpdateDeliveredReducer = (state = {}, action) => {
                 success: true,
             };
         case ORDER_UPDATE_DELIVERED_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderAddTrackingNumberReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_ADD_TRACKING_NUMBER_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_ADD_TRACKING_NUMBER_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_ADD_TRACKING_NUMBER_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderDeleteTrackingNumberReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_DELETE_TRACKING_NUMBER_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_DELETE_TRACKING_NUMBER_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_DELETE_TRACKING_NUMBER_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderAddTrackingUrlReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_ADD_TRACKING_URL_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_ADD_TRACKING_URL_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_ADD_TRACKING_URL_FAIL:
+            return {
+                loading: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+}
+
+export const orderDeleteTrackingUrlReducer = (state = {}, action) => {
+    switch (action.type) {
+        case ORDER_DELETE_TRACKING_URL_REQUEST:
+            return {
+                loading: true,
+            };
+        case ORDER_DELETE_TRACKING_URL_SUCCESS:
+            return {
+                loading: false,
+                success: true,
+            };
+        case ORDER_DELETE_TRACKING_URL_FAIL:
             return {
                 loading: false,
                 error: action.payload,

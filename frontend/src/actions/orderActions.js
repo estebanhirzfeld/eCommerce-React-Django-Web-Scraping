@@ -11,9 +11,17 @@ import {
     ORDER_DETAILS_SUCCESS,
     ORDER_DETAILS_FAIL,
 
+    ORDER_DETAILS_UNLOGGED_REQUEST,
+    ORDER_DETAILS_UNLOGGED_SUCCESS,
+    ORDER_DETAILS_UNLOGGED_FAIL,
+
     ORDER_PAY_REQUEST,
     ORDER_PAY_SUCCESS,
     ORDER_PAY_FAIL,
+
+    ORDER_UPLOAD_PROOF_UNLOGGED_REQUEST,
+    ORDER_UPLOAD_PROOF_UNLOGGED_SUCCESS,
+    ORDER_UPLOAD_PROOF_UNLOGGED_FAIL,
 
     ORDERS_LIST_REQUEST,
     ORDERS_LIST_SUCCESS,
@@ -35,6 +43,24 @@ import {
     // ORDER_USER_LIST_REQUEST,
     // ORDER_USER_LIST_SUCCESS,
     // ORDER_USER_LIST_FAIL,
+
+    
+    ORDER_ADD_TRACKING_NUMBER_REQUEST,
+    ORDER_ADD_TRACKING_NUMBER_SUCCESS,
+    ORDER_ADD_TRACKING_NUMBER_FAIL,
+
+    ORDER_ADD_TRACKING_URL_REQUEST,
+    ORDER_ADD_TRACKING_URL_SUCCESS,
+    ORDER_ADD_TRACKING_URL_FAIL,
+
+    ORDER_DELETE_TRACKING_NUMBER_REQUEST,
+    ORDER_DELETE_TRACKING_NUMBER_SUCCESS,
+    ORDER_DELETE_TRACKING_NUMBER_FAIL,
+
+    ORDER_DELETE_TRACKING_URL_REQUEST,
+    ORDER_DELETE_TRACKING_URL_SUCCESS,
+    ORDER_DELETE_TRACKING_URL_FAIL,
+
 
 
 } from "../constants/orderConstants";
@@ -91,8 +117,6 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
                 Authorization: `Bearer ${userInfo.token}`,
             },
         };
-
-
         const { data } = await axios.get(`${BASE_URL}/api/orders/${id}/`, config);
 
         dispatch({
@@ -109,6 +133,33 @@ export const getOrderDetails = (id) => async (dispatch, getState) => {
         });
     }
 }
+
+export const getOrderDetailsUnlogged = (id, token) => async (dispatch) => {
+    try {
+        dispatch({
+            type: ORDER_DETAILS_UNLOGGED_REQUEST,
+        });
+        const { data } = await axios.get(`${BASE_URL}/api/orders/unlogged/${id}/${token}/`);
+
+        console.log(data)
+
+        dispatch({
+            type: ORDER_DETAILS_UNLOGGED_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_DETAILS_UNLOGGED_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
+
+
 
 export const getUserOrders = (id) => async (dispatch, getState) => {
     try {
@@ -202,9 +253,10 @@ export const payOrder = (orderId, method, image = null) => async (dispatch, getS
                     },
                     "auto_return": "approved",
 
-                    "notification_url": `https://87fe-186-127-157-186.sa.ngrok.io/api/orders/pay/${order.id}/`,
+                    // https://3451-186-127-157-186.ngrok-free.app/
+                    "notification_url": `https://3451-186-127-157-186.ngrok-free.app/api/orders/pay/${order.id}/`,
                     "statement_descriptor": "Zoldyck Store",
-                    // "external_reference": order.id,
+                    "external_reference": order.id,
                     "expires": false,
                 }
 
@@ -226,52 +278,60 @@ export const payOrder = (orderId, method, image = null) => async (dispatch, getS
         }
 
 
-    /// Tranferencia Bancaria //////////////////////////////
+        /// Tranferencia Bancaria //////////////////////////////
 
-    else if(method === 'Tranferencia Bancaria') {
-        // upload payment proof to server
-        console.log('Tranferencia Bancaria');
-        const { orderDetails: { order }, } = getState();
-        const {
-            login: { userInfo },
-        } = getState();
+        else if (method === 'Tranferencia Bancaria') {
+            // upload payment proof to server
+            console.log('Tranferencia Bancaria');
+            const { orderDetails: { order }, } = getState();
+            const {
+                login: { userInfo },
+            } = getState();
 
-        const expirationDate = new Date(order.expiryDate).getTime()
+            const expirationDate = new Date(order.expiryDate).getTime()
 
-        if (expirationDate < Date.now()) {
+            if (expirationDate < Date.now()) {
+                dispatch({
+                    type: ORDER_PAY_FAIL,
+                    payload: "La orden ha expirado",
+                });
+            }
+
+            else {
+
+                // post image to server
+
+                if (!image) {
+                    dispatch({
+                        type: ORDER_PAY_FAIL,
+                        payload: "No se ha seleccionado una imagen",
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('image', image);
+                    const { data } = await axios.post(`${BASE_URL}/api/orders/pay/proof/${orderId}/`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'Authorization': `Bearer ${userInfo.token}`,
+                        }
+                    });
+
+                    dispatch({
+                        type: ORDER_PAY_SUCCESS,
+                        payload: data,
+                    });
+                    console.log(data);
+                    console.log('Success');
+                }
+            }
+
+        }
+        else {
             dispatch({
                 type: ORDER_PAY_FAIL,
-                payload: "La orden ha expirado",
+                payload: "No se ha seleccionado un metodo de pago",
             });
         }
-
-        else {
-
-            // post image to server
-            const formData = new FormData();
-            formData.append('image', image);
-            const { data } = await axios.post(`${BASE_URL}/api/orders/pay/proof/${orderId}/`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${userInfo.token}`,
-                }
-            });
-
-            dispatch({
-                type: ORDER_PAY_SUCCESS,
-                payload: data,
-            });
-            console.log(data);
-            console.log('Success');
-        }
-
-    }
-    else{
-        dispatch({
-            type: ORDER_PAY_FAIL,
-            payload: "No se ha seleccionado un metodo de pago",
-        });
-    }
 
     } catch (error) {
         dispatch({
@@ -283,6 +343,55 @@ export const payOrder = (orderId, method, image = null) => async (dispatch, getS
         });
     }
 }
+
+export const orderUploadProofUnlogged = (orderId, token, image = null) => async (dispatch, getState) => {
+
+    try {
+        dispatch({
+            type: ORDER_UPLOAD_PROOF_UNLOGGED_REQUEST,
+        });
+
+        // upload payment proof to server
+        console.log('orderUploadProofUnlogged', orderId, token);
+
+        // post image to server
+        const formData = new FormData();
+        formData.append('image', image);
+        // path('unlogged/pay/proof/<str:pk>/<str:token>/', views.attachProofUnlogged, name='payment-proof-unlogged'),
+        const { data } = await axios.post(`${BASE_URL}/api/orders/unlogged/pay/proof/${orderId}/${token}/`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+
+        dispatch({
+            type: ORDER_UPLOAD_PROOF_UNLOGGED_SUCCESS,
+            payload: data,
+        });
+        console.log(data);
+        console.log('Success');
+
+    } catch (error) {
+        dispatch({
+            type: ORDER_UPLOAD_PROOF_UNLOGGED_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 export const listOrders = () => async (dispatch, getState) => {
     try {
@@ -417,5 +526,154 @@ export const updatePaidOrder = (id) => async (dispatch, getState) => {
                     ? error.response.data.message
                     : error.message,
         });
+    }
+}
+
+export const addTrackingNumber = (orderId, trackingNumber) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_ADD_TRACKING_NUMBER_REQUEST
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+                'Content-Type': 'application/json',            },
+        };
+
+        // if trackingNumber post trackingNumber to server
+
+        const { data } = await axios.put(`${BASE_URL}/api/orders/update/tracking/${orderId}/`, { trackingNumber }, config);
+
+        dispatch({
+            type: ORDER_ADD_TRACKING_NUMBER_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_ADD_TRACKING_NUMBER_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
+
+export const deleteTrackingNumber = (orderId) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_DELETE_TRACKING_NUMBER_REQUEST
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+                'Content-Type': 'application/json',            },
+        };
+
+        // delete trackingNumber from server
+
+        const { data } = await axios.delete(`${BASE_URL}/api/orders/update/tracking/${orderId}/`, config);
+
+        dispatch({
+            type: ORDER_DELETE_TRACKING_NUMBER_SUCCESS,
+            payload: data,
+        });
+
+    } catch (error) {
+
+        dispatch({
+            type: ORDER_DELETE_TRACKING_NUMBER_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+
+    }
+}
+
+export const AddTrackingUrl = (orderId, trackingUrl) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_ADD_TRACKING_URL_REQUEST
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };
+
+        // if trackingNumber post trackingNumber to server
+
+        const { data } = await axios.put(`${BASE_URL}/api/orders/update/tracking/url/${orderId}/`, { trackingUrl }, config);
+
+        dispatch({
+            type: ORDER_ADD_TRACKING_URL_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_ADD_TRACKING_URL_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+
+}
+
+export const deleteTrackingUrl = (orderId) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_DELETE_TRACKING_URL_REQUEST
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+                'Content-Type': 'application/json',
+            },
+        };
+
+        // delete trackingNumber from server
+
+        const { data } = await axios.delete(`${BASE_URL}/api/orders/update/tracking/url/${orderId}/`, config);
+
+        dispatch({
+            type: ORDER_DELETE_TRACKING_URL_SUCCESS,
+            payload: data,
+        });
+
+    } catch (error) {
+
+        dispatch({
+            type: ORDER_DELETE_TRACKING_URL_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+
     }
 }

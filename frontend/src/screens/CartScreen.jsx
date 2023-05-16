@@ -75,7 +75,11 @@ function CartScreen() {
                                         <p className='mt-2'>Size: {item.size}</p>
                                         <p className='mt-2'>Color: {item.color}</p>
                                         {
-                                            item.stock <= 0 || item.product.is_active === false ? <p className='text-danger'>Out of stock</p> : null
+                                            item.stock <= 0 || item.product.is_active === false
+                                            ? <>
+                                            <p className='text-danger'>Out of stock</p>
+                                            </>
+                                            : null
                                         }
                                     </Col>
 

@@ -1,5 +1,6 @@
+from django.db.models import Sum
 from django.contrib import admin
-from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute
+from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute, StockNotification
 from urllib.parse import urlparse
 # Register your models here.
 
@@ -10,7 +11,8 @@ class DomainFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         queryset = model_admin.get_queryset(request)
-        domains = set(urlparse(p.original_url).hostname.split('.')[1] for p in queryset if p.original_url)
+        domains = set(urlparse(p.original_url).hostname.split(
+            '.')[1] for p in queryset if p.original_url)
         return [(d, d) for d in domains]
 
     def queryset(self, request, queryset):
@@ -20,49 +22,61 @@ class DomainFilter(admin.SimpleListFilter):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'price',
-    # 'sizes',
-    # 'colors',
-    'category',
-    'last_day',
-    'last_week',
-    'views',
-    # 'last_month_views',
-    # 'brand',
-    # 'rating', 'numReviews',
-    'is_scraped',
-    'is_active',
-    'createdAt',
-    'updatedAt',
-    )
-    list_filter = ('category',DomainFilter, 'createdAt', 'updatedAt')
+                    # 'sizes',
+                    # 'colors',
+                    'category',
+                    'last_day',
+                    'last_week',
+                    # 'total_views',
+                    # 'last_month_views',
+                    # 'brand',
+                    # 'rating', 'numReviews',
+                    'is_scraped',
+                    'is_active',
+                    'createdAt',
+                    'updatedAt',
+                    )
+    list_filter = ('is_active', 'category', DomainFilter, 'createdAt', 'updatedAt',)
     search_fields = ('name', 'price', 'category', 'is_scraped', 'is_active')
+
+    def total_views(self, obj):
+        return obj.productview_set.aggregate(Sum('total_views'))['total_views__sum']
+    total_views.admin_order_field = 'total_views'
 
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ('product', 'image')
 
     search_fields = ['product__name']
 
+
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('name', 'rating', 'product', 'user')
 
+
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'id','paymentMethod',
-    'shippingAddress',
-    'shippingPrice', 'totalPrice', 'status', 'isPaid' ,'paidAt', 'isDelivered', 'deliveredAt', 'createdAt', 'expiryDate')
+    list_display = (
+        'token',
+        'user', 'id', 'paymentMethod',
+        'shippingAddress',
+        'shippingPrice', 'totalPrice', 'status', 'isPaid', 'paidAt', 'isDelivered', 'deliveredAt', 'createdAt', 'expiryDate')
+
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'get_user_email', 'product', 'qty','size' ,'price', 'image', 'payment_status', 'is_paid' ,'is_delivered')
+    list_display = ('order', 'get_user_email', 'product', 'qty', 'size',
+                    'price', 'image', 'payment_status', 'is_paid', 'is_delivered')
+
 
 class ShippingAddressAdmin(admin.ModelAdmin):
     list_display = (
-    # 'order',
-    # 'get_user_email', 
-    # 'shippingPrice'
-    'name',
-    'user',
-    'address', 'city', 'postalCode',
-    'province'
+        # 'order',
+        # 'get_user_email',
+        # 'shippingPrice'
+        'name',
+        'user',
+        'address', 'city', 'postalCode',
+        'province'
     )
+
 
 class SizeAdmin(admin.ModelAdmin):
     list_display = (
@@ -70,7 +84,8 @@ class SizeAdmin(admin.ModelAdmin):
         'size',
         'id',
         # 'stock'
-        )
+    )
+
 
 class ColorAdmin(admin.ModelAdmin):
     list_display = (
@@ -78,42 +93,59 @@ class ColorAdmin(admin.ModelAdmin):
         'color',
         # 'sizes',
         # 'stock'
-        )
+    )
+
 
 class ProductAttributeAdmin(admin.ModelAdmin):
     list_display = (
         'product',
         'colors',
         'sizes',
-        'stock'
-        )
-    search_fields = ['product__name']
+        'stock',
+        'id'
+    )
+    search_fields = ['product__name', 'id']
+
 
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')
 
+
 class CartItemAdmin(admin.ModelAdmin):
     list_display = ('cart',
-    'product',
-    'qty',
-    'get_size',
-    'get_color',
-    # 'size',
-    # 'color',
-    # 'stock'
-    )
+                    'product',
+                    'qty',
+                    'get_size',
+                    'get_color',
+                    'createdAt',
+                    # 'size',
+                    # 'color',
+                    # 'stock'
+                    )
+
 
 class WishlistAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')
 
+
 class WishlistItemAdmin(admin.ModelAdmin):
     list_display = ('wishlist', 'product', 'addedAt')
+
 
 class SavedForLaterAdmin(admin.ModelAdmin):
     list_display = ('user', 'createdAt')
 
+
 class SavedForLaterItemAdmin(admin.ModelAdmin):
     list_display = ('savedForLater', 'product')
+
+class StockNotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'email', 'product_attribute', 'get_id','is_notified')
+    raw_id_fields = ('product_attribute',)
+
+    search_fields = ['user__email', 'product_attribute__product__name', 'product_attribute__id']
+
+
 
 admin.site.register(Wishlist, WishlistAdmin)
 admin.site.register(WishlistItem, WishlistItemAdmin)
@@ -131,5 +163,4 @@ admin.site.register(ShippingAddress, ShippingAddressAdmin)
 admin.site.register(Size, SizeAdmin)
 admin.site.register(Color, ColorAdmin)
 admin.site.register(ProductAttribute, ProductAttributeAdmin)
-
-
+admin.site.register(StockNotification, StockNotificationAdmin)

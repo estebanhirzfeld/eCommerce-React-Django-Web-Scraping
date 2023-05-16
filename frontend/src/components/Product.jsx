@@ -36,9 +36,6 @@ function Product({ product }) {
         <Card className='h-100 my-3 border-0'
         style={{ transform: isHovered ? 'translateY(-10px)' : 'translateY(0px)', transition: 'transform 0.3s ease-in-out' }}
         >
-
-
-        
             <Link to={`/product/${product.id}`}>
                 <Card.Img
                     className='cardImage'

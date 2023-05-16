@@ -50,6 +50,16 @@ const ADMIN_EditProductScreen = () => {
     const [description, setDescription] = useState('')
     const [uploading, setUploading] = useState(false)
 
+    // if user is not logged in or is not an admin, redirect to home
+    useEffect(() => {
+        if (!userInfo || !userInfo.is_Admin) {
+            navigate('/')
+        }
+
+    }, [dispatch, navigate, userInfo])
+
+
+
     useEffect(() => {
         if (successUpdate) {
             dispatch({ type: PRODUCT_UPDATE_RESET })

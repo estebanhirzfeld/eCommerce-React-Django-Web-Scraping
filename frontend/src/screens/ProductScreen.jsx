@@ -28,6 +28,9 @@ import { addToCart, getCart, removeFromCart } from '../actions/cartActions'
 import CartToastNotification from '../components/CartToastNotification'
 import '../components/styles/CartToastNotification.css'
 
+// import ProductScreen css
+import './styles/ProductScreen.css'
+
 function ProductScreen() {
 
     const [was_added, setWasAdded] = useState(false)
@@ -138,6 +141,8 @@ function ProductScreen() {
         }
 
     }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
+
+    console.log(product)
 
     return (
         <div>

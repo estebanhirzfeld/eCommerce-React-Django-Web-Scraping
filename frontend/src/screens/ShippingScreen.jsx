@@ -115,7 +115,7 @@ function ShippingScreen() {
                     <CheckoutSteps step1 />
                 )
             }
-            <Row className='justify-content-md-center'>
+            <Row className='justify-content-center'>
                 <Col xs={12} md={6}>
                     <Form onSubmit={(e) => { submitHandler(e) }}>
 
@@ -194,8 +194,7 @@ function ShippingScreen() {
 
                 {
                     is_address ?
-                        (<Col xs={12} md={6}>
-
+                        (<Col xs={12} md={6} >
                             <MapContainer center={coords} zoom={15} scrollWheelZoom={true}
                                 style={{ height: "100%", width: "100%" }}>
                                 <ChangeView center={coords} zoom={18} />

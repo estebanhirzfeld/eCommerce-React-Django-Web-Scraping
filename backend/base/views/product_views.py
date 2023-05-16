@@ -1,4 +1,20 @@
-from base.tasks import scrape_product, scrape_discover
+# import csv
+# from django.utils.encoding import smart_str # Use smart_str to encode text as UTF-8
+
+# 
+
+from django.db.models import Q, Min, Max, Sum, Count
+from django.db.models.functions import Lower
+from django.db.models import QuerySet
+from django.core.validators import EmailValidator
+from django.core.exceptions import ValidationError
+import secrets
+
+from django.http import HttpResponse
+from backend.tasks import scrape_product, scrape_discover, update_all_products
+
+
+
 
 from django.utils import timezone
 from datetime import timedelta
@@ -33,8 +49,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 
 
-from base.models import Product, ProductImage, Review, Order, OrderItem, Size, Color, ProductAttribute, ProductView
-from base.products import products
+from base.models import Product, ProductImage, Review, Order, OrderItem, Size, Color, ProductAttribute, ProductView, Order, StockNotification
 from base.serializers import ProductSerializer, ProductImageSerializer, SizeSerializer
 
 from rest_framework import status
@@ -43,71 +58,118 @@ from rest_framework import status
 @api_view(['GET'])
 def getProducts(request):
 
-    # allPrd = Product.objects.all()  
-    # for prd in allPrd:
-    #     if prd.subCategory != None:
-    #         prd.subCategory = prd.subCategory.lower()
-    #         prd.save()
-    #     if prd.subCategory != None:
-    #         prd.subCategory = prd.subCategory.lower()
-    #         prd.save()
 
-    query = request.query_params.get('keyword', '')
-    category = request.query_params.get('category', '')
-    subcategory = request.query_params.get('subcategory', '')
+    # all_products = Product.objects.filter(is_active=True)
 
+    # with open('all_active_products.csv', 'w', encoding='utf-8') as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(['id', 'name', 'price']) # Add headers
+    #     for product in all_products:
+    #         writer.writerow([product.id, smart_str(product.name), product.price])
 
-    if query != '':
-        products = Product.objects.filter(name__icontains=query, is_active=True)
-    elif subcategory != '':
-        products = Product.objects.filter(subCategory__icontains=subcategory, is_active=True)
-    elif category != '':
-        products = Product.objects.filter(category__icontains=category, is_active=True)
+    query = request.query_params.get('keyword')
+    category = request.query_params.get('category')
+    subcategory = request.query_params.get('subcategory')
+    priceFrom = request.query_params.get('priceFrom')
+    priceTo = request.query_params.get('priceTo')
+    sortBy = request.query_params.get('sortBy')
+    color = request.query_params.get('color')
+
+    products = Product.objects.filter(
+        Q(name__icontains=query) |
+        Q(description__icontains=query),
+        is_active=True
+    )
+
+    # get the lowest price of products in the current request    
+    min_price = products.aggregate(min_price=Min('price'))['min_price']
+    # get the highest price of products in the current request
+    max_price = products.aggregate(max_price=Max('price'))['max_price']
+    # Get the categories of all active products 
+    categories = products.order_by().values_list('category', flat=True).distinct()
+
+    if category:
+        products = products.filter(category=category)
+
+    if subcategory:
+        products = products.filter(subCategory=subcategory)
+    
+    if priceFrom or priceTo:
+        products = products.filter(price__range=(priceFrom, priceTo))
+
+    if color:
+        products = products.filter(productattribute__color__color=color)
+
+    # Sort By
+    print('---------------------------------------------------\n')
+    print(sortBy)
+    print('---------------------------------------------------\n')
+        
+
+    if sortBy == 'Lowest':
+        products = products.order_by('price')
+    elif sortBy == 'Highest':
+        products = products.order_by('-price')
+    elif sortBy == 'Popularity':
+        products = Product.objects.annotate(num_views=Count('productview')).order_by('-num_views')
+    elif sortBy == 'Newest':
+        products = products.order_by('-createdAt')
+    elif sortBy == 'Rating':
+        products = products.order_by('-rating')
     else:
-        products = Product.objects.all().filter(is_active=True)
+        products = products.order_by('-createdAt')
 
-    #  randomize products if there is no query and category
-    if query == '' and category == '':
-        products = random.sample(list(products), len(products))
+    products = products.prefetch_related('productattribute_set__color')
 
-    page = request.query_params.get('page', None)
+
     paginator = Paginator(products, 32)
 
+    page = request.query_params.get('page', None)
     try:
         products = paginator.page(page)
-
     except PageNotAnInteger:
         products = paginator.page(1)
-
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
 
     serializer = ProductSerializer(products, many=True)
-    return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    colors = set()
+
+    for product in products:
+        for attribute in product.productattribute_set.all():
+            colors.update(attribute.color.values_list('color', flat=True))
+
+    return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages, 'colors_list': list(colors), 'min_price': min_price, 'max_price': max_price, 'categories': categories})
+
+
+
 
 @api_view(['GET'])
 def getProduct(request, pk):
     product = Product.objects.get(id=pk)
     # Registrar la nueva visita
-    ProductView.objects.create(product=product)
+    # ProductView.objects.create(product=product)
 
-    # Incrementar el contador de vistas del producto
-    product.views += 1
-    product.last_viewed_at = timezone.now()
-    product.save()
+    # # Incrementar el contador de vistas del producto
+    # product.views += 1
+    # product.last_viewed_at = timezone.now()
+    # product.save()
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 def getProductsByCategory(request, category):
     products = Product.objects.filter(category=category, is_active=True)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
@@ -254,15 +316,57 @@ def createReview(request, pk):
             content = {'detail': 'You have not ordered this product'}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
+# Subscribe to stock Changes
+
+
+@api_view(['POST'])
+def notifyProduct(request, pk):
+    user = request.user
+    product = Product.objects.get(id=pk)
+
+    data = request.data
+    email = data['email']
+    color = Color.objects.get(color=data['color'])
+    size = Size.objects.get(size=data['size'])
+
+    productAtt = ProductAttribute.objects.get(
+        color=color, size=size, product=product)
+
+    if email != '':
+        validator = EmailValidator()
+        try:
+            validator(email)
+        except ValidationError as error:
+            return Response({'detail': str(error), 'message': 'Invalid Email'}, status=status.HTTP_400_BAD_REQUEST)
+
+        notification = StockNotification.objects.create(
+            email=email,
+            product_attribute=productAtt
+        )
+        notification.save()
+        return Response('Subscription Added')
+
+    if request.user.is_authenticated:
+        notification = StockNotification.objects.create(
+            user=request.user,
+            product_attribute=productAtt
+        )
+        notification.save()
+
+        return Response('Subscription Added')
+
+
 @api_view(['GET'])
 def scrapeProduct(request, pk):
+# def scrapeProduct(request):
     product = Product.objects.get(id=pk)
     print('Scraping Product: ', product.name)
     # start scraping with celery
     scrape_product.delay(product.id)
+    # update_all_products.delay()
 
     return Response('Product is being scraped')
-    
+
 
 @api_view(['GET'])
 def discoverProducts(request):
@@ -271,6 +375,13 @@ def discoverProducts(request):
     scrape_discover.delay()
     return Response('Discover Products are being scraped')
 
+
+@api_view(['GET'])
+def updateProducts(request):
+    print('Updating Products')
+    # start scraping with celery
+    update_all_products.delay()
+    return Response('Products are being updated')
 # @api_view(['GET'])
 # def scrapeProducts(request):
 
@@ -883,7 +994,7 @@ def discoverProducts(request):
 #                                     srcset_items = srcset.split(',')
 #                                     last_item = srcset_items[-1].strip().split(' ')[
 #                                         0]
-                                    
+
 #                                     if 'placeholder' not in last_item:
 #                                         images_list.append(last_item)
 #                                     else:
@@ -973,7 +1084,7 @@ def discoverProducts(request):
 #                             category_time = time.time()
 #                             category = waitForElement(
 #                                 category_xpath, driver, 0.3, True)
-                            
+
 #                             # if category is more than one, iterate ignoring 'inicio' and 'home'
 #                             print(len(category))
 #                             if len(category) > 1:
@@ -1227,7 +1338,6 @@ def discoverProducts(request):
 
 #                     status = False
 
-                
 
 #                 # if product doesn't exist, create it
 #                 try:
@@ -1249,7 +1359,7 @@ def discoverProducts(request):
 
 #                     product.save()
 
-                
+
 #                 # update product price
 #                 if product.price != price:
 #                     product.price = price

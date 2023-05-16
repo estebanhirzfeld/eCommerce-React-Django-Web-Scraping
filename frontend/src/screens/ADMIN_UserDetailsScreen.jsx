@@ -18,12 +18,21 @@ import 'leaflet/dist/leaflet.css'
 function ADMIN_UserDetailsScreen() {
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const ordersList = useSelector(state => state.ordersList)
     const { loading, error, orders } = ordersList
-
+    
     const login = useSelector(state => state.login)
     const { userInfo } = login
+
+    // if user is not logged in or is not an admin, redirect to home
+    useEffect(() => {
+        if (!userInfo || !userInfo.is_Admin) {
+            navigate('/')
+        }
+
+    }, [dispatch, navigate, userInfo])
 
     const userDetails = useSelector(state => state.userDetails)
     const { loading: loadingDetails, error: errorDetails, user } = userDetails

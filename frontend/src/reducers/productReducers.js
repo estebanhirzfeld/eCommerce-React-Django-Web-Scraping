@@ -32,6 +32,12 @@ import {
     PRODUCT_CREATE_REVIEW_FAIL,
     PRODUCT_CREATE_REVIEW_RESET,
 
+    PRODUCT_NOTIFY_REQUEST,
+    PRODUCT_NOTIFY_SUCCESS,
+    PRODUCT_NOTIFY_FAIL,
+    PRODUCT_NOTIFY_RESET,
+
+
 } from "../constants/productConstants";
 
 export const productListReducers = (state = { products: [] }, action) => {
@@ -45,7 +51,11 @@ export const productListReducers = (state = { products: [] }, action) => {
                 loading: false,
                 products: action.payload.products,
                 pages: action.payload.pages,
-                page: action.payload.page
+                page: action.payload.page,
+                colors_list: action.payload.colors_list,
+                min_price: action.payload.min_price,
+                max_price: action.payload.max_price,
+                categories: action.payload.categories,
             }
 
         case PRODUCT_LIST_FAIL:
@@ -179,3 +189,23 @@ export const productCreateReviewReducers = (state = {}, action) => {
             return state
     }
 }
+
+export const productNotifyReducers = (state = {}, action) => {
+    
+        switch (action.type) {
+            case PRODUCT_NOTIFY_REQUEST:
+                return { loading: true }
+    
+            case PRODUCT_NOTIFY_SUCCESS:
+                return { loading: false, success: true }
+    
+            case PRODUCT_NOTIFY_FAIL:
+                return { loading: false, error: action.payload }
+    
+            case PRODUCT_NOTIFY_RESET:
+                return {}
+                
+            default:
+                return state
+        }
+    }

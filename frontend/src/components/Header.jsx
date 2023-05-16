@@ -10,6 +10,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { Link, useNavigate } from 'react-router-dom'
+import Ticker from "./Ticker";
 
 
 function Header() {
@@ -28,9 +29,11 @@ function Header() {
 
   return (
     <header>
-      <Navbar bg="dark" expand="lg" collapseOnSelect>
+      <Ticker />
+      <Navbar expand="lg" collapseOnSelect style={{ backgroundColor: '#080808 !important' }}>
         <Container>
-          <Navbar.Brand as={Link} to="/">React + Django</Navbar.Brand>
+          {/* <Navbar.Brand as={Link} to="/">Zoldyck</Navbar.Brand> */}
+          <Navbar.Brand as={Link} to="/">Django + React</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <SearchBar />

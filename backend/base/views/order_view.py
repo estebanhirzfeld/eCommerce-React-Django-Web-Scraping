@@ -1,8 +1,9 @@
 import random
 import requests
+import secrets
 
 import mercadopago
-from datetime import datetime
+from datetime import datetime, timezone
 from django.shortcuts import render
 
 from rest_framework.decorators import api_view, permission_classes
@@ -24,13 +25,14 @@ def addOrderItems(request):
     data = request.data
     orderItems = data['orderItems']
     shippingAddress = ShippingAddress.objects.get(id=data['shippingAddress'])
+    token = secrets.token_hex(16)
 
     if orderItems and len(orderItems) == 0:
         return Response({'message': 'No Order Items'}, status=status.HTTP_400_BAD_REQUEST)
 
     if not shippingAddress:
         return Response({'message': 'No Shipping Address'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
     else:
         # (1) Create order
         # (2) find shipping address by id
@@ -39,7 +41,8 @@ def addOrderItems(request):
             paymentMethod=data['paymentMethod'],
             shippingPrice=data['shippingPrice'],
             totalPrice=data['totalPrice'],
-            shippingAddress=shippingAddress
+            shippingAddress=shippingAddress,
+            token=secrets.token_hex(16)
         )
 
         # (3) Create order items and set order to orderItem relationship
@@ -61,49 +64,64 @@ def addOrderItems(request):
             # if qty > stock, return error
             # if item.qty > product.size_set.filter(size=item.size).first().stock:
             #     return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # use qty from ProductAttribute model
             # if item.qty > product.productattribute_set.filter(size=item.size, color=item.color).first().stock:
             if item.qty > product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).first().stock:
                 return Response({'message': 'Product is out of stock'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # if qty <= stock, update stock
             else:
-            # get stock from that size
+                # get stock from that size
                 # product.size_set.filter(size=item.size).update(stock=product.size_set.filter(size=item.size).first().stock - int(item.qty))
                 # product.save()
                 # product.productattribute_set.filter(size=item.size, color=item.color).update(stock=product.productattribute_set.filter(size=item.size, color=item.color).first().stock - int(item.qty))
-                product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).update(stock=product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).first().stock - int(item.qty))
+                product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).update(
+                    stock=product.productattribute_set.filter(size=Size.objects.get(size=item.size), color=Color.objects.get(color=item.color)).first().stock - int(item.qty))
                 product.save()
-            
+
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def getOrders(request):
     orders = Order.objects.all()
-
-    # all the order that has expiryDate less than today and isPaid is False set status to 'Expired'
-    
-
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+def getOrderByToken(request, pk, token):
+    try:
+        order = Order.objects.get(id=pk, token=token)
+        # if order is paid deliverd, return error
+        if order.isPaid or order.isDelivered:
+            return Response({'message': 'Order is paid'}, status=status.HTTP_400_BAD_REQUEST)
+        # else return order
+        serializer = OrderSerializer(order, many=False)
+        return Response(serializer.data)
+    except:
+        return Response({'message': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getOrderById(request, pk):
     user = request.user
-    
+
     try:
         order = Order.objects.get(id=pk)
         if user.is_staff or order.user == user:
             serializer = OrderSerializer(order, many=False)
             return Response(serializer.data)
         else:
-            Response({'message': 'Not authorized to view this order'}, status=status.HTTP_400_BAD_REQUEST)
+            Response({'message': 'Not authorized to view this order'},
+                     status=status.HTTP_400_BAD_REQUEST)
     except:
         return Response({'message': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -113,6 +131,7 @@ def getMyOrders(request):
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def getOrdersByUser(request, pk):
@@ -121,13 +140,22 @@ def getOrdersByUser(request, pk):
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 # attach payment proof'
-def attachProof(request,pk):
+def attachProof(request, pk):
     user = request.user
     image = request.data['image']
     order = Order.objects.get(id=pk)
+
+    # if !image return error
+    if image == None:
+        print('------------------------------------ \n')
+        print('No image')
+        print('------------------------------------ \n')
+        return Response({'message': 'No image'}, status=status.HTTP_400_BAD_REQUEST)
+
     if user.is_staff or order.user == user:
         order.paymentProof = image
         order.save()
@@ -138,15 +166,31 @@ def attachProof(request,pk):
 
 
 @api_view(['POST'])
+def attachProofUnlogged(request, pk, token):
+    image = request.data['image']
+    order = Order.objects.get(id=pk, token=token)
+
+    # if !image return error
+    if image == None:
+        return Response({'message': 'No image'}, status=status.HTTP_400_BAD_REQUEST)
+
+    order.paymentProof = image
+    order.save()
+    serializer = OrderSerializer(order, many=False)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mercadoPagoWebhook(request, pk):
     data = request.data
     order = Order.objects.get(id=pk)
     if data.get('type') == 'payment':
         payment_id = data['data']['id']
-        
+
         url = f'https://api.mercadopago.com/v1/payments/{payment_id}'
-        headers = {'Authorization': 'Bearer APP_USR-944357534465341-092314-60cc827acfdc0e3ff80e99b84db94e81-1203886094'}
+        headers = {
+            'Authorization': 'Bearer APP_USR-944357534465341-092314-60cc827acfdc0e3ff80e99b84db94e81-1203886094'}
 
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -160,6 +204,7 @@ def mercadoPagoWebhook(request, pk):
     else:
         return Response('Payment was not received')
 
+
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def updateOrderToPaid(request, pk):
@@ -169,6 +214,7 @@ def updateOrderToPaid(request, pk):
     order.save()
     return Response('Order was paid')
 
+
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def updateOrderToDelivered(request, pk):
@@ -177,6 +223,40 @@ def updateOrderToDelivered(request, pk):
     order.deliveredAt = datetime.now()
     order.save()
     return Response('Order was delivered')
+
+# Add Tracking Number
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
+def updateOrderTracking(request, pk):
+    order = Order.objects.get(id=pk)
+
+    if request.method == 'PUT':
+        order.trackingNumber = request.data['trackingNumber']
+        message = 'Tracking Number was added'
+    elif request.method == 'DELETE':
+        order.trackingNumber = ''
+        message = 'Tracking Number was deleted'
+
+    order.save()
+    return Response(message)
+
+# Add Tracking Url
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
+def updateOrderTrackingUrl(request, pk):
+    order = Order.objects.get(id=pk)
+
+    if request.method == 'PUT':
+        order.trackingUrl = request.data['trackingUrl']
+        message = 'Tracking Url was added'
+    elif request.method == 'DELETE':
+        order.trackingUrl = ''
+        message = 'Tracking Url was deleted'
+
+    order.save()
+    return Response(message)
+
+
 
 
 @api_view(['GET'])

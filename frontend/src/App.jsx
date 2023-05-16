@@ -19,6 +19,7 @@ import ProfileScreen from './screens/ProfileScreen.jsx'
 import ShippingScreen from './screens/ShippingScreen.jsx'
 import PaymentScreen from './screens/PaymentScreen.jsx'
 import PlaceOrderScreen from './screens/PlaceOrderScreen.jsx'
+import PaymentProofScreen from './screens/PaymentProofScreen.jsx'
 import OrderScreen from './screens/OrderScreen.jsx'
 import WishlistScreen from './screens/WishListScreen.jsx'
 
@@ -34,6 +35,11 @@ import ADMIN_ListOrdersStatusScreen from './screens/ADMIN_ListOrdersStatusScreen
 import ADMIN_ListProductsScreen from './screens/ADMIN_ListProductsScreen.jsx'
 import ADMIN_EditProductScreen from './screens/ADMIN_EditProductScreen.jsx'
 
+
+// Add App.css
+import './App.css'
+
+
 function App() {
 
   return (
@@ -42,126 +48,134 @@ function App() {
       <main className='py-3'>
         <Routes>
           <Route path='/' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <HomeScreen />
             </Container>
           } />
           <Route path='/category/:category' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <HomeScreen />
             </Container>
           } />
           <Route path='/product/:id' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ProductScreen />
             </Container>
           } />
           <Route path='/cart/' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <CartScreen />
             </Container>
           } />
 
           <Route path='/wishlist/' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <WishlistScreen />
             </Container>
           } />
 
           <Route path='/test'
             element={
-              <Container>
+              <Container style={{minHeight: '100vh'}}>
                 <Test />
               </Container>
             }
           />
           
           <Route path='/login' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <LoginScreen />
             </Container>
           }
           />
           <Route path='/register' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <RegisterScreen />
             </Container>
           }
           />
           <Route path='/profile' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ProfileScreen />
             </Container>
           }
           />
           <Route path='/shipping' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ShippingScreen />
             </Container>
           }
           />
           <Route path='/payment' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <PaymentScreen />
             </Container>
           }
           />
           <Route path='placeorder' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <PlaceOrderScreen />
             </Container>
           }
           />
           <Route path='/order/:id' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <OrderScreen />
             </Container>
           }
           />
+
+          <Route path='/payment-proof' element={
+            <Container style={{minHeight: '100vh'}}>
+              <PaymentProofScreen />
+            </Container>
+          }
+          />
+          
           <Route path='/admin/users' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_ListUsersScreen />
             </Container>
           }
           />
           <Route path='admin/user/:id' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_UserDetailsScreen />
             </Container>
           }
           />
           <Route path='/admin/user/:id/edit' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_EditUserScreen />
             </Container>
           }
           />
           <Route path='admin/orders' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_ListOrdersScreen />
             </Container>
           }
           />
           <Route path='admin/orders/:status' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_ListOrdersStatusScreen />
             </Container>
           }
           />
           <Route path='admin' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_PanelScreen />
             </Container>
           }
           />
           <Route path='admin/products' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_ListProductsScreen />
             </Container>
           }
           />
           <Route path='admin/product/:id/edit' element={
-            <Container>
+            <Container style={{minHeight: '100vh'}}>
               <ADMIN_EditProductScreen />
             </Container>
           }

@@ -1,3 +1,4 @@
+from django.db.models import Sum
 import random
 from urllib.parse import urlparse
 from django.utils import timezone
@@ -10,8 +11,37 @@ from django.contrib.auth.models import User
 
 from PIL import Image
 
+from django.db.models import Count, Q
+
 
 # Create your models here.
+
+# class ProductManager(models.Manager):
+#     def get_queryset(self):
+#         return super().get_queryset().filter(is_active=True)
+    
+#     # lowest price
+#     def lowest_price(self, queryset):
+#         return queryset.order_by('price').first()
+    
+#     # highest price
+#     def highest_price(self, queryset):
+#         return queryset.order_by('-price').first()
+    
+#     # top rated
+#     def top_rated(self, queryset):
+#         return queryset.order_by('-rating').first()
+    
+#     # new arrivals
+#     def new_arrivals(self, queryset):
+#         return queryset.order_by('-createdAt').first()
+    
+#     # most viewed in last week
+#     def most_viewed(self, queryset):
+        # return queryset.annotate(week_views=Count('productview', filter=Q(productview__viewed_at__gte=timezone.now()-timedelta(days=7)))).order_by('-week_views').first()
+
+
+
 
 class Product(models.Model):
     # if user is deleted, set to null
@@ -19,7 +49,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     # brand = models.CharField(max_length=200, null=True, blank=True)
 
-    views = models.IntegerField(null=True, blank=True, default=0)
+    # views = models.IntegerField(null=True, blank=True, default=0)
     last_viewed_at = models.DateTimeField(auto_now=True)
 
     category = models.CharField(max_length=100, null=True, blank=True)
@@ -39,13 +69,11 @@ class Product(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
 
-    # def colors(self):
-    #     colors = self.color_set.all()
-    #     color_list = [color.color for color in colors]
-    #     return color_list
 
+    @property
     def total_views(self):
-        return self.views
+        # return self.product_views.aggregate(total_views=Sum('views'))['total_views'] changed to below
+        return self.productview_set.aggregate(total_views=Sum('views'))['total_views']
 
     def last_five_minutes_views(self):
         five_minutes_ago = timezone.now() - timedelta(minutes=5)
@@ -71,7 +99,6 @@ class Product(models.Model):
     class Meta:
         ordering = [F'?',]
 
-
     def __str__(self):
         return self.name
 
@@ -87,6 +114,9 @@ class ProductImage(models.Model):
 class ProductView(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     viewed_at = models.DateTimeField(auto_now_add=True)
+    total_views = models.IntegerField(default=0)
+
+    
 
 
 class Review(models.Model):
@@ -114,6 +144,9 @@ class Order(models.Model):
         max_digits=7, decimal_places=2, null=True, blank=True)
     paymentProof = models.ImageField(null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
+    token = models.CharField(max_length=100, null=True, blank=True)
+    trackingNumber = models.CharField(max_length=100, null=True, blank=True)
+    trackingUrl = models.CharField(max_length=100, null=True, blank=True)
 
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
@@ -257,9 +290,27 @@ class ProductAttribute (models.Model):
 
     def sizes(self):
         return "\n".join([p.size for p in self.size.all()])
+    
+    def get_color_size_display(self):
+        color_display = ', '.join([color.color for color in self.color.all()])
+        size_display = ', '.join([size.size for size in self.size.all()])
+        return f"{color_display} y {size_display}"
 
     def __str__(self):
         return str(self.product)
+
+class StockNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    email = models.EmailField(blank=True, null=True)
+    product_attribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE)
+    is_notified = models.BooleanField(default=False)
+
+    # get product_attribute id
+    def get_id(self):
+        return self.product_attribute.id
+
+    class Meta:
+        unique_together = ('user', 'product_attribute')
 
 
 # # Cart & CartItem models
@@ -276,6 +327,7 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.IntegerField(null=True, blank=True, default=0)
     productAttribute = models.ForeignKey(ProductAttribute, on_delete=models.CASCADE, null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def get_size(self):
         if self.productAttribute is not None:

@@ -1,6 +1,6 @@
+from celery.schedules import crontab
 from datetime import timedelta
 from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,7 +20,22 @@ ALLOWED_HOSTS = [
     'localhost',
     ]
 
+# Celery configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'America/Argentina/Buenos_Aires'
 
+CELERY_BEAT_SCHEDULE = {
+    'update-all-products': {
+        'task': 'backend.tasks.update_all_products',
+        'schedule': crontab(hour=00, minute=00),
+        'args': (),
+    },
+}
 
 
 # Application definition
@@ -32,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    
 
     'corsheaders',
     'rest_framework',
@@ -176,3 +193,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ORIGIN_WHITELIST = [ 'http://localhost:5173',]
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'fishinet123@gmail.com'
+EMAIL_HOST_PASSWORD = 'rooirdizrnrobwtm'
+
+
+
+
+
+
+
+
+
+
+

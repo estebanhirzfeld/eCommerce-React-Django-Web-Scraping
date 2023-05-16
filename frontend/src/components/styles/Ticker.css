@@ -1,0 +1,38 @@
+.ticker {
+    background-color: black;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+}
+
+.ticker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(-100%);
+    background-color: black;
+    z-index: -1;
+}
+
+.ticker-text {
+    display: inline-block;
+    padding: 0 1rem;
+    animation: ticker 10s linear infinite;
+}
+
+@keyframes ticker {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}

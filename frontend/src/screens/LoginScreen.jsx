@@ -55,6 +55,13 @@ function LoginScreen() {
                                 placeholder='Enter password'
                                 ></Form.Control>
                         </Form.Group>
+                        {/* Forgot Password */}
+                        <Row className='py-3'>
+                            <Col>
+                                Forgot Password? <Link to='/forgot-password'>Reset Password</Link>
+                            </Col>
+                        </Row>
+
                         <Button className="my-3" type='submit' variant='primary'>Sign In</Button>
                                 {error && <p className='container-fluid alert alert-danger'>{error}</p>}
                     </Form>

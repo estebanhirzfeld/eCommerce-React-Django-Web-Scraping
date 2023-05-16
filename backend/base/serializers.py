@@ -267,6 +267,10 @@ class OrderSerializer(serializers.ModelSerializer):
             'createdAt',
             'id',
             'paymentProof',
+            'token',
+            'trackingNumber',
+            'trackingUrl',
+            
         )
 
     def get_OrderItems(self, obj):

@@ -1,0 +1,14 @@
+.input-range__track--active {
+    background: black;
+}
+
+
+.input-range__slider {
+    background: black;
+    border: 1px solid black;
+}
+
+.react-drawer-drawer{
+    z-index: 5;
+    background-color: white;
+}

@@ -33,6 +33,20 @@ function ADMIN_EditUserScreen() {
         dispatch(updateUser({ id: id, name, email, isAdmin }))
     }
 
+    
+    const login = useSelector(state => state.login)
+    const { userInfo } = login
+
+    // if user is not logged in or is not an admin, redirect to home
+    useEffect(() => {
+        if (!userInfo || !userInfo.is_Admin) {
+            navigate('/')
+        }
+
+    }, [dispatch, navigate, userInfo])
+
+    
+
 
     useEffect(() => {
         if (successUpdate) {

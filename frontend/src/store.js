@@ -1,16 +1,19 @@
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 
-import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers } from './reducers/productReducers.js';
+import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers, productNotifyReducers } from './reducers/productReducers.js';
 import { cartReducer } from './reducers/cartReducers';
 import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer } from './reducers/userReducers';
-import { orderCreateReducer, orderDetailsReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer } from './reducers/orderReducers';
+import { orderCreateReducer, orderDetailsReducer, orderDetailsUnloggedReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer, orderUploadProofUnloggedReducer, orderAddTrackingNumberReducer, orderDeleteTrackingNumberReducer, orderAddTrackingUrlReducer, orderDeleteTrackingUrlReducer } from './reducers/orderReducers';
 import { addressReducer, addressCreateReducer } from './reducers/addressReducers';
 
 import { wishlistReducer, saveForLaterReducer } from './reducers/listsReducers';
 
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
+
+
+
 
 const reducer = combineReducers({
     productList: productListReducers,
@@ -21,6 +24,7 @@ const reducer = combineReducers({
     productImageDelete: productImageDeleteReducers,
 
     productCreateReview: productCreateReviewReducers,
+    productNotify: productNotifyReducers,
 
     cart: cartReducer,
     wishlist: wishlistReducer,
@@ -36,8 +40,15 @@ const reducer = combineReducers({
 
     orderCreate: orderCreateReducer,
     orderDetails: orderDetailsReducer,
+    orderDetailsUnlogged: orderDetailsUnloggedReducer,
     orderPay: orderPayReducer,
+    orderUploadProofUnlogged: orderUploadProofUnloggedReducer,
     ordersList: ordersListReducer,
+
+    orderAddTrackingNumber: orderAddTrackingNumberReducer,
+    orderDeleteTrackingNumber: orderDeleteTrackingNumberReducer,
+    orderAddTrackingUrl: orderAddTrackingUrlReducer,
+    orderDeleteTrackingUrl: orderDeleteTrackingUrlReducer,
 
     addresses: addressReducer,
     addressCreate: addressCreateReducer,

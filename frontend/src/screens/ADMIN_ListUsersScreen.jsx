@@ -8,6 +8,7 @@ import { listUsers, deleteUser } from '../actions/userActions'
 
 function ADMIN_ListUsersScreen() {
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const userList = useSelector(state => state.userList)
     const { loading, error, users } = userList
@@ -15,12 +16,26 @@ function ADMIN_ListUsersScreen() {
     const userDelete = useSelector(state => state.userDelete)
     const { success: successDelete } = userDelete
 
+    const login = useSelector(state => state.login)
+    const { userInfo } = login
 
+    // if user is not logged in or is not an admin, redirect to home
+    useEffect(() => {
+        if (!userInfo || !userInfo.is_Admin) {
+            navigate('/')
+        }
+
+    }, [dispatch, navigate, userInfo])
+
+    
     const deleteUserHandler = (id) => {
         if (window.confirm('Are you sure?')) {
             dispatch(deleteUser(id))
         }
     }
+
+
+
 
     useEffect(() => {
         dispatch(listUsers())

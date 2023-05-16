@@ -35,6 +35,13 @@ function ADMIN_ListOrdersScreen() {
     const ordersListAdmin = useSelector(state => state.ordersListAdmin)
     const { loading, error, orders, success } = ordersListAdmin
 
+    // if user is not logged in or is not an admin, redirect to home
+    useEffect(() => {
+        if (!userInfo || !userInfo.is_Admin) {
+            navigate('/')
+        }
+
+    }, [dispatch, navigate, userInfo])
 
     useEffect(() => {
         if (success) {
