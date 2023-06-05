@@ -22,6 +22,14 @@ import {
     USER_UPDATE_PROFILE_SUCCESS,
     USER_UPDATE_PROFILE_FAIL,
 
+    USER_PASSWORD_SEND_RESET_EMAIL_REQUEST,
+    USER_PASSWORD_SEND_RESET_EMAIL_SUCCESS,
+    USER_PASSWORD_SEND_RESET_EMAIL_FAIL,
+
+    USER_PASSWORD_RESET_REQUEST,
+    USER_PASSWORD_RESET_SUCCESS,
+    USER_PASSWORD_RESET_FAIL,
+
     USER_LIST_REQUEST,
     USER_LIST_SUCCESS,
     USER_LIST_FAIL,
@@ -323,3 +331,83 @@ export const updateUser = (user) => async (dispatch, getState) => {
         });
     }
 }
+
+export const sendPasswordResetEmail = (email) => async (dispatch) => {
+    try {
+        dispatch({
+            type: USER_PASSWORD_SEND_RESET_EMAIL_REQUEST,
+        });
+
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        await axios.post(
+            
+            `${BASE_URL}/api/users/reset_password/`,
+            { email },
+            config
+        );
+
+        dispatch({
+            type: USER_PASSWORD_SEND_RESET_EMAIL_SUCCESS,
+        });
+    } catch (error) {
+        console.log(
+            error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message
+        );
+        dispatch({
+            type: USER_PASSWORD_SEND_RESET_EMAIL_FAIL,
+            payload:
+                error.response && error.response.data.detail
+                    ? error.response.data.detail
+                    : error.message,
+        });
+    }
+}
+
+export const resetPassword = (uid, token, password) => async (dispatch) => {
+    try {
+        dispatch({
+            type: USER_PASSWORD_RESET_REQUEST,
+        });
+
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        await axios.post(
+            
+            `${BASE_URL}/api/users/reset_password_confirm/${uid}/${token}/`,
+            { password },
+            config
+        );
+
+        dispatch({
+            type: USER_PASSWORD_RESET_SUCCESS,
+        });
+    } catch (error) {
+        console.log(
+            error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message
+        );
+        dispatch({
+            type: USER_PASSWORD_RESET_FAIL,
+            payload:
+                error.response && error.response.data.detail
+                    ? error.response.data.detail
+                    : error.message,
+        });
+    }
+}
+
+
+
+

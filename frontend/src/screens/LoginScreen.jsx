@@ -34,8 +34,6 @@ function LoginScreen() {
             <Row className='justify-content-md-center'>
                 <Col xs={12} md={6}>
                     <h1>Sign In</h1>
-
-
                     <Form onSubmit={submitHandler}>
                         <Form.Group className="my-3" controlId='email'>
                             <Form.Label>Email Address</Form.Label>

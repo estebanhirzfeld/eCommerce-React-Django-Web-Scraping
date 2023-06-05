@@ -4,6 +4,9 @@ import { Container, Col, Row, Form, Button } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { userLogin, userRegister } from '../actions/userActions'
 
+import { GoogleLogin } from 'react-google-login';
+
+
 function RegisterScreen() {
 
     const [email, setEmail] = useState('')
@@ -32,11 +35,37 @@ function RegisterScreen() {
         }
     }
 
+    // Google Register
+    const responseGoogle = (response) => {
+        console.log("Google Register Response: ", response);
+        // dispatch(userRegister(response.profileObj.name, response.profileObj.email, response.profileObj.googleId))
+        // dispatch(userLogin(response.profileObj.email, response.profileObj.googleId))
+    }
+
+    const responseGoogleFailure = (response) => {
+        console.log("Google Register Failure: Response: ", response);
+    }
+
+
     return (
         <Container className='mt-5'>
             <Row className='justify-content-md-center'>
                 <Col xs={12} md={6}>
                     <h1>Sign Up</h1>
+
+                    {/* Register with Google */}
+                    
+                    <GoogleLogin
+                        clientId="872171782252-80ut0gm3elrth3b26601tqf6eifvpn2p.apps.googleusercontent.com"
+                        buttonText="Register with Google"
+                        onSuccess={responseGoogle}
+                        onFailure={responseGoogleFailure}
+                    />
+
+                    {/* Register with Email */}
+                    <p className='my-3'>Or Register with Email</p>
+
+
                     <Form onSubmit={(e) => { submitHandler(e) }}>
                         <Form.Group className="my-3" controlId='name'>
                             <Form.Label>Name</Form.Label>

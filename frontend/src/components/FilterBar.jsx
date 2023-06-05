@@ -52,6 +52,7 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
         searchParams.delete('priceFrom');
         searchParams.delete('priceTo');
         searchParams.delete('color');
+        searchParams.delete('sortBy');
         window.location.href = `/?${searchParams.toString()}`;
     };
 
@@ -87,16 +88,16 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                         )
                     }
                 </Breadcrumb>
-                <div className="d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-center justify-content-between mt-3">
                     <Row>
                         {/* Filter */}
-                        <Col className='col-3'>
+                        <Col className='col-4'>
                             <Button variant="outline-primary" className="me-2" onClick={() => setShowFilters(!showFilters)}>
-                                Filter
+                                Filter <i className="fas fa-filter"></i>
                             </Button>
                         </Col>
                         {/* Order By*/}
-                        <Col className='col-4'>
+                        <Col className='col-3'>
                             <Dropdown>
                                 <Dropdown.Toggle id="dropdown-basic">
                                     Order By

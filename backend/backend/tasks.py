@@ -1,4 +1,6 @@
 from datetime import timedelta
+import datetime
+from datetime import datetime as dt
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
 
@@ -83,6 +85,7 @@ def scrape_product(id):
         # "//div[contains(@data-variant,'Color')]/div/a/span",
         # "//form[@id='product_form']//label[text()='Color']/following-sibling::select/option",
         # "//span[text()[contains(.,'Color')]]/parent::label/following-sibling::div/select[contains(@class,'js-variation-option')]/option"
+        "//span[text()[contains(.,'Estampa')]]/parent::label/following-sibling::div/select/option",
         "//span[text()[contains(.,'Color')]]/parent::label/following-sibling::div/select/option",
         "//form[@id='product_form']//label[text()[contains(.,'Color')]]/following-sibling::select/option",
     ]
@@ -129,42 +132,63 @@ def scrape_product(id):
                 EC.presence_of_element_located((By.XPATH, xpath)))
             return result
 
-    def map_category(category):
-        if category in ['VESTIDOS']:
+    def map_category(category, name = ''):
+        # to lower case
+        category = category.upper()
+        name = name.upper()
+
+        if category or name in ['VESTIDOS', 'VESTIDO']:
             return 'Vestidos'
-        elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
-            return 'Shorts y bermudas'
-        elif category in ['FALDAS', 'Pollera']:
+        # elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
+        elif category or name in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
+            return 'Shorts y Bermudas'
+        # elif category in ['FALDAS', 'Pollera']:
+        elif category or name in ['FALDAS', 'POLLERA', 'FALDA']:
             return 'Faldas'
-        elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
+        # elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
+        elif category or name in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON']:
             return 'Remeras y tops'
-        elif category in ['BODYS', 'Body']:
+        # elif category in ['BODYS', 'BODY']:
+        elif category or name in ['BODYS', 'BODY']:
             return 'Bodys'
-        elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']:
+        # elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']
+        elif category or name in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
             return 'Hoodies/Buzos/Sweaters'
-        elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
+        # elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
+        elif category or name in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
             return 'Pantalones'
-        elif category in ['CONJUNTOS']:
+        # elif category in ['CONJUNTOS']:
+        elif category or name in ['CONJUNTOS', 'CONJUNTO']:
             return 'Conjuntos'
-        elif category in ['Trajes de Baño']:
+        # elif category in ['Trajes de Baño']:
+        elif category or name in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
             return 'Trajes de baño'
-        elif category in ['Chalecos']:
+        # elif category in ['Chalecos']:
+        elif category or name in ['CHALECOS', 'CHALECO']:
             return 'Chalecos'
-        elif category in ['Corset']:
+        # elif category in ['Corset']:
+        elif category or name in ['CORSET']:
             return 'Corset'
-        elif category in ['CALZADO']:
+        # elif category in ['CALZADO']:
+        elif category or name in ['CALZADO']:
             return 'Calzado'
-        elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
+        # elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
+        elif category or name in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
             return 'Accesorios'
-        elif category in ['Colección']:
+        # elif category in ['Colección']:
+        elif category or name in ['COLECCIÓN']:
             return 'Colección'
-        elif category in ['Sale !']:
-            return 'Sale!'
-        elif category in ['THE END OF $TW']:
-            return 'The end of $TW'
-        elif category in ['Mallas y Bermudas']:
+        # elif category in ['Sale !']:
+        elif category or name in ['SALE !']:
+            return 'Outlet'
+        # elif category in ['THE END OF $TW']:
+        elif category or name in ['THE END OF $TW']:
+            return 'Outlet'
+        # elif category in ['Mallas y Bermudas']:
+        elif category or name in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
             return 'Mallas y bermudas'
-        elif category in ['Gorras', 'Beanies']:
+        # elif category in ['Gorras', 'Beanies']:
+        elif category or name in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
             return 'Gorras y Beanies'
         else:
             return category
@@ -402,12 +426,12 @@ def scrape_product(id):
                 print(item.text)
                 if item.text.lower() != 'inicio' and item.text.lower() != 'home':
                     category = item.text
-                    category = map_category(category)
+                    category = map_category(category, name)
                     print('category found ' + category)
                     break
         else:
             category = category[0].text
-            category = map_category(category)
+            category = map_category(category, name)
 
         print('Category found in', category_time, 'seconds with lucky ;)')
     except:
@@ -425,7 +449,7 @@ def scrape_product(id):
                         print(item.text)
                         if item.text.lower() != 'inicio' and item.text.lower() != 'home':
                             category = item.text
-                            category = map_category(category)
+                            category = map_category(category, name)
                             print('category found ' + category)
                             break
 
@@ -863,42 +887,64 @@ def scrape_discover():
 
     # Functions
 
-    def map_category(category):
-        if category in ['VESTIDOS']:
+    def map_category(category, name = ''):
+        
+        # to lower case
+        category = category.upper()
+        name = name.upper()
+
+        if category or name in ['VESTIDOS', 'VESTIDO']:
             return 'Vestidos'
-        elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
-            return 'Shorts y bermudas'
-        elif category in ['FALDAS', 'Pollera']:
+        # elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
+        elif category or name in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
+            return 'Shorts y Bermudas'
+        # elif category in ['FALDAS', 'Pollera']:
+        elif category or name in ['FALDAS', 'POLLERA', 'FALDA']:
             return 'Faldas'
-        elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
+        # elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
+        elif category or name in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON']:
             return 'Remeras y tops'
-        elif category in ['BODYS', 'Body']:
+        # elif category in ['BODYS', 'BODY']:
+        elif category or name in ['BODYS', 'BODY']:
             return 'Bodys'
-        elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']:
+        # elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']
+        elif category or name in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
             return 'Hoodies/Buzos/Sweaters'
-        elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
+        # elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
+        elif category or name in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
             return 'Pantalones'
-        elif category in ['CONJUNTOS']:
+        # elif category in ['CONJUNTOS']:
+        elif category or name in ['CONJUNTOS', 'CONJUNTO']:
             return 'Conjuntos'
-        elif category in ['Trajes de Baño']:
+        # elif category in ['Trajes de Baño']:
+        elif category or name in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
             return 'Trajes de baño'
-        elif category in ['Chalecos']:
+        # elif category in ['Chalecos']:
+        elif category or name in ['CHALECOS', 'CHALECO']:
             return 'Chalecos'
-        elif category in ['Corset']:
+        # elif category in ['Corset']:
+        elif category or name in ['CORSET']:
             return 'Corset'
-        elif category in ['CALZADO']:
+        # elif category in ['CALZADO']:
+        elif category or name in ['CALZADO']:
             return 'Calzado'
-        elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
+        # elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
+        elif category or name in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
             return 'Accesorios'
-        elif category in ['Colección']:
+        # elif category in ['Colección']:
+        elif category or name in ['COLECCIÓN']:
             return 'Colección'
-        elif category in ['Sale !']:
-            return 'Sale!'
-        elif category in ['THE END OF $TW']:
-            return 'The end of $TW'
-        elif category in ['Mallas y Bermudas']:
+        # elif category in ['Sale !']:
+        elif category or name in ['SALE !']:
+            return 'Outlet'
+        # elif category in ['THE END OF $TW']:
+        elif category or name in ['THE END OF $TW']:
+            return 'Outlet'
+        # elif category in ['Mallas y Bermudas']:
+        elif category or name in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
             return 'Mallas y bermudas'
-        elif category in ['Gorras', 'Beanies']:
+        # elif category in ['Gorras', 'Beanies']:
+        elif category or name in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
             return 'Gorras y Beanies'
         else:
             return category
@@ -906,7 +952,7 @@ def scrape_discover():
     stores = [
         "https://www.satanaclothes.com/productos/?mpage=60",
         "https://www.mustaqe.com.ar/productos/?mpage=60",
-        "https://www.jimmyrebel.com.ar/productos/?mpage=60",
+        # "https://www.jimmyrebel.com.ar/productos/?mpage=60",
     ]
 
     was_saved = False
@@ -1240,15 +1286,14 @@ def scrape_discover():
                             print(item.text)
                             if item.text.lower() != 'inicio' and item.text.lower() != 'home':
                                 category = item.text
-                                category = map_category(category)
+                                category = map_category(category, name)
                                 print('category found ' + category)
                                 break
                     else:
                         category = category[0].text
                         category = map_category(category)
 
-                    print('Category found in', category_time,
-                          'seconds with lucky ;)')
+                    print('Category found in', category_time, 'seconds with lucky ;)')
                 except:
                     for category_xpath in CATEGORY_XPATHS:
                         try:
@@ -1264,13 +1309,12 @@ def scrape_discover():
                                     print(item.text)
                                     if item.text.lower() != 'inicio' and item.text.lower() != 'home':
                                         category = item.text
-                                        category = map_category(category)
+                                        category = map_category(category, name)
                                         print('category found ' + category)
                                         break
 
                             category_time = time.time() - category_time
-                            print('Category found in',
-                                  category_time, 'seconds')
+                            print('Category found in', category_time, 'seconds')
                             lucky_category_xpath = CATEGORY_XPATHS.index(
                                 category_xpath)
                             break
@@ -1509,6 +1553,7 @@ def scrape_discover():
                         original_url=link,
                         is_scraped=True,
                         is_active=status,
+                        # createdAt=dt.now(),
                     )
 
                     product.save()

@@ -112,8 +112,8 @@ function HomeScreen() {
             <div className='d-flex justify-content-center'>
                 <div className='d-flex flex-wrap justify-content-center'>
                     {
-                        // keyword && <span className='badge badge-pill badge-primary mx-1 my-1'>{keyword}</span> //cross icon to remove keyword
-                        keyword && <span className='badge badge-pill badge-primary mx-1 my-1'>{keyword}
+                        // keyword && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{keyword}</span> //cross icon to remove keyword
+                        keyword && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{keyword}
                             {/* //cross icon to remove keyword */}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('keyword')
@@ -122,7 +122,7 @@ function HomeScreen() {
                         </span>
                     }
                     {
-                        category && <span className='badge badge-pill badge-primary mx-1 my-1'>{category}
+                        category && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{category}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('category')
                                 window.location.search = searchParams.toString()
@@ -131,7 +131,7 @@ function HomeScreen() {
                         </span>
                     }
                     {
-                        subcategory && <span className='badge badge-pill badge-primary mx-1 my-1'>{subcategory}
+                        subcategory && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{subcategory}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('subcategory')
                                 window.location.search = searchParams.toString()
@@ -140,7 +140,7 @@ function HomeScreen() {
                         </span>
                     }
                     {
-                        priceFrom && <span className='badge badge-pill badge-primary mx-1 my-1'>${priceFrom} - ${priceTo}
+                        priceFrom && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>${priceFrom} - ${priceTo}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('priceFrom')
                                 searchParams.delete('priceTo')
@@ -150,7 +150,7 @@ function HomeScreen() {
                         </span>
                     }
                     {
-                        sortBy && <span className='badge badge-pill badge-primary mx-1 my-1'>{sortBy}
+                        sortBy && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{sortBy}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('sortBy')
                                 window.location.search = searchParams.toString()
@@ -159,7 +159,7 @@ function HomeScreen() {
                         </span>
                     }
                     {
-                        color && <span className='badge badge-pill badge-primary mx-1 my-1'>{color}
+                        color && <span className='badge bg-dark badge-pill badge-primary mx-1 my-1'>{color}
                             <i style={{cursor:'pointer'}} className="fas fa-times-circle mx-1" onClick={() => {
                                 searchParams.delete('color')
                                 window.location.search = searchParams.toString()

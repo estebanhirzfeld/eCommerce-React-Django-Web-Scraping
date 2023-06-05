@@ -19,6 +19,17 @@ import {
     USER_UPDATE_PROFILE_FAIL,
     USER_UPDATE_PROFILE_RESET,
 
+    USER_PASSWORD_SEND_RESET_EMAIL_REQUEST,
+    USER_PASSWORD_SEND_RESET_EMAIL_SUCCESS,
+    USER_PASSWORD_SEND_RESET_EMAIL_FAIL,
+    USER_PASSWORD_SEND_RESET_EMAIL_RESET,
+
+
+    USER_PASSWORD_RESET_REQUEST,
+    USER_PASSWORD_RESET_SUCCESS,
+    USER_PASSWORD_RESET_FAIL,
+    USER_PASSWORD_RESET_RESET,
+
     USER_LIST_REQUEST,
     USER_LIST_SUCCESS,
     USER_LIST_FAIL,
@@ -156,6 +167,44 @@ export const userUpdateReducer = (state = { user: {} }, action) => {
         
         case USER_UPDATE_RESET:
             return { user: {} };
+
+        default:
+            return state;
+    }
+}
+
+export const userPasswordSendResetEmailReducer = (state = {}, action) => {
+    switch (action.type) {
+        case USER_PASSWORD_SEND_RESET_EMAIL_REQUEST:
+            return { loading: true };
+
+        case USER_PASSWORD_SEND_RESET_EMAIL_SUCCESS:
+            return { loading: false, success: true };
+
+        case USER_PASSWORD_SEND_RESET_EMAIL_FAIL:
+            return { loading: false, error: action.payload };
+
+        case USER_PASSWORD_SEND_RESET_EMAIL_RESET:
+            return {};
+
+        default:
+            return state;
+    }
+}
+
+export const userPasswordResetReducer = (state = {}, action) => {
+    switch (action.type) {
+        case USER_PASSWORD_RESET_REQUEST:
+            return { loading: true };
+
+        case USER_PASSWORD_RESET_SUCCESS:
+            return { loading: false, success: true };
+
+        case USER_PASSWORD_RESET_FAIL:
+            return { loading: false, error: action.payload };
+
+        case USER_PASSWORD_RESET_RESET:
+            return {};
 
         default:
             return state;

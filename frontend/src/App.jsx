@@ -16,6 +16,9 @@ import reactLogo from './assets/react.svg'
 import LoginScreen from './screens/LoginScreen.jsx'
 import RegisterScreen from './screens/RegisterScreen.jsx'
 import ProfileScreen from './screens/ProfileScreen.jsx'
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen.jsx'
+import ResetPasswordScreen from './screens/ResetPasswordScreen.jsx'
+
 import ShippingScreen from './screens/ShippingScreen.jsx'
 import PaymentScreen from './screens/PaymentScreen.jsx'
 import PlaceOrderScreen from './screens/PlaceOrderScreen.jsx'
@@ -35,6 +38,7 @@ import ADMIN_ListOrdersStatusScreen from './screens/ADMIN_ListOrdersStatusScreen
 import ADMIN_ListProductsScreen from './screens/ADMIN_ListProductsScreen.jsx'
 import ADMIN_EditProductScreen from './screens/ADMIN_EditProductScreen.jsx'
 
+import LandingPageScreen from './screens/LandingPageScreen.jsx'
 
 // Add App.css
 import './App.css'
@@ -52,6 +56,14 @@ function App() {
               <HomeScreen />
             </Container>
           } />
+
+          <Route path='/landingpage' element={
+            <Container style={{minHeight: '100vh'}}>
+              <LandingPageScreen />
+            </Container>
+          } />
+          
+
           <Route path='/category/:category' element={
             <Container style={{minHeight: '100vh'}}>
               <HomeScreen />
@@ -94,6 +106,20 @@ function App() {
             </Container>
           }
           />
+          <Route path='/forgot-password' element={
+            <Container style={{minHeight: '100vh'}}>
+              <ForgotPasswordScreen />
+            </Container>
+          }
+          />
+          
+          <Route path='/reset/:id/:token' element={
+            <Container style={{minHeight: '100vh'}}>
+              <ResetPasswordScreen />
+            </Container>
+          }
+          />
+
           <Route path='/profile' element={
             <Container style={{minHeight: '100vh'}}>
               <ProfileScreen />

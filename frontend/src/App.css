@@ -7,6 +7,10 @@
     background-color: #080808 !important;
 }
 
+[class*=btn-outline-]{
+    border:none !important;
+}
+
 /* --bs-navbar-color */
 /* 
 --darkreader-text--bs-navbar-color: rgba(232, 230, 227, 0.3);
@@ -15,7 +19,7 @@
 --darkreader-text--bs-navbar-active-color: #d8d4cf; */
 /* --darkreader-text--bs-navbar-brand-color: #d8d4cf;
     --darkreader-text--bs-navbar-brand-hover-color: #d8d4cf; */
-/* 
+
 .navbar{
     --bs-navbar-color: rgba(232, 230, 227, 0.3) !important ;
     --bs-navbar-hover-color: #d8d4cf !important ;
@@ -23,7 +27,7 @@
     --bs-navbar-active-color: #d8d4cf !important ;
     --bs-navbar-brand-color: #d8d4cf !important ;
     --bs-navbar-brand-hover-color: #d8d4cf !important ;
-} */
+}
 
 /* --bs-link-color: #1a1a1a;
 --bs-link-hover-color: #151515; */

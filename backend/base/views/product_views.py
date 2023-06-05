@@ -1,3 +1,5 @@
+# from openpyxl import Workbook
+
 # import csv
 # from django.utils.encoding import smart_str # Use smart_str to encode text as UTF-8
 
@@ -59,13 +61,54 @@ from rest_framework import status
 def getProducts(request):
 
 
+# disable all products that contains jimmy in their original_url 
+    # all_products = Product.objects.filter(is_active=True)
+
+    # for p in all_products:
+    #     if 'jimmy' in p.original_url:
+    #         p.is_active = False
+    #         p.save() 
+
+# Comibine Hoodies/buzos/sweaters category with Hoodies/Buzos/Sweaters
+
+    # all_products = Product.objects.filter(is_active=True)
+
+    # for p in all_products:
+    #     if p.category == 'Hoodies/buzos/sweaters':
+    #         p.category = 'Hoodies/Buzos/Sweaters'
+    #         p.save()
+
+# Comibine Shorts y bermudas with Shorts y Bermudas
+
+    # all_products = Product.objects.filter(is_active=True)
+
+    # for p in all_products:
+    #     if p.category == 'Shorts y bermudas':
+    #         p.category = 'Shorts y Bermudas'
+    #         p.save()
+    
+    
+
+
     # all_products = Product.objects.filter(is_active=True)
 
     # with open('all_active_products.csv', 'w', encoding='utf-8') as f:
     #     writer = csv.writer(f)
-    #     writer.writerow(['id', 'name', 'price']) # Add headers
+    #     writer.writerow(['id', 'name', 'price', 'original_url'])
     #     for product in all_products:
-    #         writer.writerow([product.id, smart_str(product.name), product.price])
+    #         writer.writerow([product.id, smart_str(product.name), product.price, product.original_url])
+
+
+# /// 2do metodo
+
+    # wb = Workbook()
+    # ws = wb.active
+    # ws.append(['id', 'name', 'price', 'original url'])
+
+    # for product in all_products:
+    #     ws.append([product.id, product.name, product.price, product.original_url])
+
+    # wb.save('all_active_products.xlsx')
 
     query = request.query_params.get('keyword')
     category = request.query_params.get('category')
@@ -89,7 +132,11 @@ def getProducts(request):
     categories = products.order_by().values_list('category', flat=True).distinct()
 
     if category:
-        products = products.filter(category=category)
+        # products = products.filter(category=category) or product name contains the category or product category contains the category
+        # products = products.filter(Q(category__icontains=category) | Q(name__icontains=category) | Q(description__icontains=category))
+        products = products.filter( Q(category__icontains=category.lower()) | Q(name__icontains=category.lower()) | Q(description__icontains=category.lower())
+)
+
 
     if subcategory:
         products = products.filter(subCategory=subcategory)
@@ -111,7 +158,7 @@ def getProducts(request):
     elif sortBy == 'Highest':
         products = products.order_by('-price')
     elif sortBy == 'Popularity':
-        products = Product.objects.annotate(num_views=Count('productview')).order_by('-num_views')
+        products = products.annotate(num_views=Count('productview')).order_by('-num_views')
     elif sortBy == 'Newest':
         products = products.order_by('-createdAt')
     elif sortBy == 'Rating':

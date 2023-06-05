@@ -3,7 +3,7 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 
 import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers, productNotifyReducers } from './reducers/productReducers.js';
 import { cartReducer } from './reducers/cartReducers';
-import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer } from './reducers/userReducers';
+import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer, userPasswordSendResetEmailReducer, userPasswordResetReducer } from './reducers/userReducers';
 import { orderCreateReducer, orderDetailsReducer, orderDetailsUnloggedReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer, orderUploadProofUnloggedReducer, orderAddTrackingNumberReducer, orderDeleteTrackingNumberReducer, orderAddTrackingUrlReducer, orderDeleteTrackingUrlReducer } from './reducers/orderReducers';
 import { addressReducer, addressCreateReducer } from './reducers/addressReducers';
 
@@ -34,6 +34,10 @@ const reducer = combineReducers({
     register: userRegisterReducer,
     userDetails: userDetailsReducer,
     userUpdateProfile: userUpdateProfileReducer,
+
+    userPasswordSendResetEmail: userPasswordSendResetEmailReducer,
+    userPasswordReset: userPasswordResetReducer,
+
     userList: userListReducer,
     userDelete: userDeleteReducer,
     userUpdate: userUpdateReducer,

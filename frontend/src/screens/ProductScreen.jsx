@@ -232,7 +232,15 @@ function ProductScreen() {
                                                                 <i className='fas fa-edit text-warning'></i>
                                                             </Link>
                                                         }
-                                                                
+                                                        
+                                                        {
+                                                            userInfo && userInfo.is_Admin &&
+                                                            <a href={product.original_url} target="_blank" className='btn btn-light my-3' rel="noopener noreferrer">
+                                                                <i className='fas fa-eye text-primary'></i>
+                                                            </a>
+
+                                                        }
+
                                                     </h3>
 
                                                 </ListGroup.Item>
@@ -273,7 +281,7 @@ function ProductScreen() {
                                 </Row>
                                 {/* Leave a Review */}
                                 {/* button to change between reviews amd description of the product */}
-                                <ButtonGroup className='mb-3 justify-content-between align-items-center'>
+                                <ButtonGroup className='my-3 w-100 justify-content-between align-items-center'>
                                     <Button
                                         variant='outline-secondary'
                                         onClick={() => setIsDescription(true)}
