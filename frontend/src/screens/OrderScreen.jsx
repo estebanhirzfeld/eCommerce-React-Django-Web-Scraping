@@ -223,21 +223,33 @@ function OrderScreen() {
 
                                         {/* add tracking number and tracking url */}
                                         {/* trackingNumber, trackingUrl */}
-                                        {
-                                            order.trackingNumber && order.trackingUrl ?
-                                                <p>
-                                                    <strong>Tracking Number: </strong>
-                                                    <a target='_blank' href={order.trackingUrl}>{order.trackingNumber}</a>
-                                                    {/* <i className="fas fa-copy ms-2 " onClick={() => copyTrackingNumber(order.trackingNumber)} style={{cursor: 'pointer'}}></i> */}
-                                                    {
-                                                        isCopied ? <i className="fas fa-check ms-2" onClick={() => copyTrackingNumber(order.trackingNumber)} style={{ color: 'green', cursor: 'pointer' }}></i>
-                                                            :
-                                                            <i className="fas fa-copy ms-2 " onClick={() => copyTrackingNumber(order.trackingNumber)} style={{ cursor: 'pointer' }}></i>
-                                                    }
-                                                </p>
-                                                : null
-                                        }
+                                        {order.trackingNumber ? (
+                                            <p>
+                                                <strong>Tracking Number: </strong>
+                                                {order.trackingUrl ? (
+                                                    <a target='_blank' href={order.trackingUrl}>
+                                                        {order.trackingNumber}
+                                                    </a>
+                                                ) : (
+                                                    order.trackingNumber
+                                                )}
+                                                {isCopied ? (
+                                                    <i
+                                                        className="fas fa-check ms-2"
+                                                        onClick={() => copyTrackingNumber(order.trackingNumber)}
+                                                        style={{ color: 'green', cursor: 'pointer' }}
+                                                    ></i>
+                                                ) : (
+                                                    <i
+                                                        className="fas fa-copy ms-2"
+                                                        onClick={() => copyTrackingNumber(order.trackingNumber)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    ></i>
+                                                )}
+                                            </p>
+                                        ) : null}
                                     </div>
+
                                 ) : (
                                     <div className="alert alert-danger" role="alert">
                                         Not Delivered

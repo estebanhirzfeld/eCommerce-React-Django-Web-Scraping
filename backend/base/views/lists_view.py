@@ -17,7 +17,7 @@ def getWishListItems(request):
     user = request.user
     # if user has no wishlist, create one
     wishlist, created = Wishlist.objects.get_or_create(user=user)
-    wishlistItems = wishlist.wishlistitem_set.all()
+    wishlistItems = wishlist.wishlistitem_set.filter(product__is_active=True)
     serializer = WishlistItemSerializer(wishlistItems, many=True)
     return Response(serializer.data)
 

@@ -9,16 +9,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Row, Col, Card, Image, ListGroup, Button, Form, Container, ButtonGroup } from 'react-bootstrap'
 import Carousel from 'react-bootstrap/Carousel';
 
-
-
 // components 
 import Rating from '../components/Rating'
 import ItemDetailLoader from '../components/itemDetailsLoader'
 import CartList from '../components/CartList'
 import Selectors from '../components/Selectors'
+import Product from '../components/Product'
 
 // actions
 import { getWishlist, addToWishlist, removeFromWishlist } from '../actions/listsActions'
+import { listProductRecommendations } from '../actions/productActions'
+
 
 import { listProductDetails, createProductReview } from '../actions/productActions'
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants'
@@ -70,26 +71,39 @@ function ProductScreen() {
     const wishlist = useSelector(state => state.wishlist)
     const { wishlistItems, loading: loadingWishlist, success: successWishlist, error: errorWishlist } = wishlist
 
+    const productRecommend = useSelector(state => state.productRecommend)
+    const { loading: loadingRecommendations, error: errorRecommendations, products: recommendations } = productRecommend
+
+
+
 
     useEffect(() => {
         window.scrollTo(0, 0)
         dispatch(listProductDetails(id))
         dispatch(getWishlist())
-        console.log(product)
     }, [dispatch, id, successProductReview, errorProductReview])
 
 
     const productDetails = useSelector(state => state.productDetails)
     const { loading, error, product, success } = productDetails
 
+    // if product not found, redirect to home page
+    useEffect(() => {
+        if (error) {
+            // wait 3 seconds and redirect to home page
+            setTimeout(() => {
+                navigate('/')
+            }
+                , 3000)
+
+        }
+    }, [error, navigate])
+
     useEffect(() => {
 
         if (success && product?.images) {
             setSelectedImage(product.images[0])
         }
-
-        // scroll to top
-
     }, [success, product])
 
 
@@ -142,7 +156,23 @@ function ProductScreen() {
 
     }, [wishlistItems, id, loadingWishlist, successWishlist, errorWishlist, was_added, dispatch])
 
-    console.log(product)
+    // get product recommendations
+    useEffect(() => {
+        if (success) {
+            dispatch(listProductRecommendations(id))
+        }
+    }, [dispatch, id, success])
+
+
+    // const productUrl = this url
+    // const productUrl = window.location.href;
+    const productUrl = "https://www.satanaclothes.com/productos/camiseta-tul-bones"
+
+    const pinterestShareUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(productUrl)}`;
+    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+    const twitterShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}`;
+    const instagramShareUrl = `https://www.instagram.com/zoldyck-clothes/`;
+
 
     return (
         <div>
@@ -152,7 +182,7 @@ function ProductScreen() {
                         : product ?
                             <Container>
                                 <Row>
-                                    <Col md={1} className={'d-none d-md-block'}>
+                                    <Col md={1} className={'d-none d-md-block'} style={{ maxHeight: '95vh', overflowY: 'scroll' }}>
                                         {/* column of images */}
                                         <Row>
                                             {product.images &&
@@ -177,6 +207,24 @@ function ProductScreen() {
                                                     </Carousel.Item>
                                                 ))}
                                         </Carousel>
+                                        <div className="text-center my-3">
+                                            {/* Pinterest share button */}
+                                            <a href={pinterestShareUrl} target="_blank" rel="noopener noreferrer">
+                                                <i className="fab fa-pinterest-p fa-lg mx-2"></i>
+                                            </a>
+                                            {/* Facebook share button */}
+                                            <a href={facebookShareUrl} target="_blank" rel="noopener noreferrer">
+                                                <i className="fab fa-facebook-f fa-lg mx-2"></i>
+                                            </a>
+                                            {/* Twitter share button */}
+                                            <a href={twitterShareUrl} target="_blank" rel="noopener noreferrer">
+                                                <i className="fab fa-twitter fa-lg mx-2"></i>
+                                            </a>
+                                            {/* Instagram share button */}
+                                            <a href={instagramShareUrl} target="_blank" rel="noopener noreferrer">
+                                                <i className="fab fa-instagram fa-lg mx-2"></i>
+                                            </a>
+                                        </div>
                                     </Col>
 
                                     {was_clicked
@@ -214,7 +262,7 @@ function ProductScreen() {
                                             <ListGroup variant='flush'>
                                                 <ListGroup.Item>
                                                     <h3>{product.name}
-                                                    {/* if user is admin add update button*/}
+                                                        {/* if user is admin add update button*/}
                                                         {userInfo && userInfo.is_Admin &&
                                                             <a href={`http://localhost:8000/api/products/scrape/${product.id}`} target="_blank" className='btn btn-light my-3' rel="noopener noreferrer">
                                                                 <i className='fas fa-sync text-success'></i>
@@ -232,7 +280,7 @@ function ProductScreen() {
                                                                 <i className='fas fa-edit text-warning'></i>
                                                             </Link>
                                                         }
-                                                        
+
                                                         {
                                                             userInfo && userInfo.is_Admin &&
                                                             <a href={product.original_url} target="_blank" className='btn btn-light my-3' rel="noopener noreferrer">
@@ -302,7 +350,7 @@ function ProductScreen() {
                                         <p>{product.description}</p>
                                     </div>
                                     : <Row className='mt-5'>
-                                        <Col md={8}>
+                                        <Col md={12} lg={8} className='col-12'>
                                             <ListGroup variant='flush'>
                                                 <ListGroup.Item>
                                                     <h2>Reviews</h2>
@@ -334,7 +382,7 @@ function ProductScreen() {
                                                                             value={rating}
                                                                             onChange={(e) => setRating(e.target.value)}
                                                                         >
-                                                                            <option value=''>Select...</option>
+                                                                            <option value=''>Select... ⭐</option>
                                                                             <option value='1'>1 - Poor</option>
                                                                             <option value='2'>2 - Fair</option>
                                                                             <option value='3'>3 - Good</option>
@@ -372,6 +420,32 @@ function ProductScreen() {
                                         </Col>
                                     </Row>
                                 }
+                                {/* Related Products */}
+                                {
+                                    recommendations?.length > 0 &&
+                                    <Row className='mt-5'>
+                                        <Col sm={12} className='col-12 mt-5'>
+                                            <h4 className='text-center' >Related Products</h4>
+
+                                            <Row>
+                                                {recommendations?.map((product) => (
+                                                    <Col key={product.id} sm={12} md={6} lg={4} xl={3}>
+                                                        <Product product={product} />
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        </Col>
+                                    </Row>
+                                }
+
+                                <div className='mt-5 justify-content-center align-items-center text-center'>
+                                    <Button className='btn btn-primary my-3 text-center'
+                                        onClick={() => navigate('/')}
+                                    >
+                                        All Products
+                                    </Button>
+                                </div>
+
                             </Container>
                             :
                             <h2>No Product Found</h2>

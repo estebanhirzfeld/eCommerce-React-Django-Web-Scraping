@@ -8,6 +8,9 @@ import {
     PRODUCT_DETAILS_FAIL,
     PRODUCT_DETAILS_RESET,
 
+    PRODUCT_RECOMMEND_REQUEST,
+    PRODUCT_RECOMMEND_SUCCESS,
+    PRODUCT_RECOMMEND_FAIL,
 
     PRODUCT_DELETE_REQUEST,
     PRODUCT_DELETE_SUCCESS,
@@ -95,6 +98,27 @@ export const productDetailsReducers = (state = { product: { reviews: [] } }, act
             return state
     }
 }
+
+export const productRecommendReducers = (state = { products: [] }, action) => {
+
+    switch (action.type) {
+        case PRODUCT_RECOMMEND_REQUEST:
+            return { loading: true, products: [] }
+
+        case PRODUCT_RECOMMEND_SUCCESS:
+            return {
+                loading: false,
+                products: action.payload
+            }
+
+        case PRODUCT_RECOMMEND_FAIL:
+            return { loading: false, error: action.payload }
+
+        default:
+            return state
+    }
+}
+
 
 export const productDeleteReducers = (state = {}, action) => {
 

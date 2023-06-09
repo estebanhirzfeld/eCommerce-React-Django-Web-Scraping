@@ -63,12 +63,17 @@ function PaymentScreen() {
                                     <Form.Check
                                         required
                                         type='radio'
-                                        label='Tranferencia Bancaria'
-                                        id='Tranferencia Bancaria'
+                                        label='Transferencia Bancaria'
+                                        id='Transferencia Bancaria'
                                         name='paymentMethod'
-                                        value='Tranferencia Bancaria'
+                                        value='Transferencia Bancaria'
                                         onClick={(e) => setPaymentMethod(e.target.value)}
                                     ></Form.Check>
+                                    <span>
+                                        <small>
+                                            <p className='text-success'>+  10% de descuento</p>
+                                        </small>
+                                    </span>
                                 </Col>
                             </Row>
                         </Form.Group>

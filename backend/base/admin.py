@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from django.contrib import admin
-from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute, StockNotification
+from .models import Product, ProductImage, Review, Order, OrderItem, ShippingAddress, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute, StockNotification, Ticker
 from urllib.parse import urlparse
 # Register your models here.
 
@@ -145,6 +145,8 @@ class StockNotificationAdmin(admin.ModelAdmin):
 
     search_fields = ['user__email', 'product_attribute__product__name', 'product_attribute__id']
 
+class TickerAdmin(admin.ModelAdmin):
+    list_display = ('message', 'createdAt')
 
 
 admin.site.register(Wishlist, WishlistAdmin)
@@ -164,3 +166,5 @@ admin.site.register(Size, SizeAdmin)
 admin.site.register(Color, ColorAdmin)
 admin.site.register(ProductAttribute, ProductAttributeAdmin)
 admin.site.register(StockNotification, StockNotificationAdmin)
+
+admin.site.register(Ticker, TickerAdmin)

@@ -9,94 +9,67 @@ function Footer() {
       <Container>
         <Row>
           <Col md={3}>
-            <h5>Section 1</h5>
+            <h5>Navigation</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <Link to="/" className="nav-link p-0">
+                <a href="/" className="nav-link p-0 ">
                   Home
-                </Link>
+                </a>
               </li>
               <li className="nav-item mb-2">
-                <Link to="/category" className="nav-link p-0">
-                  Features
-                </Link>
+                <a href="/" className="nav-link p-0 ">
+                  Products
+                </a>
               </li>
               <li className="nav-item mb-2">
-                <Link to="/pricing" className="nav-link p-0">
-                  Pricing
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/faqs" className="nav-link p-0">
-                  FAQs
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/about" className="nav-link p-0">
-                  About
+                <Link to="/Contact" className="nav-link p-0">
+                  Contact
                 </Link>
               </li>
             </ul>
           </Col>
 
           <Col md={3}>
-            <h5>Section 2</h5>
+            <h5>Contact Us</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <Link to="/" className="nav-link p-0">
-                  Home
+                <Link to="/Contact" className="nav-link p-0">
+                  Contact
                 </Link>
               </li>
               <li className="nav-item mb-2">
-                <Link to="/category" className="nav-link p-0">
-                  Features
-                </Link>
+                <a href="#" className="nav-link p-0">
+                  example@mail.com
+                </a>
               </li>
               <li className="nav-item mb-2">
-                <Link to="/pricing" className="nav-link p-0">
-                  Pricing
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/faqs" className="nav-link p-0">
-                  FAQs
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/about" className="nav-link p-0">
-                  About
-                </Link>
+                <a href="#" className="nav-link p-0">
+                  +91 1234567890
+                </a>
               </li>
             </ul>
           </Col>
 
           <Col md={3}>
-            <h5>Section 3</h5>
+            <h5>Follow Us</h5>
             <ul className="nav flex-column">
               <li className="nav-item mb-2">
-                <Link to="/" className="nav-link p-0">
-                  Home
-                </Link>
+                <a href="https://www.instagram.com/zoldyck-clothes/"
+                  target="_blank"
+                  className="nav-link p-0">
+                  {/* insta icon */}
+                  <i className="fab fa-instagram fa-lg"></i>
+                  <span className="ms-1">Instagram</span>
+                </a>
               </li>
               <li className="nav-item mb-2">
-                <Link to="/category" className="nav-link p-0">
-                  Features
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/pricing" className="nav-link p-0">
-                  Pricing
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/faqs" className="nav-link p-0">
-                  FAQs
-                </Link>
-              </li>
-              <li className="nav-item mb-2">
-                <Link to="/about" className="nav-link p-0">
-                  About
-                </Link>
+                <a href="https://www.facebook.com/Zoldyck-Clothes"
+                  target="_blank"
+                  className="nav-link p-0">
+                  {/* facebook icon */}
+                  <i className="fab fa-facebook fa-lg"></i>
+                  <span className="ms-1">Facebook</span>
+                </a>
               </li>
             </ul>
           </Col>

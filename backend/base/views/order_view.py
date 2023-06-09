@@ -17,6 +17,39 @@ from rest_framework import status
 
 from django.contrib.auth.models import User
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def calculateOrderPrice(request):
+    user = request.user
+    data = request.data
+    orderItems = data['orderItems']
+    shippingAddress = ShippingAddress.objects.get(id=data['shippingAddress'])
+    paymentMethod = data['paymentMethod']
+
+    if orderItems and len(orderItems) == 0:
+        return Response({'message': 'No Order Items'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not shippingAddress:
+        return Response({'message': 'No Shipping Address'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    else:
+        # Calculate price of order items + shipping price + discount if any
+        orderItemsPrice = 0
+        for item in orderItems:
+            product = Product.objects.get(id=item['product']['id'])
+            orderItemsPrice += product.price * item['qty']
+
+        shippingPrice = data['shippingPrice']
+
+        if paymentMethod == 'Transferencia Bancaria':
+            discount = 0.1 * orderItemsPrice
+        else:
+            discount = 0
+
+        totalPrice = (orderItemsPrice - discount ) + shippingPrice
+
+        return Response({'orderItemsPrice': orderItemsPrice, 'shippingPrice': shippingPrice, 'discount': discount, 'totalPrice': totalPrice})
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -83,6 +116,7 @@ def addOrderItems(request):
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
 
+    
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])

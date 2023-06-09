@@ -2,6 +2,11 @@ import BASE_URL from "../../constants";
 
 import axios from "axios";
 import {
+
+    ORDER_PRE_CREATE_REQUEST,
+    ORDER_PRE_CREATE_SUCCESS,
+    ORDER_PRE_CREATE_FAIL,
+
     ORDER_CREATE_REQUEST,
     ORDER_CREATE_SUCCESS,
     ORDER_CREATE_FAIL,
@@ -65,6 +70,40 @@ import {
 
 } from "../constants/orderConstants";
 
+
+export const calculateOrder = (order) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: ORDER_PRE_CREATE_REQUEST,
+        });
+
+        const {
+            login: { userInfo },
+        } = getState();
+
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        };  
+
+        const { data } = await axios.post(`${BASE_URL}/api/orders/preorder/`, order, config);
+
+        dispatch({
+            type: ORDER_PRE_CREATE_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: ORDER_PRE_CREATE_FAIL,
+            payload:
+                error.response && error.response.data.message
+                    ? error.response.data.message
+                    : error.message,
+        });
+    }
+}
 
 
 export const createOrder = (order) => async (dispatch, getState) => {

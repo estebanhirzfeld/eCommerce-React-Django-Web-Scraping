@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/cart/', include('base.urls.cart_urls')),
     path('api/address/', include('base.urls.address_urls')),
     path('api/lists/', include('base.urls.lists_urls')),
+    path('api/ticker/', include('base.urls.ticker_urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

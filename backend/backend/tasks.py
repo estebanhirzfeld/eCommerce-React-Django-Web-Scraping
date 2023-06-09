@@ -72,6 +72,8 @@ def scrape_product(id):
         "//div[contains(@class,'js-product-left-col')]/div[contains(@class,'product-description')]/p",
         "//div[contains(@class,'product-description')]/p",
         "//div[@class='user-content']//p",
+        "//*[@id='single-product']/div/div[1]/div[3]/div[2]/p",
+        "//*[@id='single-product']/div/div/div[2]/div/div[5]/div/h3/text()"
     ]
 
     SIZES_XPATHS = [
@@ -131,68 +133,72 @@ def scrape_product(id):
             result = WebDriverWait(driver, max_time).until(
                 EC.presence_of_element_located((By.XPATH, xpath)))
             return result
-
-    def map_category(category, name = ''):
-        # to lower case
-        category = category.upper()
-        name = name.upper()
-
-        if category or name in ['VESTIDOS', 'VESTIDO']:
-            return 'Vestidos'
-        # elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
-        elif category or name in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
-            return 'Shorts y Bermudas'
-        # elif category in ['FALDAS', 'Pollera']:
-        elif category or name in ['FALDAS', 'POLLERA', 'FALDA']:
+        
+    def map_category(category, name):
+        # if name.upper() in ['FALDAS', 'FALDA'] or category.upper() in ['FALDAS', 'FALDA']:
+        if any(word.upper() in name.upper() for word in ['FALDAS', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'FALDA']):
             return 'Faldas'
-        # elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
-        elif category or name in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON']:
+        # if name.upper() in ['VESTIDOS', 'VESTIDO'] or category.upper() in ['VESTIDOS', 'VESTIDO']:
+        if any(word.upper() in name.upper() for word in ['VESTIDOS', 'VESTIDO']) or any(word.upper() in category.upper() for word in ['VESTIDOS', 'VESTIDO']):
+            return 'Vestidos'
+        # if name.upper() in ['CAMISAS', 'CAMISA'] or category.upper() in ['CAMISAS', 'CAMISA']:
+        if any(word.upper() in name.upper() for word in ['CAMISAS', 'CAMISA']) or any(word.upper() in category.upper() for word in ['CAMISAS', 'CAMISA']):
+            return 'Camisas'
+        # if name.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS'] or category.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
+        if any(word.upper() in name.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']) or any(word.upper() in category.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']):
+            return 'Shorts y Bermudas'
+        # if name.upper() in ['FALDAS', 'POLLERA', 'FALDA'] or category.upper() in ['FALDAS', 'POLLERA', 'FALDA']:
+        if any(word.upper() in name.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']):
+            return 'Faldas'
+        # if name.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON','OVERSIZE'] or category.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']:
+        if any(word.upper() in name.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']) or any(word.upper() in category.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']):
             return 'Remeras y tops'
-        # elif category in ['BODYS', 'BODY']:
-        elif category or name in ['BODYS', 'BODY']:
+        # if name.upper() in ['BODYS', 'BODY'] or category.upper() in ['BODYS', 'BODY']:
+        if any(word.upper() in name.upper() for word in ['BODYS', 'BODY']) or any(word.upper() in category.upper() for word in ['BODYS', 'BODY']):
             return 'Bodys'
-        # elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']
-        elif category or name in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
+        # if name.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS'] or category.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
+        if any(word.upper() in name.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']) or any(word.upper() in category.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']):
             return 'Hoodies/Buzos/Sweaters'
-        # elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
-        elif category or name in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
+        # if name.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA'] or category.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
+        if any(word.upper() in name.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']) or any(word.upper() in category.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']):
             return 'Pantalones'
-        # elif category in ['CONJUNTOS']:
-        elif category or name in ['CONJUNTOS', 'CONJUNTO']:
+        # if name.upper() in ['CONJUNTOS', 'CONJUNTO'] or category.upper() in ['CONJUNTOS', 'CONJUNTO']:
+        if any(word.upper() in name.upper() for word in ['CONJUNTOS', 'CONJUNTO']) or any(word.upper() in category.upper() for word in ['CONJUNTOS', 'CONJUNTO']):
             return 'Conjuntos'
-        # elif category in ['Trajes de Baño']:
-        elif category or name in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
+        # if name.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO'] or category.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
+        if any(word.upper() in name.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']) or any(word.upper() in category.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']):
             return 'Trajes de baño'
-        # elif category in ['Chalecos']:
-        elif category or name in ['CHALECOS', 'CHALECO']:
+        # if name.upper() in ['CHALECOS', 'CHALECO'] or category.upper() in ['CHALECOS', 'CHALECO']:
+        if any(word.upper() in name.upper() for word in ['CHALECOS', 'CHALECO']) or any(word.upper() in category.upper() for word in ['CHALECOS', 'CHALECO']):
             return 'Chalecos'
-        # elif category in ['Corset']:
-        elif category or name in ['CORSET']:
+        # if name.upper() in ['CORSET'] or category.upper() in ['CORSET']:
+        if any(word.upper() in name.upper() for word in ['CORSET']) or any(word.upper() in category.upper() for word in ['CORSET']):
             return 'Corset'
-        # elif category in ['CALZADO']:
-        elif category or name in ['CALZADO']:
+        # if name.upper() in ['CALZADO'] or category.upper() in ['CALZADO']:
+        if any(word.upper() in name.upper() for word in ['CALZADO']) or any(word.upper() in category.upper() for word in ['CALZADO']):
             return 'Calzado'
-        # elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
-        elif category or name in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
-            return 'Accesorios'
-        # elif category in ['Colección']:
-        elif category or name in ['COLECCIÓN']:
-            return 'Colección'
-        # elif category in ['Sale !']:
-        elif category or name in ['SALE !']:
-            return 'Outlet'
-        # elif category in ['THE END OF $TW']:
-        elif category or name in ['THE END OF $TW']:
-            return 'Outlet'
-        # elif category in ['Mallas y Bermudas']:
-        elif category or name in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
-            return 'Mallas y bermudas'
-        # elif category in ['Gorras', 'Beanies']:
-        elif category or name in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
+        # if name.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE'] or category.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
+        if any(word.upper() in name.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']) or any(word.upper() in category.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']):
             return 'Gorras y Beanies'
+        # if name.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA'] or category.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
+        if any(word.upper() in name.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']) or any(word.upper() in category.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']):
+            return 'Accesorios'
+        # if name.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA'] or category.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
+        if any(word.upper() in name.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']) or any(word.upper() in category.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']):
+            return 'Mallas y Bermudas'
+        # if name.upper() in ['COLECCIÓN'] or category.upper() in ['COLECCIÓN']:
+        if any(word.upper() in name.upper() for word in ['COLECCIÓN']) or any(word.upper() in category.upper() for word in ['COLECCIÓN']):
+            return 'Colección'
+        # if name.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET'] or category.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET']:
+        if any(word.upper() in name.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']) or any(word.upper() in category.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']):
+            return 'Outlet'
+        # if name.upper() in ['THE END OF $TW'] or category.upper() in ['THE END OF $TW']:
+        if any(word.upper() in name.upper() for word in ['THE END OF $TW']) or any(word.upper() in category.upper() for word in ['THE END OF $TW']):
+            return 'Outlet'
         else:
-            return category
-
+            return category.title()
+        
+        
     # Variables
     scraping_time = time.time()
     error_log_list = []
@@ -410,6 +416,12 @@ def scrape_product(id):
         description = description.replace(' -', '\n -')
         description = description.replace('  ', '\n')
         description = description.replace('. ', '\n')
+        description = description.replace(' .', '\n')
+        description = description.replace(';', '\n')
+        description = description.replace('&nbsp;', '\n')
+
+    else:
+        print('No words found')
 
     # Get Category
     try:
@@ -669,6 +681,16 @@ def scrape_product(id):
         if 'remeron' in name.lower():
             subCategory = 'Remerones'
 
+    # if name.lower() contains 'mustaqe', 'satana' or 'stn' remove them
+    if name:
+        if 'mustaqe' in name.lower():
+            name = name.lower().replace('mustaqe', '')
+        if 'satana' in name.lower():
+            name = name.lower().replace('satana', '')
+        if 'stn' in name.lower():
+            name = name.lower().replace('stn', '')
+
+
     # if some field except description is none set is_active to False
     status = True
     if not name or not price or not images or not category or not buy_button or price == '0' or price == '':
@@ -702,6 +724,21 @@ def scrape_product(id):
         else:
             product.price = price
             product.save()
+
+    # update product category
+    if product.category != category:
+        product.category = category
+        product.save()
+
+    # update product name
+    if product.name != name:
+        product.name = name
+        product.save()
+
+    # update product description
+    if product.description != description:
+        product.description = description
+        product.save()
 
     # if product had subcategory then don't update category
     # if product.subCategory:
@@ -886,68 +923,70 @@ def scrape_discover():
         executable_path='./chromedriver.exe', options=options)
 
     # Functions
-
-    def map_category(category, name = ''):
-        
-        # to lower case
-        category = category.upper()
-        name = name.upper()
-
-        if category or name in ['VESTIDOS', 'VESTIDO']:
-            return 'Vestidos'
-        # elif category in ['SHORTS', 'SHORTS Y BERMUDAS', 'Short']:
-        elif category or name in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
-            return 'Shorts y Bermudas'
-        # elif category in ['FALDAS', 'Pollera']:
-        elif category or name in ['FALDAS', 'POLLERA', 'FALDA']:
+    def map_category(category, name):
+        # if name.upper() in ['FALDAS', 'FALDA'] or category.upper() in ['FALDAS', 'FALDA']:
+        if any(word.upper() in name.upper() for word in ['FALDAS', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'FALDA']):
             return 'Faldas'
-        # elif category in ['REMERAS Y TOPS', 'REMERAS', 'Tops', 'Remes', 'Remerones', 'CAMISAS', 'CAMISETAS OVERSIZE']:
-        elif category or name in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON']:
+        # if name.upper() in ['VESTIDOS', 'VESTIDO'] or category.upper() in ['VESTIDOS', 'VESTIDO']:
+        if any(word.upper() in name.upper() for word in ['VESTIDOS', 'VESTIDO']) or any(word.upper() in category.upper() for word in ['VESTIDOS', 'VESTIDO']):
+            return 'Vestidos'
+        # if name.upper() in ['CAMISAS', 'CAMISA'] or category.upper() in ['CAMISAS', 'CAMISA']:
+        if any(word.upper() in name.upper() for word in ['CAMISAS', 'CAMISA']) or any(word.upper() in category.upper() for word in ['CAMISAS', 'CAMISA']):
+            return 'Camisas'
+        # if name.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS'] or category.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
+        if any(word.upper() in name.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']) or any(word.upper() in category.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']):
+            return 'Shorts y Bermudas'
+        # if name.upper() in ['FALDAS', 'POLLERA', 'FALDA'] or category.upper() in ['FALDAS', 'POLLERA', 'FALDA']:
+        if any(word.upper() in name.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']):
+            return 'Faldas'
+        # if name.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON','OVERSIZE'] or category.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']:
+        if any(word.upper() in name.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']) or any(word.upper() in category.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']):
             return 'Remeras y tops'
-        # elif category in ['BODYS', 'BODY']:
-        elif category or name in ['BODYS', 'BODY']:
+        # if name.upper() in ['BODYS', 'BODY'] or category.upper() in ['BODYS', 'BODY']:
+        if any(word.upper() in name.upper() for word in ['BODYS', 'BODY']) or any(word.upper() in category.upper() for word in ['BODYS', 'BODY']):
             return 'Bodys'
-        # elif category in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'Hoodie/Buzos']
-        elif category or name in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
+        # if name.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS'] or category.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
+        if any(word.upper() in name.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']) or any(word.upper() in category.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']):
             return 'Hoodies/Buzos/Sweaters'
-        # elif category in ['PANTALONES', 'Pantalones', 'CALZAS']:
-        elif category or name in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
+        # if name.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA'] or category.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
+        if any(word.upper() in name.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']) or any(word.upper() in category.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']):
             return 'Pantalones'
-        # elif category in ['CONJUNTOS']:
-        elif category or name in ['CONJUNTOS', 'CONJUNTO']:
+        # if name.upper() in ['CONJUNTOS', 'CONJUNTO'] or category.upper() in ['CONJUNTOS', 'CONJUNTO']:
+        if any(word.upper() in name.upper() for word in ['CONJUNTOS', 'CONJUNTO']) or any(word.upper() in category.upper() for word in ['CONJUNTOS', 'CONJUNTO']):
             return 'Conjuntos'
-        # elif category in ['Trajes de Baño']:
-        elif category or name in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
+        # if name.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO'] or category.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
+        if any(word.upper() in name.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']) or any(word.upper() in category.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']):
             return 'Trajes de baño'
-        # elif category in ['Chalecos']:
-        elif category or name in ['CHALECOS', 'CHALECO']:
+        # if name.upper() in ['CHALECOS', 'CHALECO'] or category.upper() in ['CHALECOS', 'CHALECO']:
+        if any(word.upper() in name.upper() for word in ['CHALECOS', 'CHALECO']) or any(word.upper() in category.upper() for word in ['CHALECOS', 'CHALECO']):
             return 'Chalecos'
-        # elif category in ['Corset']:
-        elif category or name in ['CORSET']:
+        # if name.upper() in ['CORSET'] or category.upper() in ['CORSET']:
+        if any(word.upper() in name.upper() for word in ['CORSET']) or any(word.upper() in category.upper() for word in ['CORSET']):
             return 'Corset'
-        # elif category in ['CALZADO']:
-        elif category or name in ['CALZADO']:
+        # if name.upper() in ['CALZADO'] or category.upper() in ['CALZADO']:
+        if any(word.upper() in name.upper() for word in ['CALZADO']) or any(word.upper() in category.upper() for word in ['CALZADO']):
             return 'Calzado'
-        # elif category in ['Accesorios', 'CHOKERS eco-cuero', 'CHOKERS con cadenita', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS']:
-        elif category or name in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
-            return 'Accesorios'
-        # elif category in ['Colección']:
-        elif category or name in ['COLECCIÓN']:
-            return 'Colección'
-        # elif category in ['Sale !']:
-        elif category or name in ['SALE !']:
-            return 'Outlet'
-        # elif category in ['THE END OF $TW']:
-        elif category or name in ['THE END OF $TW']:
-            return 'Outlet'
-        # elif category in ['Mallas y Bermudas']:
-        elif category or name in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
-            return 'Mallas y bermudas'
-        # elif category in ['Gorras', 'Beanies']:
-        elif category or name in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
+        # if name.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE'] or category.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
+        if any(word.upper() in name.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']) or any(word.upper() in category.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']):
             return 'Gorras y Beanies'
+        # if name.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA'] or category.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
+        if any(word.upper() in name.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']) or any(word.upper() in category.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']):
+            return 'Accesorios'
+        # if name.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA'] or category.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
+        if any(word.upper() in name.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']) or any(word.upper() in category.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']):
+            return 'Mallas y Bermudas'
+        # if name.upper() in ['COLECCIÓN'] or category.upper() in ['COLECCIÓN']:
+        if any(word.upper() in name.upper() for word in ['COLECCIÓN']) or any(word.upper() in category.upper() for word in ['COLECCIÓN']):
+            return 'Colección'
+        # if name.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET'] or category.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET']:
+        if any(word.upper() in name.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']) or any(word.upper() in category.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']):
+            return 'Outlet'
+        # if name.upper() in ['THE END OF $TW'] or category.upper() in ['THE END OF $TW']:
+        if any(word.upper() in name.upper() for word in ['THE END OF $TW']) or any(word.upper() in category.upper() for word in ['THE END OF $TW']):
+            return 'Outlet'
         else:
-            return category
+            return category.title()
+        
 
     stores = [
         "https://www.satanaclothes.com/productos/?mpage=60",

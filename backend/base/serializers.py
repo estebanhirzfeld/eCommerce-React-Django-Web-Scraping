@@ -3,7 +3,7 @@ from collections import OrderedDict
 from dataclasses import fields
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Product, ProductImage, Order, OrderItem, ShippingAddress, Review, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute
+from .models import Product, ProductImage, Order, OrderItem, ShippingAddress, Review, Size, Cart, CartItem, Wishlist, WishlistItem, SavedForLater, SavedForLaterItem, Color, ProductAttribute, Ticker
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -293,3 +293,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = '__all__'
+
+class TickerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticker
+        fields = ['message']

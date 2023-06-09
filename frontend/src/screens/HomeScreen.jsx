@@ -24,6 +24,8 @@ function HomeScreen() {
     const productList = useSelector(state => state.productList)
     const { loading, error, products, page, pages, categories, min_price, max_price, colors_list } = productList
 
+    
+
     const [searchParams] = useSearchParams();
 
     const keyword = searchParams.get('keyword') ? searchParams.get('keyword') : ''

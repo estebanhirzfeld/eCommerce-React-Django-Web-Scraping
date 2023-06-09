@@ -10,7 +10,7 @@ import { createOrder } from '../actions/orderActions'
 import { payOrder } from '../actions/orderActions'
 
 
-import { getCart, clearCart} from '../actions/cartActions'
+import { getCart, clearCart } from '../actions/cartActions'
 import { ORDER_CREATE_RESET } from '../constants/orderConstants'
 
 import { getAddress } from '../actions/addressActions'
@@ -33,19 +33,20 @@ function PlaceOrderScreen() {
     const [itemsPrice, setItemsPrice] = useState(0)
     const [shippingPrice, setShippingPrice] = useState(0)
     const [totalPrice, setTotalPrice] = useState(0)
+    const [discount, setDiscount] = useState(0)
 
     const [address, setAddress] = useState('')
     const [postalCode, setPostalCode] = useState('')
     const [city, setCity] = useState('')
     const [province, setProvince] = useState('')
 
-useEffect(() => {
-    // if not paymentMethod redirect to payment screen
-    if (!cart.paymentMethod) {
-        navigate('/payment')
-    }
-    // if not shippingAddress redirect to shipping screen
-}, [cart, navigate])
+    useEffect(() => {
+        // if not paymentMethod redirect to payment screen
+        if (!cart.paymentMethod) {
+            navigate('/payment')
+        }
+        // if not shippingAddress redirect to shipping screen
+    }, [cart, navigate])
 
 
     useEffect(() => {
@@ -62,8 +63,13 @@ useEffect(() => {
         }
         if (cartItems) {
             setItemsPrice(cartItems.reduce((acc, item) => acc + item.product.price * item.qty, 0).toFixed(2))
-            setShippingPrice(itemsPrice > 15000 ? 0 : 800)
-            setTotalPrice((Number(itemsPrice) + Number(shippingPrice)).toFixed(2))
+            setShippingPrice((Number(1300).toFixed(2)))
+            // if method is Transferencia Bancaria, set total price - 10%
+            if (cart.paymentMethod === 'Transferencia Bancaria') {
+                setDiscount((itemsPrice * 0.1).toFixed(2))
+            }
+            // apply discount only in total price (not in shipping price)
+            setTotalPrice((Number(itemsPrice) + Number(shippingPrice) - Number(discount)).toFixed(2))
         }
     }, [cartItems, shippingAddresses, itemsPrice, shippingPrice, totalPrice])
 
@@ -89,12 +95,12 @@ useEffect(() => {
             totalPrice: totalPrice
         }))
 
-            console.log('paymentMethod', cart.paymentMethod,)
-            console.log('shippingPrice', shippingPrice,)
-            console.log('orderItems', cartItems,)
-            console.log('shippingAddress', shippingAddresses[0].id,)
-            console.log('itemsPrice', itemsPrice,)
-            console.log('totalPrice', totalPrice)
+        console.log('paymentMethod', cart.paymentMethod,)
+        console.log('shippingPrice', shippingPrice,)
+        console.log('orderItems', cartItems,)
+        console.log('shippingAddress', shippingAddresses[0].id,)
+        console.log('itemsPrice', itemsPrice,)
+        console.log('totalPrice', totalPrice)
     }
 
     return (
@@ -146,7 +152,7 @@ useEffect(() => {
                                                         {item.qty} X ${item.product.price} = ${(item.qty * item.product.price).toFixed(2)}
                                                         {item.stock <= 0 || item.stock < item.qty ? <p className='text-danger'>Out of stock</p> : null}
                                                     </Col>
-                                                    
+
                                                 </Row>
                                             </ListGroup.Item>
                                         ))}
@@ -176,17 +182,31 @@ useEffect(() => {
                                 <Row>
                                     <Col>Shipping:</Col>
                                     <Col>
-                                    {shippingPrice === 0 ?
-                                        <span className='text-success'>Free!</span>
-                                    : `$${shippingPrice}`}
+                                        {shippingPrice === 0 ?
+                                            <span className='text-success'>Free!</span>
+                                            : `$${shippingPrice}`}
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
+                                    <Col>Discount:</Col>
+                                    {cart.paymentMethod === 'Transferencia Bancaria' ?
+                                        <>
+                                            <Col className='text-danger'>-${discount}</Col>
+                                        </>
+                                        :
+                                        <Col>${totalPrice}</Col>
+                                    }
+
+                                </Row>
+
+                            </ListGroup.Item>
+                            <ListGroup.Item>
+                                <Row>
                                     <Col>Total:</Col>
-                                    <Col>${totalPrice}</Col>
+                                    <Col className='text-success'>${totalPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
 
@@ -196,17 +216,17 @@ useEffect(() => {
                             </ListGroup.Item>
 
                             <ListGroup.Item>
-                                {cart?.cartItems?.length === 0 
-                                ? <Button className='btn-block' type='button' disabled>Place Order</Button>
-                                :
-                                <Button
-                                type='button'
-                                className='btn-block'
-                                disabled={cart.cartItems === 0}
-                                onClick={placeOrderHandler}
-                                >
-                                    Place Order
-                                </Button>
+                                {cart?.cartItems?.length === 0
+                                    ? <Button className='btn-block' type='button' disabled>Place Order</Button>
+                                    :
+                                    <Button
+                                        type='button'
+                                        className='btn-block'
+                                        disabled={cart.cartItems === 0}
+                                        onClick={placeOrderHandler}
+                                    >
+                                        Place Order
+                                    </Button>
                                 }
                             </ListGroup.Item>
 

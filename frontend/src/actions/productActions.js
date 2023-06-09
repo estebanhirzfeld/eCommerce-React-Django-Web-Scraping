@@ -11,6 +11,10 @@ import {
     PRODUCT_DETAILS_SUCCESS,
     PRODUCT_DETAILS_FAIL,
 
+    PRODUCT_RECOMMEND_REQUEST,
+    PRODUCT_RECOMMEND_SUCCESS,
+    PRODUCT_RECOMMEND_FAIL,
+
     PRODUCT_DELETE_REQUEST,
     PRODUCT_DELETE_SUCCESS,
     PRODUCT_DELETE_FAIL,
@@ -89,6 +93,27 @@ export const listProductDetails = (id) => async (dispatch) => {
     }
 
 }
+
+export const listProductRecommendations = (id) => async (dispatch) => {
+    
+    try {
+        dispatch({ type: PRODUCT_RECOMMEND_REQUEST });
+
+        const { data } = await axios.get(`${BASE_URL}/api/products/recommendations/${id}`);
+
+        dispatch({ type: PRODUCT_RECOMMEND_SUCCESS, payload: data });
+
+    } catch (error) {
+        dispatch({
+            type: PRODUCT_RECOMMEND_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message
+        });
+    }
+
+}
+
 
 export const deleteProduct = (id) => async (dispatch, getState) => {
 

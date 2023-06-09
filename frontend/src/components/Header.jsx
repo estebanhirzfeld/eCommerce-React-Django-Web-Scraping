@@ -18,6 +18,7 @@ function Header() {
   const navigate = useNavigate()
 
   const dispatch = useDispatch();
+  
   const login = useSelector((state) => state.login);
   const { userInfo } = login;
 
@@ -33,7 +34,7 @@ function Header() {
       <Navbar expand="lg" collapseOnSelect style={{ backgroundColor: '#080808 !important' }}>
         <Container>
           {/* <Navbar.Brand as={Link} to="/">Zoldyck</Navbar.Brand> */}
-          <Navbar.Brand as={Link} to="/">Django + React</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">Zoldyck</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <SearchBar />

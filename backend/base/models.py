@@ -382,3 +382,10 @@ class SavedForLaterItem(models.Model):
 
     def __str__(self):
         return str(self.product)
+    
+class Ticker(models.Model):
+    message = models.CharField(max_length=100, null=True, blank=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.message)

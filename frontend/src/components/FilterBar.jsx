@@ -37,7 +37,8 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
         }
     };
 
-    const applyPriceRange = () => {
+    const applyPriceRange = (e) => {
+        e.preventDefault();
         searchParams.set('priceFrom', priceRange.min);
         searchParams.set('priceTo', priceRange.max);
         window.location.href = `/?${searchParams.toString()}`;
@@ -88,32 +89,21 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                         )
                     }
                 </Breadcrumb>
-                <div className="d-flex align-items-center justify-content-between mt-3">
-                    <Row>
+                
+                    <Row className='d-flex align-items-center justify-content-between text-center'>
                         {/* Filter */}
                         <Col className='col-4'>
                             <Button variant="outline-primary" className="me-2" onClick={() => setShowFilters(!showFilters)}>
-                                Filter <i className="fas fa-filter"></i>
+                                Filter
                             </Button>
                         </Col>
-                        {/* Order By*/}
-                        <Col className='col-3'>
+                        {/* Sort By*/}
+                        <Col className='col-4'>
                             <Dropdown>
-                                <Dropdown.Toggle id="dropdown-basic">
-                                    Order By
+                                <Dropdown.Toggle id="dropdown-basic" variant="outline-primary">
+                                    Sort By
                                 </Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    {/* <Dropdown.Item href="#/action-1">Price: Low to High</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-2">Price: High to Low</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-3">Rating</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-4">Popularity</Dropdown.Item> */}
-
-                                    {/* Lowest Price
-                                    Highest Price
-                                    Popular
-                                    Newest
-                                    Rating */}
-
                                     <Dropdown.Item href="#/action-1" onClick={() => {
                                         searchParams.set('sortBy', 'Lowest')
                                         window.location.href = `/?${searchParams.toString()}`
@@ -139,25 +129,18 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                                         window.location.href = `/?${searchParams.toString()}`
                                     }}>Rating</Dropdown.Item>
 
-
-
-
-
-
                                 </Dropdown.Menu>
                             </Dropdown>
                         </Col>
 
                         {/* clear filters */}
-                        <Col className='col-5'>
-                            <Button variant="outline-primary" className="me-2" onClick={clearFilters}
-                                // overflow ellipsis
-                                style={{ whiteSpace: 'nowrap' }}>
-                                Clear Filters
+                        <Col className='col-4'>
+                            <Button variant="primary" className="me-2" onClick={clearFilters}>
+                                {/* Clear */}
+                                <i className="fas fa-times"></i>
                             </Button>
                         </Col>
                     </Row>
-                </div>
             </div>
 
             <Collapse in={showFilters} className='mb-5'>
@@ -166,7 +149,7 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                         <Row>
                             <Col xs={12} md={4}>
                                 <Form.Group>
-                                    <Form.Label className='mb-4'>Filter By Category</Form.Label>
+                                    <Form.Label className='my-3'>Filter By Category</Form.Label>
                                     <Form.Select
                                         aria-label="Filter by category"
                                         value={category}
@@ -192,7 +175,7 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                             {/* Color */}
                             <Col xs={12} md={4}>
                                 <Form.Group>
-                                    <Form.Label className='mb-4'>Filter By Color</Form.Label>
+                                    <Form.Label className='my-3'>Filter By Color</Form.Label>
                                     <Form.Select
                                         aria-label="Filter by color"
                                         // value={selectedColors}
@@ -221,7 +204,7 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                             {/* Slider */}
                             <Col className='d-none d-md-block col-md-4' xs={12} md={4}> {/* show on desktop and hide on mobile */}
                                 <Form.Group>
-                                    <Form.Label className='mb-4'>Filter By Price: ${priceRange.min} - ${priceRange.max}</Form.Label>
+                                    <Form.Label className='my-3'>Filter By Price: ${priceRange.min} - ${priceRange.max}</Form.Label>
                                     <div className="d-flex align-items-center">
                                         <InputRange
                                             minValue={min_price}
@@ -237,8 +220,9 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                             </Col>
                             {/* Inputs */}
                             <Col className='d-block d-md-none col-md-4' xs={12} md={4}> {/* show on mobile and hide on desktop */}
-                                <Form.Group onSubmit={applyPriceRange}>
-                                    <Form.Label className='mb-4'>Filter By Price</Form.Label>
+                            
+                                <Form.Group onSubmit={(e) => applyPriceRange(e)}>
+                                    <Form.Label className='my-3'>Filter By Price</Form.Label>
                                     <div className="d-flex align-items-center">
                                         {/* label Min */}
                                         <Form.Label className="me-3">Min</Form.Label>
@@ -268,7 +252,7 @@ function FilterBar({ category, subcategory, keyword, pageNumber, categories, col
                                             }
                                         />
                                     </div>
-                                    <Button variant="outline-primary" className="mt-4 w-100" type='submit'>
+                                    <Button variant="primary" className="mt-4 w-100" type='submit' onClick={applyPriceRange}>
                                         Apply
                                     </Button>
                                 </Form.Group>

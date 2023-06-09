@@ -3,7 +3,7 @@
 # import csv
 # from django.utils.encoding import smart_str # Use smart_str to encode text as UTF-8
 
-# 
+#
 
 from django.db.models import Q, Min, Max, Sum, Count
 from django.db.models.functions import Lower
@@ -14,8 +14,6 @@ import secrets
 
 from django.http import HttpResponse
 from backend.tasks import scrape_product, scrape_discover, update_all_products
-
-
 
 
 from django.utils import timezone
@@ -60,16 +58,15 @@ from rest_framework import status
 @api_view(['GET'])
 def getProducts(request):
 
-
-# disable all products that contains jimmy in their original_url 
+    # disable all products that contains jimmy in their original_url
     # all_products = Product.objects.filter(is_active=True)
 
     # for p in all_products:
     #     if 'jimmy' in p.original_url:
     #         p.is_active = False
-    #         p.save() 
+    #         p.save()
 
-# Comibine Hoodies/buzos/sweaters category with Hoodies/Buzos/Sweaters
+    # Comibine Hoodies/buzos/sweaters category with Hoodies/Buzos/Sweaters
 
     # all_products = Product.objects.filter(is_active=True)
 
@@ -78,7 +75,7 @@ def getProducts(request):
     #         p.category = 'Hoodies/Buzos/Sweaters'
     #         p.save()
 
-# Comibine Shorts y bermudas with Shorts y Bermudas
+    # Comibine Shorts y bermudas with Shorts y Bermudas
 
     # all_products = Product.objects.filter(is_active=True)
 
@@ -86,82 +83,81 @@ def getProducts(request):
     #     if p.category == 'Shorts y bermudas':
     #         p.category = 'Shorts y Bermudas'
     #         p.save()
-    
-#  Massive re asign categories
-    def map_category(category, name):
-        # if name.upper() in ['FALDAS', 'FALDA'] or category.upper() in ['FALDAS', 'FALDA']:
-        if any(word.upper() in name.upper() for word in ['FALDAS', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'FALDA']):
-            return 'Faldas'
-        # if name.upper() in ['VESTIDOS', 'VESTIDO'] or category.upper() in ['VESTIDOS', 'VESTIDO']:
-        if any(word.upper() in name.upper() for word in ['VESTIDOS', 'VESTIDO']) or any(word.upper() in category.upper() for word in ['VESTIDOS', 'VESTIDO']):
-            return 'Vestidos'
-        # if name.upper() in ['CAMISAS', 'CAMISA'] or category.upper() in ['CAMISAS', 'CAMISA']:
-        if any(word.upper() in name.upper() for word in ['CAMISAS', 'CAMISA']) or any(word.upper() in category.upper() for word in ['CAMISAS', 'CAMISA']):
-            return 'Camisas'
-        # if name.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS'] or category.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
-        if any(word.upper() in name.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']) or any(word.upper() in category.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']):
-            return 'Shorts y Bermudas'
-        # if name.upper() in ['FALDAS', 'POLLERA', 'FALDA'] or category.upper() in ['FALDAS', 'POLLERA', 'FALDA']:
-        if any(word.upper() in name.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']):
-            return 'Faldas'
-        # if name.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON','OVERSIZE'] or category.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']:
-        if any(word.upper() in name.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']) or any(word.upper() in category.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']):
-            return 'Remeras y tops'
-        # if name.upper() in ['BODYS', 'BODY'] or category.upper() in ['BODYS', 'BODY']:
-        if any(word.upper() in name.upper() for word in ['BODYS', 'BODY']) or any(word.upper() in category.upper() for word in ['BODYS', 'BODY']):
-            return 'Bodys'
-        # if name.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS'] or category.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
-        if any(word.upper() in name.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']) or any(word.upper() in category.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']):
-            return 'Hoodies/Buzos/Sweaters'
-        # if name.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA'] or category.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
-        if any(word.upper() in name.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']) or any(word.upper() in category.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']):
-            return 'Pantalones'
-        # if name.upper() in ['CONJUNTOS', 'CONJUNTO'] or category.upper() in ['CONJUNTOS', 'CONJUNTO']:
-        if any(word.upper() in name.upper() for word in ['CONJUNTOS', 'CONJUNTO']) or any(word.upper() in category.upper() for word in ['CONJUNTOS', 'CONJUNTO']):
-            return 'Conjuntos'
-        # if name.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO'] or category.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
-        if any(word.upper() in name.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']) or any(word.upper() in category.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']):
-            return 'Trajes de baño'
-        # if name.upper() in ['CHALECOS', 'CHALECO'] or category.upper() in ['CHALECOS', 'CHALECO']:
-        if any(word.upper() in name.upper() for word in ['CHALECOS', 'CHALECO']) or any(word.upper() in category.upper() for word in ['CHALECOS', 'CHALECO']):
-            return 'Chalecos'
-        # if name.upper() in ['CORSET'] or category.upper() in ['CORSET']:
-        if any(word.upper() in name.upper() for word in ['CORSET']) or any(word.upper() in category.upper() for word in ['CORSET']):
-            return 'Corset'
-        # if name.upper() in ['CALZADO'] or category.upper() in ['CALZADO']:
-        if any(word.upper() in name.upper() for word in ['CALZADO']) or any(word.upper() in category.upper() for word in ['CALZADO']):
-            return 'Calzado'
-        # if name.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE'] or category.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
-        if any(word.upper() in name.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']) or any(word.upper() in category.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']):
-            return 'Gorras y Beanies'
-        # if name.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA'] or category.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
-        if any(word.upper() in name.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']) or any(word.upper() in category.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']):
-            return 'Accesorios'
-        # if name.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA'] or category.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
-        if any(word.upper() in name.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']) or any(word.upper() in category.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']):
-            return 'Mallas y Bermudas'
-        # if name.upper() in ['COLECCIÓN'] or category.upper() in ['COLECCIÓN']:
-        if any(word.upper() in name.upper() for word in ['COLECCIÓN']) or any(word.upper() in category.upper() for word in ['COLECCIÓN']):
-            return 'Colección'
-        # if name.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET'] or category.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET']:
-        if any(word.upper() in name.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']) or any(word.upper() in category.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']):
-            return 'Outlet'
-        # if name.upper() in ['THE END OF $TW'] or category.upper() in ['THE END OF $TW']:
-        if any(word.upper() in name.upper() for word in ['THE END OF $TW']) or any(word.upper() in category.upper() for word in ['THE END OF $TW']):
-            return 'Outlet'
-        else:
-            return f"DEFAULT: {category}"
 
-    all_products = Product.objects.filter(is_active=True)
+    # #  Massive re asign categories
+    #     def map_category(category, name):
+    #         # if name.upper() in ['FALDAS', 'FALDA'] or category.upper() in ['FALDAS', 'FALDA']:
+    #         if any(word.upper() in name.upper() for word in ['FALDAS', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'FALDA']):
+    #             return 'Faldas'
+    #         # if name.upper() in ['VESTIDOS', 'VESTIDO'] or category.upper() in ['VESTIDOS', 'VESTIDO']:
+    #         if any(word.upper() in name.upper() for word in ['VESTIDOS', 'VESTIDO']) or any(word.upper() in category.upper() for word in ['VESTIDOS', 'VESTIDO']):
+    #             return 'Vestidos'
+    #         # if name.upper() in ['CAMISAS', 'CAMISA'] or category.upper() in ['CAMISAS', 'CAMISA']:
+    #         if any(word.upper() in name.upper() for word in ['CAMISAS', 'CAMISA']) or any(word.upper() in category.upper() for word in ['CAMISAS', 'CAMISA']):
+    #             return 'Camisas'
+    #         # if name.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS'] or category.upper() in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']:
+    #         if any(word.upper() in name.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']) or any(word.upper() in category.upper() for word in ['SHORTS', 'SHORTS Y BERMUDAS', 'SHORT', 'BERMUDA', 'BERMUDAS']):
+    #             return 'Shorts y Bermudas'
+    #         # if name.upper() in ['FALDAS', 'POLLERA', 'FALDA'] or category.upper() in ['FALDAS', 'POLLERA', 'FALDA']:
+    #         if any(word.upper() in name.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']) or any(word.upper() in category.upper() for word in ['FALDAS', 'POLLERA', 'FALDA']):
+    #             return 'Faldas'
+    #         # if name.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON','OVERSIZE'] or category.upper() in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']:
+    #         if any(word.upper() in name.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']) or any(word.upper() in category.upper() for word in ['REMERAS Y TOPS', 'REMERAS', 'TOPS', 'REMES', 'REMERONES', 'CAMISAS', 'CAMISETAS OVERSIZE', 'CAMISETAS', 'CAMISETA', 'TOP', 'REMERA', 'REMERON', 'OVERSIZE']):
+    #             return 'Remeras y tops'
+    #         # if name.upper() in ['BODYS', 'BODY'] or category.upper() in ['BODYS', 'BODY']:
+    #         if any(word.upper() in name.upper() for word in ['BODYS', 'BODY']) or any(word.upper() in category.upper() for word in ['BODYS', 'BODY']):
+    #             return 'Bodys'
+    #         # if name.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS'] or category.upper() in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']:
+    #         if any(word.upper() in name.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']) or any(word.upper() in category.upper() for word in ['HOODIES/BUZOS', 'BUZOS Y SWEATERS', 'BUZOS', 'HOODIE/BUZOS', 'BUZO', 'SWEATERS', 'SWEATER', 'HOODIE', 'BUZOS/SWEATERS']):
+    #             return 'Hoodies/Buzos/Sweaters'
+    #         # if name.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA'] or category.upper() in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']:
+    #         if any(word.upper() in name.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']) or any(word.upper() in category.upper() for word in ['PANTALONES', 'PANTALON', 'CALZAS', 'CALZA']):
+    #             return 'Pantalones'
+    #         # if name.upper() in ['CONJUNTOS', 'CONJUNTO'] or category.upper() in ['CONJUNTOS', 'CONJUNTO']:
+    #         if any(word.upper() in name.upper() for word in ['CONJUNTOS', 'CONJUNTO']) or any(word.upper() in category.upper() for word in ['CONJUNTOS', 'CONJUNTO']):
+    #             return 'Conjuntos'
+    #         # if name.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO'] or category.upper() in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']:
+    #         if any(word.upper() in name.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']) or any(word.upper() in category.upper() for word in ['TRAJES DE BAÑO', 'TRAJE DE BAÑO']):
+    #             return 'Trajes de baño'
+    #         # if name.upper() in ['CHALECOS', 'CHALECO'] or category.upper() in ['CHALECOS', 'CHALECO']:
+    #         if any(word.upper() in name.upper() for word in ['CHALECOS', 'CHALECO']) or any(word.upper() in category.upper() for word in ['CHALECOS', 'CHALECO']):
+    #             return 'Chalecos'
+    #         # if name.upper() in ['CORSET'] or category.upper() in ['CORSET']:
+    #         if any(word.upper() in name.upper() for word in ['CORSET']) or any(word.upper() in category.upper() for word in ['CORSET']):
+    #             return 'Corset'
+    #         # if name.upper() in ['CALZADO'] or category.upper() in ['CALZADO']:
+    #         if any(word.upper() in name.upper() for word in ['CALZADO']) or any(word.upper() in category.upper() for word in ['CALZADO']):
+    #             return 'Calzado'
+    #         # if name.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE'] or category.upper() in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE']:
+    #         if any(word.upper() in name.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']) or any(word.upper() in category.upper() for word in ['GORRAS', 'BEANIES', 'GORRA', 'BEANIE', 'GORRO']):
+    #             return 'Gorras y Beanies'
+    #         # if name.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA'] or category.upper() in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']:
+    #         if any(word.upper() in name.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']) or any(word.upper() in category.upper() for word in ['ACCESORIOS', 'CHOKERS ECO-CUERO', 'CHOKERS CON CADENITA', 'COLLARES', 'AROS', 'ANILLOS', 'PULSERAS DE TACHAS', 'OTROS ACCESORIOS', 'PULSERAS', 'CHOKER', 'COLLAR', 'ARO', 'ANILLO', 'PULSERA']):
+    #             return 'Accesorios'
+    #         # if name.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA'] or category.upper() in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']:
+    #         if any(word.upper() in name.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']) or any(word.upper() in category.upper() for word in ['MALLAS Y BERMUDAS', 'MALLAS', 'BERMUDAS', 'BERMUDA', 'MALLA']):
+    #             return 'Mallas y Bermudas'
+    #         # if name.upper() in ['COLECCIÓN'] or category.upper() in ['COLECCIÓN']:
+    #         if any(word.upper() in name.upper() for word in ['COLECCIÓN']) or any(word.upper() in category.upper() for word in ['COLECCIÓN']):
+    #             return 'Colección'
+    #         # if name.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET'] or category.upper() in ['SALE !','OUTLET', 'SALE', 'OUTLET']:
+    #         if any(word.upper() in name.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']) or any(word.upper() in category.upper() for word in ['SALE !','OUTLET', 'SALE', 'OUTLET']):
+    #             return 'Outlet'
+    #         # if name.upper() in ['THE END OF $TW'] or category.upper() in ['THE END OF $TW']:
+    #         if any(word.upper() in name.upper() for word in ['THE END OF $TW']) or any(word.upper() in category.upper() for word in ['THE END OF $TW']):
+    #             return 'Outlet'
+    #         else:
+    #             return category.title()
 
-    for p in all_products:
-        print('pre category', p.category)
-        print('pre name', p.name)
-        post_category = map_category(p.category, p.name)
-        print('post category', post_category)
-        
-        
+    #     all_products = Product.objects.filter(is_active=True)
 
+    #     for p in all_products:
+    #         print('pre category', p.category)
+    #         print('pre name', p.name)
+    #         post_category = map_category(p.category, p.name)
+    #         print('post category', post_category)
+    #         p.category = post_category
+    #         p.save()
 
     # all_products = Product.objects.filter(is_active=True)
 
@@ -172,7 +168,28 @@ def getProducts(request):
     #         writer.writerow([product.id, smart_str(product.name), product.price, product.original_url])
 
 
-# /// 2do metodo
+    # get all products with description = []
+    all_products = Product.objects.filter(is_active=True, description="[]")
+
+    for product in all_products:
+        print('product', product)
+        print('product description', product.description)
+
+    print('-------------------\n')
+    print('products with description = []', all_products.count())
+
+    print('-------------------\n')
+    print('updating products with description = []')
+
+    # for product in all_products:
+    #     scrape_product.delay(product.id)
+
+    # print('-------------------\n')
+    # print('products with description = []', all_products.count())
+
+
+
+    # /// 2do metodo
 
     # wb = Workbook()
     # ws = wb.active
@@ -197,23 +214,23 @@ def getProducts(request):
         is_active=True
     )
 
-    # get the lowest price of products in the current request    
+    # get the lowest price of products in the current request
     min_price = products.aggregate(min_price=Min('price'))['min_price']
     # get the highest price of products in the current request
     max_price = products.aggregate(max_price=Max('price'))['max_price']
-    # Get the categories of all active products 
+    # Get the categories of all active products
     categories = products.order_by().values_list('category', flat=True).distinct()
+    categories = sorted(categories)
 
     if category:
         # products = products.filter(category=category) or product name contains the category or product category contains the category
         # products = products.filter(Q(category__icontains=category) | Q(name__icontains=category) | Q(description__icontains=category))
-        products = products.filter( Q(category__icontains=category.lower()) | Q(name__icontains=category.lower()) | Q(description__icontains=category.lower())
-)
-
+        products = products.filter(Q(category__icontains=category.lower()) | Q(name__icontains=category.lower()) | Q(description__icontains=category.lower())
+                                   )
 
     if subcategory:
         products = products.filter(subCategory=subcategory)
-    
+
     if priceFrom or priceTo:
         products = products.filter(price__range=(priceFrom, priceTo))
 
@@ -224,14 +241,14 @@ def getProducts(request):
     print('---------------------------------------------------\n')
     print(sortBy)
     print('---------------------------------------------------\n')
-        
 
     if sortBy == 'Lowest':
         products = products.order_by('price')
     elif sortBy == 'Highest':
         products = products.order_by('-price')
     elif sortBy == 'Popularity':
-        products = products.annotate(num_views=Count('productview')).order_by('-num_views')
+        products = products.annotate(num_views=Count(
+            'productview')).order_by('-num_views')
     elif sortBy == 'Newest':
         products = products.order_by('-createdAt')
     elif sortBy == 'Rating':
@@ -240,7 +257,6 @@ def getProducts(request):
         products = products.order_by('-createdAt')
 
     products = products.prefetch_related('productattribute_set__color')
-
 
     paginator = Paginator(products, 32)
 
@@ -268,6 +284,41 @@ def getProducts(request):
     return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages, 'colors_list': list(colors), 'min_price': min_price, 'max_price': max_price, 'categories': categories})
 
 
+@api_view(['GET'])
+def getRecomendedProducts(request, pk):
+    product = Product.objects.get(id=pk)
+    if product:
+        try:
+            products = Product.objects.filter(Q(category__icontains=product.category) | Q(
+                name__icontains=product.name) | Q(description__icontains=product.name), is_active=True).exclude(id=pk)[:8]
+
+            if len(products) < 8:
+                try:
+                    products = products | Product.objects.filter(
+                        is_active=True).exclude(id=pk)[:8-len(products)]
+                except:
+                    pass
+
+            serializer = ProductSerializer(products, many=True)
+            return Response(serializer.data)
+        except:
+            try:
+                products = Product.objects.filter(
+                    category=product.category, is_active=True).exclude(id=pk)[:8]
+
+                if len(products) < 8:
+                    try:
+                        products = products | Product.objects.filter(
+                            is_active=True).exclude(id=pk)[:8-len(products)]
+                    except:
+                        pass
+
+                serializer = ProductSerializer(products, many=True)
+                return Response(serializer.data)
+            except:
+                return Response({'detail': 'No products found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'detail': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
@@ -280,8 +331,12 @@ def getProduct(request, pk):
     # product.views += 1
     # product.last_viewed_at = timezone.now()
     # product.save()
-    serializer = ProductSerializer(product, many=False)
-    return Response(serializer.data)
+
+    if product.is_active:
+        serializer = ProductSerializer(product, many=False)
+        return Response(serializer.data)
+    else:
+        return Response({'detail': 'Product is not available'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
@@ -467,18 +522,27 @@ def notifyProduct(request, pk):
         return Response('Subscription Added')
 
     if request.user.is_authenticated:
-        notification = StockNotification.objects.create(
-            user=request.user,
-            product_attribute=productAtt
-        )
-        notification.save()
+        try:
+            notification = StockNotification.objects.create(
+                user=request.user,
+                product_attribute=productAtt
+            )
+            notification.save()
+            return Response('Subscription Added')
+        except:
+            print('---------------------\n')
+            print('You are already subscribed?')
+            print('---------------------\n')
 
-        return Response('Subscription Added')
+            # return Response('You are already subscribed', status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'You are already subscribed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 @api_view(['GET'])
 def scrapeProduct(request, pk):
-# def scrapeProduct(request):
+    # def scrapeProduct(request):
     product = Product.objects.get(id=pk)
     print('Scraping Product: ', product.name)
     # start scraping with celery

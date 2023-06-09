@@ -1,13 +1,14 @@
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 
-import { productListReducers, productDetailsReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers, productNotifyReducers } from './reducers/productReducers.js';
+import { productListReducers, productDetailsReducers, productRecommendReducers, productDeleteReducers, productCreateReducers, productUpdateReducers, productCreateReviewReducers, productImageDeleteReducers, productNotifyReducers } from './reducers/productReducers.js';
 import { cartReducer } from './reducers/cartReducers';
 import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer, userUpdateReducer, userPasswordSendResetEmailReducer, userPasswordResetReducer } from './reducers/userReducers';
-import { orderCreateReducer, orderDetailsReducer, orderDetailsUnloggedReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer, orderUploadProofUnloggedReducer, orderAddTrackingNumberReducer, orderDeleteTrackingNumberReducer, orderAddTrackingUrlReducer, orderDeleteTrackingUrlReducer } from './reducers/orderReducers';
+import { orderPreCreateReducer, orderCreateReducer, orderDetailsReducer, orderDetailsUnloggedReducer, orderPayReducer, ordersListReducer, ordersListAdminReducer, orderUpdatePaidReducer, orderUpdateDeliveredReducer, orderUploadProofUnloggedReducer, orderAddTrackingNumberReducer, orderDeleteTrackingNumberReducer, orderAddTrackingUrlReducer, orderDeleteTrackingUrlReducer } from './reducers/orderReducers';
 import { addressReducer, addressCreateReducer } from './reducers/addressReducers';
 
 import { wishlistReducer, saveForLaterReducer } from './reducers/listsReducers';
+import { tickerMessageReducer } from './reducers/adminReducers';
 
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -18,6 +19,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 const reducer = combineReducers({
     productList: productListReducers,
     productDetails: productDetailsReducers,
+    productRecommend: productRecommendReducers,
     productDelete: productDeleteReducers,
     productCreate: productCreateReducers,
     productUpdate: productUpdateReducers,
@@ -42,6 +44,7 @@ const reducer = combineReducers({
     userDelete: userDeleteReducer,
     userUpdate: userUpdateReducer,
 
+    orderPreCreate: orderPreCreateReducer,
     orderCreate: orderCreateReducer,
     orderDetails: orderDetailsReducer,
     orderDetailsUnlogged: orderDetailsUnloggedReducer,
@@ -56,11 +59,12 @@ const reducer = combineReducers({
 
     addresses: addressReducer,
     addressCreate: addressCreateReducer,
-
-
+    
     ordersListAdmin: ordersListAdminReducer,
     orderUpdatePaid: orderUpdatePaidReducer,
     orderUpdateDelivered: orderUpdateDeliveredReducer,
+    
+    tickerMessage: tickerMessageReducer,
 
 });
 
