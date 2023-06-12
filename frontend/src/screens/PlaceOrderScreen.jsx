@@ -8,6 +8,7 @@ import CheckoutSteps from '../components/CheckoutSteps'
 
 import { createOrder } from '../actions/orderActions'
 import { payOrder } from '../actions/orderActions'
+import { calculateOrder } from '../actions/orderActions'
 
 
 import { getCart, clearCart } from '../actions/cartActions'
@@ -30,10 +31,13 @@ function PlaceOrderScreen() {
     const orderCreate = useSelector((state) => state.orderCreate)
     const { order, success, error } = orderCreate
 
-    const [itemsPrice, setItemsPrice] = useState(0)
-    const [shippingPrice, setShippingPrice] = useState(0)
-    const [totalPrice, setTotalPrice] = useState(0)
-    const [discount, setDiscount] = useState(0)
+    const orderPreCreate = useSelector((state) => state.orderPreCreate)
+    const { order: orderPre, success: successPre, error: errorPre } = orderPreCreate
+
+    // const [itemsPrice, setItemsPrice] = useState(0)
+    // const [shippingPrice, setShippingPrice] = useState(0)
+    // const [totalPrice, setTotalPrice] = useState(0)
+    // const [discount, setDiscount] = useState(0)
 
     const [address, setAddress] = useState('')
     const [postalCode, setPostalCode] = useState('')
@@ -61,17 +65,17 @@ function PlaceOrderScreen() {
             setCity(shippingAddresses[0].city)
             setProvince(shippingAddresses[0].province)
         }
-        if (cartItems) {
-            setItemsPrice(cartItems.reduce((acc, item) => acc + item.product.price * item.qty, 0).toFixed(2))
-            setShippingPrice((Number(1300).toFixed(2)))
-            // if method is Transferencia Bancaria, set total price - 10%
-            if (cart.paymentMethod === 'Transferencia Bancaria') {
-                setDiscount((itemsPrice * 0.1).toFixed(2))
-            }
-            // apply discount only in total price (not in shipping price)
-            setTotalPrice((Number(itemsPrice) + Number(shippingPrice) - Number(discount)).toFixed(2))
+    }, [shippingAddresses])
+
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            dispatch(calculateOrder({
+                paymentMethod: cart.paymentMethod,
+                shippingAddress: Number(shippingAddresses[0].id),
+                orderItems: cartItems,
+            }))
         }
-    }, [cartItems, shippingAddresses, itemsPrice, shippingPrice, totalPrice])
+    }, [cartItems, navigate, dispatch, shippingAddresses, cart.paymentMethod])
 
     useEffect(() => {
         if (success) {
@@ -86,21 +90,24 @@ function PlaceOrderScreen() {
 
     const placeOrderHandler = () => {
         console.log('shippingAddress', shippingAddresses[0])
-        dispatch(createOrder({
-            paymentMethod: cart.paymentMethod,
-            shippingPrice: shippingPrice,
-            orderItems: cartItems,
-            shippingAddress: Number(shippingAddresses[0].id),
-            itemsPrice: itemsPrice,
-            totalPrice: totalPrice
-        }))
-
-        console.log('paymentMethod', cart.paymentMethod,)
-        console.log('shippingPrice', shippingPrice,)
-        console.log('orderItems', cartItems,)
-        console.log('shippingAddress', shippingAddresses[0].id,)
-        console.log('itemsPrice', itemsPrice,)
-        console.log('totalPrice', totalPrice)
+        // dispatch(createOrder({
+        //     paymentMethod: cart.paymentMethod,
+        //     shippingPrice: shippingPrice,
+        //     orderItems: cartItems,
+        //     shippingAddress: Number(shippingAddresses[0].id),
+        //     itemsPrice: itemsPrice,
+        //     totalPrice: totalPrice
+        // }))
+        if (orderPre) {
+            dispatch(payOrder({
+                paymentMethod: cart.paymentMethod,
+                shippingPrice: orderPre.shippingPrice,
+                orderItems: cartItems,
+                shippingAddress: Number(shippingAddresses[0].id),
+                itemsPrice: orderPre.itemsPrice,
+                totalPrice: orderPre.totalPrice
+            }))
+        }
     }
 
     return (
@@ -126,7 +133,20 @@ function PlaceOrderScreen() {
                             <h2>Payment Method</h2>
                             <p>
                                 <strong>Method: </strong>
-                                {cart.paymentMethod}
+                                {
+                                    cart.paymentMethod === 'Transferencia Bancaria' ?
+                                        <>
+                                            {cart.paymentMethod}
+                                            {
+                                                successPre ?
+                                                    <span className='text-success'> {orderPre.discountPercentage * 100}% OFF</span>
+                                                    :
+                                                    null
+                                            }
+                                        </>
+                                        :
+                                        cart.paymentMethod
+                                }
                             </p>
                         </ListGroup.Item>
 
@@ -174,39 +194,54 @@ function PlaceOrderScreen() {
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Items:</Col>
-                                    <Col>${itemsPrice}</Col>
+                                    {/* <Col>${itemsPrice}</Col> */}
+                                    {
+                                        successPre ?
+                                            <Col>${orderPre.orderItemsPrice}</Col>
+                                            :
+                                            null
+                                    }
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Shipping:</Col>
-                                    <Col>
-                                        {shippingPrice === 0 ?
-                                            <span className='text-success'>Free!</span>
-                                            : `$${shippingPrice}`}
-                                    </Col>
-                                </Row>
-                            </ListGroup.Item>
-
-                            <ListGroup.Item>
-                                <Row>
-                                    <Col>Discount:</Col>
-                                    {cart.paymentMethod === 'Transferencia Bancaria' ?
-                                        <>
-                                            <Col className='text-danger'>-${discount}</Col>
-                                        </>
-                                        :
-                                        <Col>${totalPrice}</Col>
+                                    {
+                                        successPre ?
+                                            <Col>${orderPre.shippingPrice}</Col>
+                                            :
+                                            null
                                     }
-
                                 </Row>
-
                             </ListGroup.Item>
+
+                            {
+                                successPre && orderPre.discount ?
+                                    <ListGroup.Item>
+                                        <Row>
+                                            <Col>Discount:</Col>
+                                            {
+                                                successPre ?
+                                                    <Col className='text-danger'>-${orderPre.discount}</Col>
+                                                    :
+                                                    null
+                                            }
+                                        </Row>
+
+                                    </ListGroup.Item>
+                                    :
+                                    null
+                            }
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Total:</Col>
-                                    <Col className='text-success'>${totalPrice}</Col>
+                                    {
+                                        successPre ?
+                                            <Col className='text-success'>${orderPre.totalPrice}</Col>
+                                            :
+                                            null
+                                    }
                                 </Row>
                             </ListGroup.Item>
 

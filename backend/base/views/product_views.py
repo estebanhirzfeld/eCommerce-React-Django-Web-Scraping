@@ -169,17 +169,17 @@ def getProducts(request):
 
 
     # get all products with description = []
-    all_products = Product.objects.filter(is_active=True, description="[]")
+    # all_products = Product.objects.filter(is_active=True, description="[]")
 
-    for product in all_products:
-        print('product', product)
-        print('product description', product.description)
+    # for product in all_products:
+    #     print('product', product)
+    #     print('product description', product.description)
 
-    print('-------------------\n')
-    print('products with description = []', all_products.count())
+    # print('-------------------\n')
+    # print('products with description = []', all_products.count())
 
-    print('-------------------\n')
-    print('updating products with description = []')
+    # print('-------------------\n')
+    # print('updating products with description = []')
 
     # for product in all_products:
     #     scrape_product.delay(product.id)
@@ -324,6 +324,7 @@ def getRecomendedProducts(request, pk):
 @api_view(['GET'])
 def getProduct(request, pk):
     product = Product.objects.get(id=pk)
+    user = request.user
     # Registrar la nueva visita
     # ProductView.objects.create(product=product)
 
@@ -331,6 +332,27 @@ def getProduct(request, pk):
     # product.views += 1
     # product.last_viewed_at = timezone.now()
     # product.save()
+
+    # if user and user.is_staff:
+    #     print('------------------------------------------------------ \n')
+    #     print('User is Admin')
+    #     print('------------------------------------------------------ \n')
+
+    #     serializer = ProductSerializer(product, many=False)
+    #     colors_list = set()
+    #     sizes_list = set()
+    #     categories_list = set()
+
+    #     for attribute in product.productattribute_set.all():
+    #         colors_list.update(attribute.color.values_list('color', flat=True))
+    #         sizes_list.update(attribute.size.values_list('size', flat=True))
+
+    #     for category in Product.objects.all().values_list('category', flat=True).distinct():
+    #         categories_list.add(category)
+
+        # return Response({'product': serializer.data, 'colors_list': list(colors_list), 'sizes_list': list(sizes_list), 'categories_list': list(categories_list)}, status=status.HTTP_200_OK)
+    
+    # else:
 
     if product.is_active:
         serializer = ProductSerializer(product, many=False)
@@ -352,11 +374,96 @@ def updateProduct(request, pk):
     data = request.data
     product = Product.objects.get(id=pk)
 
+
+    # dispatch(updateProduct({
+    #     name,
+    #     price,
+    #     category,
+    #     description,
+    #     color_sizes,
+    # }))
+
     product.name = data['name']
     product.price = data['price']
     product.category = data['category']
-
     product.description = data['description']
+
+    color_sizes = data['color_sizes']
+    sizes_to_delete = data['sizes_to_delete']
+
+    print('------------------------------------------------------ \n')
+    print(data)
+    print('------------------------------------------------------ \n')
+
+    # try to get productAtribute with the product, color and size and update it, if not exit create it
+    # 'color_sizes': [
+    # {'color': 'Negro', 'size': 'M', 'stock': 1, 'id': 'MNegro'},
+    # {'color': 'Negro', 'size': 'S', 'stock': 1, 'id': 'SNegro'}
+    # ]
+    # 
+    
+    if color_sizes:
+        for data in color_sizes:
+            try:
+                color_obj = Color.objects.get(color=data['color'])
+            except:
+                color_obj = Color(
+                    color=data['color']
+                )
+                color_obj.save()
+
+            
+            try:
+                size_obj = Size.objects.get(size=data['size'])
+            except:
+                size_obj = Size(
+                    size=data['size']
+                )
+                size_obj.save()
+
+
+            # if product_attribute doesn't exist, create it
+            try:
+                product_attribute = ProductAttribute.objects.get(
+                    product=product, color=color_obj, size=size_obj)
+                product_attribute.stock = data['stock']
+                product_attribute.save()
+                continue
+            except:
+                product_attribute = ProductAttribute(
+                    product=product,
+                    stock=data['stock']
+                )
+
+                product_attribute.save()
+                product_attribute.color.add(color_obj)
+                product_attribute.size.add(size_obj)
+
+            print('Product Saved')
+
+
+
+
+                # productAtt.save()
+            # except:
+            #     return Response({'erro: An Erro ocurred'}, status=status.HTTP_400_BAD_REQUEST)
+            
+    
+    if sizes_to_delete:
+        for data in sizes_to_delete:
+            color = Color.objects.get_or_create(color=data['color'])[0]
+            size = Size.objects.get_or_create(size=data['size'])[0]
+
+            try:
+                product_attribute = ProductAttribute.objects.get(
+                    product=product, color=color, size=size)
+                product_attribute.delete()
+                print('ProductAttribute deleted')
+            except ProductAttribute.DoesNotExist:
+                print('ProductAttribute does not exist')
+
+    product.save()
+    
 
     # for every size in the product create or update size model
 
@@ -364,25 +471,27 @@ def updateProduct(request, pk):
     # if was added create it in the database
     # if was updated update it in the database
 
-    for size in data['sizeToDel']:
-        Size.objects.filter(id=size).delete()
+    # for size in data['sizeToDel']:
+    #     Size.objects.filter(id=size).delete()
 
-    for size in data['sizes']:
+    # for size in data['sizes']:
+    #     if not 'id' in size:
+    #         size_model = Size.objects.create(
+    #             product=product,
+    #             size=size['size'],
+    #             stock=size['stock']
+    #         )
+    #         size_model.save()
+    #     else:
+    #         size_model = Size.objects.get(id=size['id'])
+    #         size_model.size = size['size']
+    #         size_model.stock = size['stock']
+    #         size_model.save()
 
-        if not 'id' in size:
-            size_model = Size.objects.create(
-                product=product,
-                size=size['size'],
-                stock=size['stock']
-            )
-            size_model.save()
-        else:
-            size_model = Size.objects.get(id=size['id'])
-            size_model.size = size['size']
-            size_model.stock = size['stock']
-            size_model.save()
+    # Now sizes and colors are managed by ProductAttribute
 
-    product.save()
+
+    # product.save()
 
     serializer = ProductSerializer(product, many=False)
     return Response(serializer.data)

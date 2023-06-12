@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def calculateOrderPrice(request):
+    print('calculateOrderPrice')
     user = request.user
     data = request.data
     orderItems = data['orderItems']
@@ -34,21 +35,23 @@ def calculateOrderPrice(request):
     
     else:
         # Calculate price of order items + shipping price + discount if any
-        orderItemsPrice = 0
+        orderItemsPrice = 0.0
+        discountPercentage = 0.1
         for item in orderItems:
+            # ...
             product = Product.objects.get(id=item['product']['id'])
-            orderItemsPrice += product.price * item['qty']
+            orderItemsPrice += float(product.price) * float(item['qty'])
 
-        shippingPrice = data['shippingPrice']
+        shippingPrice = 1300.0
 
         if paymentMethod == 'Transferencia Bancaria':
-            discount = 0.1 * orderItemsPrice
+            discount = orderItemsPrice * discountPercentage
         else:
-            discount = 0
+            discount = 0.0
 
-        totalPrice = (orderItemsPrice - discount ) + shippingPrice
+        totalPrice = (orderItemsPrice - discount) + shippingPrice
 
-        return Response({'orderItemsPrice': orderItemsPrice, 'shippingPrice': shippingPrice, 'discount': discount, 'totalPrice': totalPrice})
+        return Response({'orderItemsPrice': orderItemsPrice, 'shippingPrice': shippingPrice, 'discount': discount, 'totalPrice': totalPrice, 'discountPercentage': discountPercentage})
 
 
 @api_view(['POST'])

@@ -100,9 +100,8 @@ function ProductScreen() {
     }, [error, navigate])
 
     useEffect(() => {
-
         if (success && product?.images) {
-            setSelectedImage(product.images[0])
+        setSelectedImage(product.images[0])
         }
     }, [success, product])
 
