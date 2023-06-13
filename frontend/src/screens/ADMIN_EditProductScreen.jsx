@@ -117,6 +117,7 @@ const ADMIN_EditProductScreen = () => {
     }, [dispatch, id, product, successUpdate, navigate])
 
     const uploadFilesHandler = async (e) => {
+        e.preventDefault()
         const files = e.target.files
         const length = files.length
         const formData = new FormData()

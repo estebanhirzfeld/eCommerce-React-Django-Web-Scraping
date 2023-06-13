@@ -116,7 +116,6 @@ class ProductView(models.Model):
     viewed_at = models.DateTimeField(auto_now_add=True)
     total_views = models.IntegerField(default=0)
 
-    
 
 
 class Review(models.Model):

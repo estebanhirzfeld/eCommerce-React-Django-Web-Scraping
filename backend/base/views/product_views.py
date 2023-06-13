@@ -391,6 +391,9 @@ def updateProduct(request, pk):
     color_sizes = data['color_sizes']
     sizes_to_delete = data['sizes_to_delete']
 
+    product.save()
+
+
     print('------------------------------------------------------ \n')
     print(data)
     print('------------------------------------------------------ \n')
@@ -462,7 +465,6 @@ def updateProduct(request, pk):
             except ProductAttribute.DoesNotExist:
                 print('ProductAttribute does not exist')
 
-    product.save()
     
 
     # for every size in the product create or update size model
